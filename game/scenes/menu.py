@@ -5,3 +5,5 @@
 # to the appropriate scene.
 
 # example: on title screen: if player selects "start", asks scene_manager to swtich to hub scene
+
+from game.scenes.base import Scene
