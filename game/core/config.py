@@ -4,8 +4,8 @@
 # any .py files that need to can read constants from here
 
 class Config:
-    WINDOW_W = 1920
-    WINDOW_H = 1080
+    WINDOW_W = 960
+    WINDOW_H = 540
     WINDOW_TITLE = "TBD"
     BG_COLOR = (18, 18, 24)
 

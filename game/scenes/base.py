@@ -1,15 +1,16 @@
 # Class: Scene
 
-# This is the base interface for all scenes
+# This is an abstract base class (ABC) for scenes.
+# Using this makes python complain early if a concrete scene forgets a required method like update/draw
 # possible methods: enter(), exit(), update(dt), draw(surface), handle_event(ev)
-# makes it where each scene plugs into the game-loop cleanly
 
-from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
 
 class Scene(ABC):
-    """Lifecycle contract every scene must implement."""
+
+    # currently all methods are no-ops because they are overwritten by other
+    # scene classes that inherit them
     def enter(self) -> None: ...
     def exit(self) -> None: ...
 

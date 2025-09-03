@@ -1,34 +1,45 @@
+# class: World
+
+# minimal ECS-lite container:
+# - Entity = integer ID with a dict of component instances
+# - System = object with update(world, dt)
+# world.update runs systems in the registered order
+
+
 from typing import Dict, List, Type, Iterator, Tuple, Any
 
 class World:
-    """
-    ECS-lite container: entities are dicts {ComponentType: instance}.
-    Systems are objects with update(world, dt).
-    """
     def __init__(self) -> None:
-        self.entities: Dict[int, Dict[Type, Any]] = {}
-        self.systems: List[Any] = []
-        self._next_id = 1
+        self.entities: Dict[int, Dict[Type, Any]] = {}      # id -> {CompType: comp}
+        self.systems: List[Any] = []                        # ordered list of systems
+        self._next_id = 1                                   # next integer id to be given
 
-    # ---- entity & components ----
+    # entity & component management #########################################################
+
+    # build new entity
     def new_entity(self) -> int:
-        eid = self._next_id
+        eid = self._next_id # entity id
         self._next_id += 1
         self.entities[eid] = {}
         return eid
 
+    # add a component instance to an entity
     def add(self, eid: int, comp: Any) -> None:
         self.entities[eid][type(comp)] = comp
 
+    # get a component instance from an entity
     def get(self, eid: int, comp_type: Type) -> Any:
         return self.entities[eid].get(comp_type)
 
+    # iterates through entities that have all of the requested component types
+    # yields (entity_id, component_dict) pairs 
     def query(self, *comp_types: Type) -> Iterator[Tuple[int, Dict[Type, Any]]]:
         for eid, comps in self.entities.items():
             if all(ct in comps for ct in comp_types):
                 yield eid, comps
 
-    # ---- tick ----
+    # simulation tick ###############################################################
+    # run each system once. order matters in the systems list
     def update(self, dt: float) -> None:
         for sys in self.systems:
             sys.update(self, dt)
