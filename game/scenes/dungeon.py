@@ -17,6 +17,7 @@ from game.world.world import World
 from game.world.components import Transform, Intent, DebugRect
 from game.world.systems.input import InputSystem
 from game.world.systems.movement import MovementSystem
+from game.world.systems.ai import ChaseAI, EnemyAISystem, FleeAI
 
 class DungeonScene(Scene):
     def __init__(self) -> None:
@@ -30,10 +31,26 @@ class DungeonScene(Scene):
         self.world.add(self.player_id, Intent())
         self.world.add(self.player_id, DebugRect(size=Config.RECT_SIZE, color=Config.RECT_COLOR))
 
+        #Spawn chase enemy entity with components that it will use
+        self.chaser_id = self.world.new_entity()
+        self.world.add(self.chaser_id, Transform(x=100, y=100))  # enemy starts in corner
+        self.world.add(self.chaser_id, Intent())
+        self.world.add(self.chaser_id, DebugRect(size=Config.RECT_SIZE, color=(255, 0, 0)))  # red enemy
+        self.world.add(self.chaser_id,  ChaseAI(target_id=self.player_id))       # a system with update(world, dt)
+
+        #spawn flee enemy entity with components that it will use
+        self.enemy_id = self.world.new_entity()
+        self.world.add(self.enemy_id, Transform(x=10, y=100))  # enemy starts in corner
+        self.world.add(self.enemy_id, Intent())
+        self.world.add(self.enemy_id, DebugRect(size=Config.RECT_SIZE, color=(255, 255, 0)))  # yellow  enemy
+        self.world.add(self.enemy_id,  FleeAI(target_id=self.player_id))       #  a system with update(world, dt)
+
+
         # Register systems in the order they should run each tick (order matters)
         self.world.systems = [
             InputSystem(self.player_id),
             MovementSystem(),
+            EnemyAISystem(),   # <-- AI runs every frame
             # later: CollisionSystem(), CombatSystem(), PresentationMapperSystem(), AnimationSystem(), ...
         ]
 
