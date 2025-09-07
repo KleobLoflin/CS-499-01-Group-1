@@ -25,7 +25,7 @@ class EnemyAISystem:#System):
         for entity_id, comps in world.query(Transform, Intent, ChaseAI):
             pos: Transform = comps[Transform]
             intent: Intent = comps[Intent]
-            #ai: ChaseAI = comps[ChaseAI]
+            ai: ChaseAI = comps[ChaseAI]
             #ai: FleeAI = comps[FleeAI]
 
             target_pos: Transform = world.get(ai.target_id, Transform)
@@ -38,7 +38,7 @@ class EnemyAISystem:#System):
 
 
             if ChaseAI in comps:
-                ai: ChaseAI = comps[ChaseAI] 
+                #ai: ChaseAI = comps[ChaseAI] 
                 if dist > 0:
                     intent.move_x = dx / dist
                     intent.move_y = dy / dist
@@ -47,7 +47,7 @@ class EnemyAISystem:#System):
                     intent.move_y = 0.0
 
             elif FleeAI in comps: #possible later addition
-                ai: FleeAI = comps[FleeAI]
+                #ai: FleeAI = comps[FleeAI]
                 if dist < 100:
                     intent.move_x = dx / dist
                     intent.move_y = dy / dist
