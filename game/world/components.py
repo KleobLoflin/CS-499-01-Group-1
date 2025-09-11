@@ -20,6 +20,10 @@ class Transform:
     x: float
     y: float
 
+@dataclass
+class MoveSpeed:
+    x: int
+
 # intent: data representing what the player/enemy is trying to do
 # this describes a per-tick input intent that is either written by 
 # InputSystem (from client) or by the server. movement is [-1,1] on each axis
