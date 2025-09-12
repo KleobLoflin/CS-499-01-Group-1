@@ -60,7 +60,9 @@ class DungeonScene(Scene):
 
     # this will be used to handle chat/ui later
     def handle_event(self, event) -> None:
-        pass 
+        for system in self.world.systems:
+            if hasattr(system, "handle_event"):
+                system.handle_event(event)
 
     # one fixed simulation step, runs all systems in order
     def update(self, dt: float) -> None:

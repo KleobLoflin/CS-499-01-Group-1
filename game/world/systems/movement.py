@@ -17,3 +17,5 @@ class MovementSystem:
             # meaning, no matter what fps you run the game at, the movement speed will be practically the same
             tr.x += it.move_x * Config.MOVE_SPEED * dt 
             tr.y += it.move_y * Config.MOVE_SPEED * dt
+            tr.x += it.dash_x * Config.DASH_LENGTH * dt
+            tr.y += it.dash_y * Config.DASH_LENGTH * dt

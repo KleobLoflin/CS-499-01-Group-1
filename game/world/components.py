@@ -26,7 +26,9 @@ class Transform:
 @dataclass
 class Intent:
     move_x: float = 0.0   # -1..1
-    move_y: float = 0.0
+    move_y: float = 0.0   # -1..1
+    dash_x: float = 0.0   # -1..1
+    dash_y: float = 0.0   # -1..1
 
 # presentation #####################################################
 
