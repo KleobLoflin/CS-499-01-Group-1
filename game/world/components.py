@@ -6,8 +6,6 @@
 # implementation of something like a struct from C,C++. It isnt the same thing
 # memory-wise but it behaves similarly.
 
-# 
-
 from dataclasses import dataclass
 from typing import Tuple
 
@@ -22,7 +20,7 @@ class Transform:
 
 @dataclass
 class MoveSpeed:
-    x: int
+    speed: int
 
 # intent: data representing what the player/enemy is trying to do
 # this describes a per-tick input intent that is either written by 
@@ -31,6 +29,12 @@ class MoveSpeed:
 class Intent:
     move_x: float = 0.0   # -1..1
     move_y: float = 0.0
+
+# Enemy AI Patterns
+@dataclass
+class AI:
+    kind: str   # current kinds: "chase", "flee", "wander", ...
+    target_id: int|None = None  # explicit target; None = auto-pick nearest player
 
 # presentation #####################################################
 

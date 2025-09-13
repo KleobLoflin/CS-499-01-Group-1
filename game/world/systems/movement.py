@@ -16,5 +16,5 @@ class MovementSystem:
             # velocity = intent * speed
             # dt (delta time) normalizes the amount of pixel movement per time
             # meaning, no matter what fps you run the game at, the movement speed will be practically the same
-            tr.x += it.move_x * mv.x * dt 
-            tr.y += it.move_y * mv.x * dt
+            tr.x += it.move_x * mv.speed * dt 
+            tr.y += it.move_y * mv.speed * dt
