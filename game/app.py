@@ -17,10 +17,26 @@ def run() -> None:
 
     # init window and timing
     pygame.init()
+
+    # get native screen resolution and compute scale
+    info = pygame.display.Info()
+    NATIVE_W = info.current_w
+    NATIVE_H = info.current_h
+    scale_w = NATIVE_W / Config.WINDOW_W
+    scale_h = NATIVE_H / Config.WINDOW_H
+    scale = min(scale_w, scale_h)
+    scaled_width = int(Config.WINDOW_W * scale)
+    scaled_height = int(Config.WINDOW_H * scale)
+
     pygame.display.set_caption(Config.WINDOW_TITLE)
-    screen = pygame.display.set_mode((Config.WINDOW_W, Config.WINDOW_H))
+    screen = pygame.display.set_mode((scaled_width, scaled_height))
     clock = pygame.time.Clock()
     fixed = FixedClock()
+
+    # -----------------------------
+    # create virtual surface at fixed resolution
+    # -----------------------------
+    base_surface = pygame.Surface((Config.WINDOW_W, Config.WINDOW_H))
 
     # this starts the dungeonscene for the movable rectangle
     # eventually the titlescreen would start first
@@ -32,30 +48,25 @@ def run() -> None:
     while running:
         # 1) event checking
         for event in pygame.event.get():
-            # stops program when you close the window
             if event.type == pygame.QUIT:
                 running = False
             else:
                 scenes.handle_event(event)
 
         # 2) update
-        # gets delta time value used throughout program to control timing/framerate
-        # dt explanation:
-        # dt is smaller the higher the framerate and larger the lower the framerate
-        # it is used to scale down or scale up movement speed of things on the screen
-        # so that things always move at the same rate regardless of framerate.
-        # without it, the game would play faster with a higher framerate and vice versa.
         real_dt = clock.tick(Config.CLIENT_FPS) / 1000.0
-        # get fixed number of steps based on dt
-        # gamestate is updated this many times each frame
         steps = fixed.step(real_dt, Config.FIXED_DT)
         for _ in range(steps):
-            # update all game logic
             scenes.update(Config.FIXED_DT)
 
         # 3) Draw
-        # draws everything to the screen each frame after logic update
-        scenes.draw(screen)
+        # draw everything to virtual surface first
+        scenes.draw(base_surface)
+
+        # scale virtual surface to native screen and blit
+        scaled_surface = pygame.transform.scale(base_surface, (scaled_width, scaled_height))
+        screen.blit(scaled_surface, (0, 0))
+
         pygame.display.flip()
 
     pygame.quit()
