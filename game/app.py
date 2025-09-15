@@ -12,30 +12,18 @@ from game.core.config import Config
 from game.core.time import FixedClock
 from game.scene_manager import SceneManager
 from game.scenes.dungeon import DungeonScene
+from game.core.window import Window
 
 def run() -> None:
 
     # init window and timing
     pygame.init()
-
-    # get native screen resolution and compute scale
-    info = pygame.display.Info()
-    NATIVE_W = info.current_w
-    NATIVE_H = info.current_h
-    scale_w = NATIVE_W / Config.WINDOW_W
-    scale_h = NATIVE_H / Config.WINDOW_H
-    scale = min(scale_w, scale_h)
-    scaled_width = int(Config.WINDOW_W * scale)
-    scaled_height = int(Config.WINDOW_H * scale)
-
+    window = Window()
     pygame.display.set_caption(Config.WINDOW_TITLE)
-    screen = pygame.display.set_mode((scaled_width, scaled_height))
     clock = pygame.time.Clock()
     fixed = FixedClock()
 
-    # -----------------------------
     # create virtual surface at fixed resolution
-    # -----------------------------
     base_surface = pygame.Surface((Config.WINDOW_W, Config.WINDOW_H))
 
     # this starts the dungeonscene for the movable rectangle
@@ -63,9 +51,11 @@ def run() -> None:
         # draw everything to virtual surface first
         scenes.draw(base_surface)
 
-        # scale virtual surface to native screen and blit
-        scaled_surface = pygame.transform.scale(base_surface, (scaled_width, scaled_height))
-        screen.blit(scaled_surface, (0, 0))
+                # draw to base surface
+        scenes.draw(window.get_surface())
+
+        # present final scaled image
+        window.present()
 
         pygame.display.flip()
 

@@ -21,14 +21,15 @@ from game.world.actors.enemy_factory import create as create_enemy
 from game.world.systems.input import InputSystem
 from game.world.systems.movement import MovementSystem
 from game.world.systems.ai import EnemyAISystem
-from game.world.systems.room import draw_map
+from game.world.systems.room import Room
 
 class DungeonScene(Scene):
     def __init__(self) -> None:
         self.world = World()
         self.player_id: int | None = None
-        tmx_path = "assets/maps/testmap.tmx"
-        self.world.tmx_data = pytmx.load_pygame(tmx_path)
+
+        #inits the tiled map, currently hardcoded to testmap.tmx
+        self.world.tmx_data = pytmx.load_pygame("assets/maps/testmap.tmx")
 
     def enter(self) -> None:
         # Spawn player entity with components that it will use
@@ -66,7 +67,7 @@ class DungeonScene(Scene):
     # currently clears the screen and draws any entity that has Transform and DebugRect components
     def draw(self, surface: Surface) -> None:
         surface.fill(Config.BG_COLOR)
-        draw_map(surface, self.world.tmx_data)
+        Room.draw_map(surface, self.world.tmx_data)
         for _, comps in self.world.query(Transform, DebugRect):
             tr: Transform = comps[Transform]
             dr: DebugRect = comps[DebugRect]
