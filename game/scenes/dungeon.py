@@ -36,13 +36,13 @@ class DungeonScene(Scene):
         self.player_id = create_hero(self.world, archetype="knight", owner_client_id=None, pos=(Config.WINDOW_W/2 - 16, Config.WINDOW_H/2 - 16))
 
         #Spawn chase enemy entity with components that it will use
-        self.chaser_1_id = create_enemy(self.world, kind="chase", pos=(100, 100), params={"color": (255, 0, 0), "speed" : 160, "target_id" : self.player_id})
+        self.chaser_1_id = create_enemy(self.world, kind="chase", pos=(100, 100), params={"color": (255, 0, 0), "speed" : 60, "target_id" : self.player_id})
 
         #spawn flee enemy entity with components that it will use
-        self.flee_1_id = create_enemy(self.world, kind="flee", pos=(200, 100), params={"color": (255, 255, 0), "speed" : 160, "target_id" : self.player_id})
+        self.flee_1_id = create_enemy(self.world, kind="flee", pos=(200, 100), params={"color": (255, 255, 0), "speed" : 60, "target_id" : self.player_id})
 
         #spawn wonder enemy curently is just a crackhead vibrairting violently
-        self.wander_1_id = create_enemy(self.world, kind="wander", pos=(200, 200), params={"color": (255, 0, 255), "speed" : 160})
+        self.wander_1_id = create_enemy(self.world, kind="wander", pos=(200, 200), params={"color": (255, 0, 255), "speed" : 60})
 
         # Register systems in the order they should run each tick (order matters)
         self.world.systems = [

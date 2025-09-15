@@ -17,6 +17,5 @@ class Config:
     FIXED_DT = 1.0 / 60.0
 
     # temporary player
-    MOVE_SPEED = 220
-    RECT_SIZE = (32, 64)
+    RECT_SIZE = (16, 16)
     RECT_COLOR = (90, 100, 255) 
