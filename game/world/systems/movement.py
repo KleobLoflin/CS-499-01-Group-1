@@ -5,7 +5,6 @@ from game.core.config import Config
 
 class MovementSystem:
     def update(self, world, dt: float) -> None:
-
         # loops through all entities that have transform and Intent components
         # and adjusts the transform values according to intent and movespeed
         for _, components in world.query(Transform, Intent, Movement):

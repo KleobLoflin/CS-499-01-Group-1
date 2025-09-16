@@ -20,6 +20,6 @@ class Config:
     RECT_SIZE = (16, 16)
     RECT_COLOR = (90, 100, 255) 
 
-    DASH_SPEED = 1000     # pixels per second while dashing
-    DASH_DURATION = 0.1   # how long the dash lasts
+    DASH_SPEED = 250     # pixels per second while dashing
+    DASH_DURATION = 0.075   # how long the dash lasts
     DASH_COOLDOWN = 1.0   # time before next dash
