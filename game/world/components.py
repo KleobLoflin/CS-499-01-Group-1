@@ -19,7 +19,7 @@ class Transform:
     y: float
 
 @dataclass
-class MoveSpeed:
+class Movement:
     speed: int
 
 # intent: data representing what the player/enemy is trying to do
@@ -37,6 +37,24 @@ class AI:
     target_id: int|None = None  # explicit target; None = auto-pick nearest player
 
 # presentation #####################################################
+
+@dataclass
+class Sprite:
+    atlas_id: str   # id's used for mapping sprites ("hero.knight", "enemy.chort")
+    z: int = 10     # draw order (bigger number draws last)
+
+@dataclass
+class AnimationState:
+    clip: str = "idle"  # current clip name
+    frame: int = 0
+    time: float = 0.0
+    fps: float = 0.0    # 0 means use the atlas default for this clip
+    loop: bool = True
+    changed: bool = True    # set true when clip changes so we can reset time
+
+@dataclass
+class Facing:
+    direction: int = 1  # 1 = right, -1 = left (used to mirror the sprite)
 
 # this is just here to describe the rectangle we can move around
 # later this will be Sprite + AnimationState used to draw a sprite frame

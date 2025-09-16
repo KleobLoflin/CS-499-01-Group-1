@@ -1,6 +1,6 @@
 # class: MovementSystem
 
-from game.world.components import Transform, Intent, MoveSpeed
+from game.world.components import Transform, Intent, Movement
 from game.core.config import Config
 
 class MovementSystem:
@@ -8,10 +8,10 @@ class MovementSystem:
 
         # loops through all entities that have transform and Intent components
         # and adjusts the transform values according to intent and movespeed
-        for _, components in world.query(Transform, Intent, MoveSpeed):
+        for _, components in world.query(Transform, Intent, Movement):
             tr: Transform = components[Transform]
             it: Intent = components[Intent]
-            mv: MoveSpeed = components[MoveSpeed]
+            mv: Movement = components[Movement]
 
             # velocity = intent * speed
             # dt (delta time) normalizes the amount of pixel movement per time

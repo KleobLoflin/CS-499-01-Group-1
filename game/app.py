@@ -13,6 +13,8 @@ from game.core.time import FixedClock
 from game.scene_manager import SceneManager
 from game.scenes.dungeon import DungeonScene
 from game.core.window import Window
+from game.core.resources import load_atlases
+from game.world.actors.blueprint_index import load as load_blueprints
 
 def run() -> None:
 
@@ -25,6 +27,10 @@ def run() -> None:
 
     # create virtual surface at fixed resolution
     base_surface = pygame.Surface((Config.WINDOW_W, Config.WINDOW_H))
+
+    # load atlases and blueprints
+    load_atlases("data/sprites/atlases.json")
+    load_blueprints("data/blueprints/heroes.json", "data/blueprints/enemies.json")
 
     # this starts the dungeonscene for the movable rectangle
     # eventually the titlescreen would start first

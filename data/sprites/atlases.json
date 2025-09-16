@@ -1,0 +1,41 @@
+{
+    "atlases":{
+        "hero.knight":{
+            "mirror_x": true,
+            "origin": [8, 8],
+            "clips":{
+                "idle": { "fps": 6, "loop": true,
+                    "frames": ["assets/animations/heroes/knight_m_idle_anim/0.png",
+                    "assets/animations/heroes/knight_m_idle_anim/1.png",
+                "assets/animations/heroes/knight_m_idle_anim/2.png",
+                "assets/animations/heroes/knight_m_idle_anim/3.png"]
+                },
+                "run": {"fps": 10, "loop": true,
+                    "frames": ["assets/animations/heroes/knight_m_run_anim/0.png",
+                    "assets/animations/heroes/knight_m_run_anim/1.png",
+                    "assets/animations/heroes/knight_m_run_anim/2.png",
+                    "assets/animations/heroes/knight_m_run_anim/3.png"]
+                }
+            }
+        },
+
+        "enemy.chort":{
+            "mirror_x": true,
+            "origin": [8, 8],
+            "clips":{
+                "idle": { "fps": 6, "loop": true,
+                    "frames": ["assets/animations/enemys/chort_idle_anim/0.png",
+                    "assets/animations/enemys/chort_idle_anim/1.png",
+                    "assets/animations/enemys/chort_idle_anim/2.png",
+                    "assets/animations/enemys/chort_idle_anim/3.png"]
+                },
+                "run": { "fps": 10, "loop": true,
+                    "frames": ["assets/animations/enemys/chort_run_anim/0.png",
+                    "assets/animations/enemys/chort_run_anim/1.png",
+                    "assets/animations/enemys/chort_run_anim/2.png",
+                    "assets/animations/enemys/chort_run_anim/3.png"]
+                }
+            }
+        }
+    }
+}
