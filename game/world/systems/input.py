@@ -16,7 +16,6 @@ from game.world.components import Intent
 from game.core.config import Config
 
 class InputSystem:
-
     def __init__(self, player_id: int) -> None:
         self.player_id = player_id
         pygame.key.set_repeat(0)
@@ -41,8 +40,8 @@ class InputSystem:
                             dx *= inv; dy *= inv
 
                         self.dash_dir = (dx, dy)
-                        self.dash_timer = Config.DASH_DURATION  # e.g. 0.2s
-                        self.dash_cooldown = Config.DASH_COOLDOWN  # e.g. 1.0s
+                        self.dash_timer = Config.DASH_DURATION  
+                        self.dash_cooldown = Config.DASH_COOLDOWN  
 
     def update(self, world, dt: float) -> None:
         intent: Intent = world.get(self.player_id, Intent)
