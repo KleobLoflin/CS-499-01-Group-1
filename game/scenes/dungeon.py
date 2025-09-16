@@ -28,6 +28,7 @@ from game.world.systems.ai import EnemyAISystem
 from game.world.systems.room import Room
 from game.world.systems.presentation_mapper import PresentationMapperSystem
 from game.world.systems.animation import AnimationSystem
+from game.world.systems.collision import CollisionSystem
 
 class DungeonScene(Scene):
     def __init__(self) -> None:
@@ -49,6 +50,7 @@ class DungeonScene(Scene):
             InputSystem(self.player_id),
             EnemyAISystem(),   # <-- AI runs every frame
             MovementSystem(),
+            CollisionSystem(self.player_id),
             PresentationMapperSystem(),
             AnimationSystem()
             # later: CollisionSystem(), CombatSystem(), ...
