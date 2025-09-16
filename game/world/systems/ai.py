@@ -13,32 +13,31 @@
  """
 import random
 import time
-from game.world.components import Transform, Intent
-
-#basic chase ai maybe later add for it to stop in front of the player to attack
-class ChaseAI:
-    def __init__(self, target_id: int) -> None:
-        self.target_id = target_id
-
-
-class FleeAI:      #possible enemy ais to add later
-    def __init__(self, target_id: int) -> None:
-        self.target_id = target_id        
-
-class WonderAI:    #same here
-    def __init__(self, target_id: int) -> None:
-        self.target_id = target_id
-
+from game.world.components import Transform, Intent, AI
 
 #enemy ai system currently just chases. could and will probably check to see if it is the chase ai or another.
+
+# Moved AI dataclasses to components and now there is a "kind" label for the different kinds of AI.
+# I filtered each code block for ai.kind so that it only runs if the kind of AI matches.
+# you can add code blocks for as many AI kinds as you want and just filter for the ai.kind string of choice.
+# I also removed the target.id check for wonder ai because it doesnt target a player
+# -Scott
 class EnemyAISystem:#System):
     
-    #chase ai
     def update(self, world, dt: float) -> None:
-        for entity_id, comps in world.query(Transform, Intent, ChaseAI): #possible later addition WonderAI
+
+        # chase entities
+        for entity_id, comps in world.query(Transform, Intent, AI): #possible later addition WonderAI
+            ai: AI = comps[AI]
+
+            # only handle chase entities
+            if ai.kind != "chase":
+                continue
+
             pos: Transform = comps[Transform]
             intent: Intent = comps[Intent]
-            ai: ChaseAI = comps[ChaseAI]
+            
+
 
             target_pos: Transform = world.get(ai.target_id, Transform)
             if pos is None or target_pos is None:
@@ -67,10 +66,16 @@ class EnemyAISystem:#System):
 
 
         # flee entities
-        for entity_id, comps in world.query(Transform, Intent, FleeAI):
+        for entity_id, comps in world.query(Transform, Intent, AI):
+            ai: AI = comps[AI]
+            
+            # only handle flee entities
+            if ai.kind != "flee":
+                continue
+
             pos: Transform = comps[Transform]
             intent: Intent = comps[Intent]
-            ai: FleeAI = comps[FleeAI]
+            
             
             target_pos: Transform = world.get(ai.target_id, Transform)
             if pos is None or target_pos is None:
@@ -90,15 +95,15 @@ class EnemyAISystem:#System):
 
 
         # wonder entities this crashes everything
-        for entity_id, comps in world.query(Transform, Intent, WonderAI):
+        for entity_id, comps in world.query(Transform, Intent, AI):
+            ai: AI = comps[AI]
+
+            # only handle wonder entities
+            if ai.kind != "wander":
+                continue
+            
             pos: Transform = comps[Transform]
             intent: Intent = comps[Intent]
-            ai: WonderAI = comps[WonderAI]
-            
-            target_pos: Transform = world.get(ai.target_id, Transform)
-            if pos is None or target_pos is None:
-                continue
-
 
             #time.sleep(4 )  crashes the shit out of everything  
             dx = random.randint(-10, 10)

@@ -10,59 +10,48 @@
 
 from game.scenes.base import Scene
 import pygame
+import pytmx
 from pygame import Surface, Rect
 from game.scene_manager import Scene
 from game.core.config import Config
 from game.world.world import World
-from game.world.components import Transform, Intent, DebugRect, MoveSpeed
+from game.world.components import (
+    Transform, Intent, DebugRect, Movement,
+    Sprite, AnimationState, Facing
+    )
+from game.core import resources
+from game.world.actors.hero_factory import create as create_hero
+from game.world.actors.enemy_factory import create as create_enemy
 from game.world.systems.input import InputSystem
 from game.world.systems.movement import MovementSystem
-from game.world.systems.ai import ChaseAI, EnemyAISystem, FleeAI, WonderAI
+from game.world.systems.ai import EnemyAISystem
+from game.world.systems.room import Room
+from game.world.systems.presentation_mapper import PresentationMapperSystem
+from game.world.systems.animation import AnimationSystem
 
 class DungeonScene(Scene):
     def __init__(self) -> None:
         self.world = World()
         self.player_id: int | None = None
 
+        #inits the tiled map, currently hardcoded to testmap.tmx
+        self.world.tmx_data = pytmx.load_pygame("assets/maps/testmap.tmx")
+
     def enter(self) -> None:
-        # Spawn player entity with components that it will use
-        self.player_id = self.world.new_entity()
-        self.world.add(self.player_id, Transform(x=Config.WINDOW_W/2 - 16, y=Config.WINDOW_H/2 - 16))
-        self.world.add(self.player_id, Intent())
-        self.world.add(self.player_id, MoveSpeed(220))
-        self.world.add(self.player_id, DebugRect(size=Config.RECT_SIZE, color=Config.RECT_COLOR))
+        # Spawn player knight entity with components that it will use
+        self.player_id = create_hero(self.world, archetype="knight", owner_client_id=None, pos=(Config.WINDOW_W/2 - 16, Config.WINDOW_H/2 - 16))
 
-        #Spawn chase enemy entity with components that it will use
-        self.chaser_id = self.world.new_entity()
-        self.world.add(self.chaser_id, Transform(x=100, y=100))  # enemy starts in corner
-        self.world.add(self.chaser_id, Intent())
-        self.world.add(self.chaser_id, MoveSpeed(200))
-        self.world.add(self.chaser_id, DebugRect(size=Config.RECT_SIZE, color=(255, 0, 0)))  # red enemy
-        self.world.add(self.chaser_id, ChaseAI(target_id=self.player_id))       # a system with update(world, dt)
-
-        #spawn flee enemy entity with components that it will use
-        self.enemy_id = self.world.new_entity()
-        self.world.add(self.enemy_id, Transform(x=200, y=100))  # enemy starts in corner
-        self.world.add(self.enemy_id, Intent())
-        self.world.add(self.enemy_id, MoveSpeed(200))
-        self.world.add(self.enemy_id, DebugRect(size=Config.RECT_SIZE, color=(255, 255, 0)))  # yellow  enemy
-        self.world.add(self.enemy_id, FleeAI(target_id=self.player_id))       #  a system with update(world, dt)
-
-        #spawn wonder enemy curently is just a crackhead vibrairting violently
-        #self.enemy_id = self.world.new_entity()
-        #self.world.add(self.enemy_id, Transform(x=10, y=100))  # enemy starts in corner
-        #self.world.add(self.enemy_id, Intent())
-        #self.world.add(self.enemy_id, DebugRect(size=Config.RECT_SIZE, color=(0,0, 255)))  # yellow  enemy
-        #self.world.add(self.enemy_id, WonderAI(target_id=self.player_id))       #  a system with update(world, dt)
-
-   
+        #Spawn chort enemy entity with components that it will use
+        self.chaser_1_id = create_enemy(self.world, kind="chort", pos=(100, 100), params={"target_id" : self.player_id})
 
         # Register systems in the order they should run each tick (order matters)
         self.world.systems = [
             InputSystem(self.player_id),
-            MovementSystem(),
             EnemyAISystem(),   # <-- AI runs every frame
-            # later: CollisionSystem(), CombatSystem(), PresentationMapperSystem(), AnimationSystem(), ...
+            MovementSystem(),
+            PresentationMapperSystem(),
+            AnimationSystem()
+            # later: CollisionSystem(), CombatSystem(), ...
         ]
 
     # method to release resources
@@ -79,10 +68,31 @@ class DungeonScene(Scene):
     def update(self, dt: float) -> None:
         self.world.update(dt)
 
-    # currently clears the screen and draws any entity that has Transform and DebugRect components
     def draw(self, surface: Surface) -> None:
         surface.fill(Config.BG_COLOR)
-        for _, comps in self.world.query(Transform, DebugRect):
-            tr: Transform = comps[Transform]
-            dr: DebugRect = comps[DebugRect]
-            pygame.draw.rect(surface, dr.color, Rect(int(tr.x), int(tr.y), dr.size[0], dr.size[1]))
+        Room.draw_map(surface, self.world.tmx_data)
+
+        render_list = []
+        for _, comps in self.world.query(Transform, Sprite, AnimationState, Facing):
+            tr = comps[Transform]
+            spr = comps[Sprite]
+            anim = comps[AnimationState]
+            face = comps[Facing]
+            
+            frames, _, _, mirror_x, origin = resources.clip_info(spr.atlas_id, anim.clip)
+
+            if not frames:
+                continue
+
+            img = frames[anim.frame]
+            flip = (face.direction < 0) and mirror_x
+            if flip:
+                img = pygame.transform.flip(img, True, False)
+            
+            pos = (int(tr.x - origin[0]), int(tr.y - origin[1]))
+            render_list.append((spr.z, img, pos))
+
+        render_list.sort(key=lambda t: t[0])
+        for _, img, pos in render_list:
+            surface.blit(img, pos)
+            

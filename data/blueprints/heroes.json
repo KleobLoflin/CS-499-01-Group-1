@@ -1,0 +1,12 @@
+{
+    "hero.knight":{
+        "components":[
+            {"type":"Transform"},
+            {"type":"Intent"},
+            {"type":"Movement", "speed": 80},
+            {"type":"Sprite", "atlas": "hero.knight", "z": 10},
+            {"type":"AnimationState", "clip": "idle"},
+            {"type":"Facing", "direction": 1}
+        ]
+    }
+}
