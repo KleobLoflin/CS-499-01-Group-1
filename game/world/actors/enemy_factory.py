@@ -9,5 +9,4 @@ def create(world, kind: str, pos, params=None) -> int:
     bp = enemy_bp(f"enemy.{kind}")
     ctx = {"pos": pos, "target_id": params.get("target_id")}
     apply_blueprint(world, eid, bp, ctx=ctx)
-    
     return eid

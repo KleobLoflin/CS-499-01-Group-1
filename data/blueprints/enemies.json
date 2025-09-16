@@ -4,10 +4,13 @@
             {"type": "Transform"},
             {"type": "Intent"},
             {"type": "Movement", "speed": 50},
-            {"type": "AI", "kind": "chase"},
+            {"type": "AI", "kind": "chase", "agro_range": 200},
             {"type": "Sprite", "atlas": "enemy.chort", "z": 8},
             {"type": "AnimationState", "clip": "idle"},
             {"type": "Facing", "direction": 1}
+
         ]
     }
 }
+
+

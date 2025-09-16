@@ -3,14 +3,10 @@
 
 
 #this is the code to summon the ai specifically chaser
-""" 
-    #Spawn chase enemy entity with components that it will use
-        self.chaser_id = self.world.new_entity()
-        self.world.add(self.chaser_id, Transform(x=100, y=100))  # enemy starts in corner
-        self.world.add(self.chaser_id, Intent())
-        self.world.add(self.chaser_id, DebugRect(size=Config.RECT_SIZE, color=(255, 0, 0)))  # red enemy
-        self.world.add(self.chaser_id,  ChaseAI(target_id=self.player_id))       # a system with update(world, dt)
- """
+
+        #Spawn chort enemy entity with components that it will use
+        #self.chaser_1_id = create_enemy(self.world, kind="chort", pos=(100, 100), params={"target_id" : self.player_id})
+
 import random
 import time
 from game.world.components import Transform, Intent, AI
@@ -22,6 +18,13 @@ from game.world.components import Transform, Intent, AI
 # you can add code blocks for as many AI kinds as you want and just filter for the ai.kind string of choice.
 # I also removed the target.id check for wonder ai because it doesnt target a player
 # -Scott
+
+
+#find away to make that an ai switches between the 3 states as needed. 
+#need an agro range.
+#need a place for them to stop if to close or to far agro range again i guess.
+#need another way to make a porjectile attack.
+
 class EnemyAISystem:#System):
     
     def update(self, world, dt: float) -> None:
@@ -56,7 +59,8 @@ class EnemyAISystem:#System):
             dy = target_pos.y - pos.y
             dist = (dx * dx + dy * dy) ** 0.5
 
-            if dist > 0 and dist > 10:  # avoid division by zero and jitter
+            #THIS IS AGRO RANGE WE NEED TO CHANGE IT SO THAT IT WONT FOLLOW ABOVE RANGE
+            if dist > 10 and dist < ai.agro_range:  
                 intent.move_x = dx / dist
                 intent.move_y = dy / dist
             else:
@@ -65,7 +69,7 @@ class EnemyAISystem:#System):
 
 
 
-        # flee entities
+        # FLEE entities
         for entity_id, comps in world.query(Transform, Intent, AI):
             ai: AI = comps[AI]
             
@@ -85,7 +89,9 @@ class EnemyAISystem:#System):
             dy = target_pos.y - pos.y
             dist = (dx * dx + dy * dy) ** 0.5
 
-            if dist < 200 and dist > 0:
+
+            #THIS IS AGRO RANGE agro_range
+            if dist < ai.agro_range and dist > 10:
                 intent.move_x = -dx / dist
                 intent.move_y = -dy / dist
             else:
@@ -94,7 +100,7 @@ class EnemyAISystem:#System):
 
 
 
-        # wonder entities this crashes everything
+        # WONDER entities this crashes everything
         for entity_id, comps in world.query(Transform, Intent, AI):
             ai: AI = comps[AI]
 
@@ -111,6 +117,7 @@ class EnemyAISystem:#System):
             
             dist = (dx * dx + dy * dy) ** 0.5
 
+            #ONCE AGAIN AGRO RANGE
             if dist < 200 and dist > 0:
                 intent.move_x = -dx / dist
                 intent.move_y = -dy / dist

@@ -13,7 +13,7 @@ def build_Movement(spec, ctx):
     return Movement(speed=float(spec.get("speed", 80)))
 
 def build_AI(spec, ctx):
-    return AI(kind=spec.get("kind", "wander"), target_id=ctx.get("target_id"))
+    return AI(kind=spec.get("kind", "wander"), target_id=ctx.get("target_id"), agro_range=spec.get("agro_range", 200))
 
 def build_Sprite(spec, ctx):
     return Sprite(atlas_id=spec["atlas"], z=int(spec.get("z", 10)))

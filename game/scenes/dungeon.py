@@ -42,7 +42,9 @@ class DungeonScene(Scene):
         self.player_id = create_hero(self.world, archetype="knight", owner_client_id=None, pos=(Config.WINDOW_W/2 - 16, Config.WINDOW_H/2 - 16))
 
         #Spawn chort enemy entity with components that it will use
-        self.chaser_1_id = create_enemy(self.world, kind="chort", pos=(100, 100), params={"target_id" : self.player_id})
+        self.chaser_1_id = create_enemy(self.world, kind="chort", pos=(100, 100), params={"target_id" : self.player_id, "agro_range" :200})
+
+
 
         # Register systems in the order they should run each tick (order matters)
         self.world.systems = [
