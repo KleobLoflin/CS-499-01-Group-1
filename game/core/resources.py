@@ -1,16 +1,17 @@
-# Class: Resources
+# contains functions for loading sprite images and animation clip data
+# will possibly contain functions for loading fonts and audio in the future
 
-# loads/caches images, atlases, fonts, audio.
 # serves animation clips/frames
 
-# possible methods: load_*, get_image(id), get_clip(atlas_id, clip, frame)
-# the point of this class is to be a single source for loading assets to prevent double loading
+# the point of this script is to be a single source for loading assets to prevent double loading
 
 import json, os, pygame
 
 images = {}     # path -> surface
-atlases = {}    # atlas_id ->
+atlases = {}    # atlas ids -> graphical metadata
 
+# loads an image from a path and used to create a pygame surface.
+# stores the surface in the images dictionary as well as returns the surface.
 def image(path: str) -> pygame.Surface:
     surface = images.get(path)
     if surface is None:
@@ -18,6 +19,8 @@ def image(path: str) -> pygame.Surface:
         images[path] = surface
     return surface
 
+# reads and loads atlas data from a .json file
+# stores this data in the atlases dictionary
 def load_atlases(json_path: str):
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -35,13 +38,13 @@ def load_atlases(json_path: str):
         
         atlases[atlas_id] = {"mirror_x": mirror_x, "origin": origin, "clips": clips_meta}
 
+# checks if an atlas id has an associated animation clip
 def atlas_has(atlas_id: str, clip: str) -> bool:
     a = atlases.get(atlas_id)
     return bool(a and clip in a["clips"])
 
+# returns animation clip data given an atlas id and clip name
 def clip_info(atlas_id: str, clip: str):
-
-    # returns frames, fps, loop, mirror_x, origin
     a = atlases.get(atlas_id)
     if not a or clip not in a["clips"]:
         return [], 0, True, False, (0, 0)

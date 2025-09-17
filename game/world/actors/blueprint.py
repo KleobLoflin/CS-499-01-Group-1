@@ -1,3 +1,9 @@
+# contains builder functions that instantiate components based on
+# data from .json files
+
+# Any addition or deletion of components in components.py needs to be reflected
+# in these component builder functions
+
 from game.world.components import (
     Transform, Intent, Movement, AI,
     Sprite, AnimationState, Facing, DebugRect
@@ -30,6 +36,7 @@ def build_Facing(spec, ctx): return Facing(direction=int(spec.get("direction", 1
 def build_DebugRect(spec, ctx):
     return DebugRect(size=tuple(spec.get("size", (16, 16))), color=tuple(spec.get("color", (90, 180, 255))))
 
+# gather all builder functions
 BUILDERS = {
     "Transform": build_Transform,
     "Intent": build_Intent,
@@ -41,6 +48,9 @@ BUILDERS = {
     "DebugRect": build_DebugRect
 }
 
+# uses builder functions to add components to an entity
+# gets the appropriate components depending on entity id and calls
+# world.add() to link them.
 def apply_blueprint(world, eid, blueprint: dict, ctx: dict):
     for spec in blueprint.get("components", []):
         t = spec["type"]

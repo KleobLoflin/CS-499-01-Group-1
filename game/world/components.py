@@ -18,6 +18,7 @@ class Transform:
     x: float
     y: float
 
+# any data constants that are involved in entity movement calculations
 @dataclass
 class Movement:
     speed: int
@@ -38,6 +39,7 @@ class AI:
     kind: str   # current kinds: "chase", "flee", "wander", ...
     target_id: int|None = None  # explicit target; None = auto-pick nearest player
     agro_range: int = 0   # distance to start chasing
+
 # presentation #####################################################
 
 @dataclass
@@ -58,8 +60,6 @@ class AnimationState:
 class Facing:
     direction: int = 1  # 1 = right, -1 = left (used to mirror the sprite)
 
-# this is just here to describe the rectangle we can move around
-# later this will be Sprite + AnimationState used to draw a sprite frame
 @dataclass
 class DebugRect:
     size: Tuple[int, int] = (32, 32)

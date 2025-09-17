@@ -6,7 +6,7 @@
 # client prediction/reconciliation -> world.update(dt).
 # in draw(): render world -> HUD.
 
-# currently owns a world, registers systems in order, and draws entities
+# owns a world, registers systems in order, and draws entities
 
 from game.scenes.base import Scene
 import pygame
@@ -72,10 +72,17 @@ class DungeonScene(Scene):
     def update(self, dt: float) -> None:
         self.world.update(dt)
 
+    # renders all graphics
     def draw(self, surface: Surface) -> None:
+
+        # fill the screen with black
         surface.fill(Config.BG_COLOR)
+        # render and draw the map
+        # note: anything here is drawn first and will be covered by sprites
+        # that are drawn later
         Room.draw_map(surface, self.world.tmx_data)
 
+        # get a list of all entities to render
         render_list = []
         for _, comps in self.world.query(Transform, Sprite, AnimationState, Facing):
             tr = comps[Transform]
@@ -83,19 +90,29 @@ class DungeonScene(Scene):
             anim = comps[AnimationState]
             face = comps[Facing]
             
+            # get sprite animation data using atlas id and type of animation clip
+            # frames = list of .pngs for animation
+            # mirror_x = True or False to mirror image
+            # origin = the center of the sprite
             frames, _, _, mirror_x, origin = resources.clip_info(spr.atlas_id, anim.clip)
 
+            # if no sprite frames found, exit loop
             if not frames:
                 continue
-
+            
+            # get frame image to draw
             img = frames[anim.frame]
+
+            # handles which way the sprite is facing
             flip = (face.direction < 0) and mirror_x
             if flip:
                 img = pygame.transform.flip(img, True, False)
             
+            # get (x, y) position of sprite to draw
             pos = (int(tr.x - origin[0]), int(tr.y - origin[1]))
             render_list.append((spr.z, img, pos))
 
+        # sort the render list by spr.z to control the draw order
         render_list.sort(key=lambda t: t[0])
         for _, img, pos in render_list:
             surface.blit(img, pos)
