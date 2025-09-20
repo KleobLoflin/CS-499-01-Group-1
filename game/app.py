@@ -8,6 +8,8 @@
 # (this will be the script to run to start the game client)
 
 import sys, pygame
+import threading
+from game.net.server import GameServer
 from game.core.config import Config
 from game.core.time import FixedClock
 from game.scene_manager import SceneManager
@@ -31,6 +33,12 @@ def run() -> None:
     # load atlases and blueprints
     load_atlases("data/sprites/atlases.json")
     load_blueprints("data/blueprints/heroes.json", "data/blueprints/enemies.json")
+
+    # --- Start local multiplayer server ---
+    server = GameServer()
+    server_thread = threading.Thread(target=server.run, daemon=True)
+    server_thread.start()
+    print("Local multiplayer server started on 127.0.0.1:50000")
 
     # this starts the dungeonscene for the movable rectangle
     # eventually the titlescreen would start first

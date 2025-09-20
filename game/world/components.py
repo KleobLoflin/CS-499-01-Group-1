@@ -64,3 +64,7 @@ class Facing:
 class DebugRect:
     size: Tuple[int, int] = (32, 32)
     color: Tuple[int, int, int] = (90, 180, 255)
+
+@dataclass
+class Player:
+    client_id: int
