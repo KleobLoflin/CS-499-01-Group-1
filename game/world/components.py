@@ -32,6 +32,13 @@ class Intent:
     move_y: float = 0.0   # -1..1
     dash_x: float = 0.0   # -1..1
     dash_y: float = 0.0   # -1..1
+    basic_atk: bool = False         
+
+@dataclass
+class Attack:
+    max_cooldown: float = 0.15
+    remaining_cooldown: float = max_cooldown
+    active: bool = False
 
 # Enemy AI Patterns
 @dataclass
@@ -58,7 +65,9 @@ class AnimationState:
 
 @dataclass
 class Facing:
-    direction: int = 1  # 1 = right, -1 = left (used to mirror the sprite)
+    horizontal_direction: int = 1  # 1 = right, -1 = left (used to mirror the sprite)
+    up: bool = False
+    down: bool = False
 
 @dataclass
 class DebugRect:

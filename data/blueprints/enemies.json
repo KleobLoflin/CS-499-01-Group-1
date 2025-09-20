@@ -7,8 +7,8 @@
             {"type": "AI", "kind": "chase", "agro_range": 200},
             {"type": "Sprite", "atlas": "enemy.chort", "z": 8},
             {"type": "AnimationState", "clip": "idle"},
-            {"type": "Facing", "direction": 1}
-
+            {"type": "Facing", "horizontal_direction": 1, "up": false, "down": false},
+            {"type": "Attack", "max_cooldown": 2}
         ]
     },
 

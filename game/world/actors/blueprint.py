@@ -4,10 +4,7 @@
 # Any addition or deletion of components in components.py needs to be reflected
 # in these component builder functions
 
-from game.world.components import (
-    Transform, Intent, Movement, AI,
-    Sprite, AnimationState, Facing, DebugRect
-)
+from game.world.components import *
 
 def build_Transform(spec, ctx):
     x, y = ctx.get("pos", (0,0))
@@ -31,10 +28,15 @@ def build_AnimationState(spec, ctx):
                           loop=bool(spec.get("loop", True)),
                           changed=True)
 
-def build_Facing(spec, ctx): return Facing(direction=int(spec.get("direction", 1)))
+def build_Facing(spec, ctx): return Facing(horizontal_direction=int(spec.get("horizontal_direction", 1)),
+                                           up=spec.get("up", False),
+                                           down=spec.get("down", False)
+                                        )
 
 def build_DebugRect(spec, ctx):
     return DebugRect(size=tuple(spec.get("size", (16, 16))), color=tuple(spec.get("color", (90, 180, 255))))
+
+def build_Attack(spec, ctx): return Attack(max_cooldown=spec.get("max_cooldown", 0.15))
 
 # gather all builder functions
 BUILDERS = {
@@ -45,6 +47,7 @@ BUILDERS = {
     "Sprite": build_Sprite,
     "AnimationState": build_AnimationState,
     "Facing": build_Facing,
+    "Attack": build_Attack,
     "DebugRect": build_DebugRect
 }
 

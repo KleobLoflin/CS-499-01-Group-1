@@ -74,3 +74,8 @@ class InputSystem:
         else:
             intent.dash_x = 0.0
             intent.dash_y = 0.0
+
+        # attacking
+        if not intent.basic_atk:
+            if keys[pygame.K_SPACE]:
+                intent.basic_atk = True

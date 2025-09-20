@@ -29,6 +29,7 @@ from game.world.systems.room import Room
 from game.world.systems.presentation_mapper import PresentationMapperSystem
 from game.world.systems.animation import AnimationSystem
 from game.world.systems.collision import CollisionSystem
+from game.world.systems.attack import AttackSystem
 
 class DungeonScene(Scene):
     def __init__(self) -> None:
@@ -54,10 +55,10 @@ class DungeonScene(Scene):
             InputSystem(self.player_id),
             EnemyAISystem(),   # <-- AI runs every frame
             MovementSystem(),
+            AttackSystem(),
             CollisionSystem(self.player_id),
             PresentationMapperSystem(),
             AnimationSystem()
-            # later: CollisionSystem(), CombatSystem(), ...
         ]
 
     # method to release resources
@@ -106,7 +107,7 @@ class DungeonScene(Scene):
             img = frames[anim.frame]
 
             # handles which way the sprite is facing
-            flip = (face.direction < 0) and mirror_x
+            flip = (face.horizontal_direction < 0) and mirror_x
             if flip:
                 img = pygame.transform.flip(img, True, False)
             
