@@ -26,12 +26,20 @@ class MovementSystem:
                 tr.y += it.dash_y * Config.DASH_SPEED * dt
 
                 # calculate which direction the entity is facing based on intent
-                face.up = False; face.down = False
+                for direction in face.directions:
+                    if face.directions[direction]:
+                        face.prev_directions[direction] = face.directions[direction]
+
                 if it.move_x > 0.01:
-                    face.horizontal_direction = 1
+                    face.directions["right"] = True; face.directions["left"] = False
                 elif it.move_x < -0.01:
-                    face.horizontal_direction = -1
+                    face.directions["left"] = True; face.directions["right"] = False
+                else:
+                    face.directions["left"] = False; face.directions["right"] = False
+
                 if it.move_y > 0.01:
-                    face.up = True; face.down = False
+                    face.directions["down"] = True; face.directions["up"] = False
                 elif it.move_y < -0.01:
-                    face.up = False; face.down = True
+                    face.directions["up"] = True; face.directions["down"] = False
+                else:
+                    face.directions["up"] = False; face.directions["down"] = False
