@@ -107,7 +107,7 @@ class DungeonScene(Scene):
             img = frames[anim.frame]
 
             # handles which way the sprite is facing
-            flip = (face.horizontal_direction < 0) and mirror_x
+            flip = (face.directions["left"]) and mirror_x
             if flip:
                 img = pygame.transform.flip(img, True, False)
             

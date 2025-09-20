@@ -8,18 +8,21 @@ class PresentationMapperSystem:
         
         # loop through all entities with intent, animationstate, and facing components
         for eid, comps in world.query(Intent, AnimationState, Facing):
-            it = comps[Intent]
-            anim = comps[AnimationState]
-            face = comps[Facing]
+            it: Intent = comps[Intent]
+            anim: AnimationState = comps[AnimationState]
+            face: Facing = comps[Facing]
 
             # adjust clip type depending on intent to move or not
             # moving = "run", not moving = "idle"
             attacking = it.basic_atk
             moving = abs(it.move_x) > 0.01 or abs(it.move_y) > 0.01
+
+            if not any(face.directions.values()):
+                face.directions = face.prev_directions.copy()
             if attacking:
-                if face.up:
+                if face.directions["up"]:
                     new_clip = "attack_up"
-                elif face.down:
+                elif face.directions["down"]:
                     new_clip = "attack_down"
                 else:
                     new_clip = "attack_right"

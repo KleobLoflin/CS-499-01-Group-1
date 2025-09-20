@@ -6,8 +6,8 @@
 # implementation of something like a struct from C,C++. It isnt the same thing
 # memory-wise but it behaves similarly.
 
-from dataclasses import dataclass
-from typing import Tuple
+from dataclasses import dataclass, field
+from typing import Tuple, Dict
 
 # gameplay data ##################################################
 
@@ -68,6 +68,12 @@ class Facing:
     horizontal_direction: int = 1  # 1 = right, -1 = left (used to mirror the sprite)
     up: bool = False
     down: bool = False
+    directions: Dict[str, bool] = field(
+        default_factory=lambda: {"up": False, "down": False, "left": False, "right": True}
+    )
+    prev_directions: Dict[str, bool] = field(
+        default_factory=lambda: {"up": False, "down": False, "left": False, "right": False}
+    )
 
 @dataclass
 class DebugRect:
