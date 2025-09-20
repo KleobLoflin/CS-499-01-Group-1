@@ -1,0 +1,13 @@
+Attack animations:
+    - using flags in intent and attack components:
+        - attack.active used to stop movement changing transform during attack animations
+        - intent.basic_atk used to tell AttackSystem to set attack.active to true and start a cooldown timer
+    - using Facing:
+        - Facing written in MovementSystem
+        - Presentation mapper uses facing to choose between clip names
+        
+    - need to look into different ways to get the animation looking right other than
+        using an attack cooldown from AttackSystem + attack comp, but it works
+    - decide between having separate origins for different sized animations OR take all
+        of the animations, put them on the same sized canvas in aseprite, and line the
+        feet up in the same spot for all of them.

@@ -14,8 +14,17 @@ class PresentationMapperSystem:
 
             # adjust clip type depending on intent to move or not
             # moving = "run", not moving = "idle"
+            attacking = it.basic_atk
             moving = abs(it.move_x) > 0.01 or abs(it.move_y) > 0.01
-            new_clip = "run" if moving else "idle"
+            if attacking:
+                if face.up:
+                    new_clip = "attack_up"
+                elif face.down:
+                    new_clip = "attack_down"
+                else:
+                    new_clip = "attack_right"
+            else:
+                new_clip = "run" if moving else "idle"
 
             if new_clip != anim.clip:
                 anim.clip = new_clip
@@ -23,9 +32,3 @@ class PresentationMapperSystem:
                 anim.frame = 0
                 anim.changed = True
             
-            # update the facing component depending on whether
-            # intent to move is left or right
-            if it.move_x > 0.01:
-                face.direction = 1
-            elif it.move_x < -0.01:
-                face.direction = -1

@@ -7,14 +7,35 @@
                 "idle": { "fps": 6, "loop": true,
                     "frames": ["assets/animations/heroes/knight_m_idle_anim/0.png",
                     "assets/animations/heroes/knight_m_idle_anim/1.png",
-                "assets/animations/heroes/knight_m_idle_anim/2.png",
-                "assets/animations/heroes/knight_m_idle_anim/3.png"]
+                    "assets/animations/heroes/knight_m_idle_anim/2.png",
+                    "assets/animations/heroes/knight_m_idle_anim/3.png"]
                 },
                 "run": {"fps": 10, "loop": true,
                     "frames": ["assets/animations/heroes/knight_m_run_anim/0.png",
                     "assets/animations/heroes/knight_m_run_anim/1.png",
                     "assets/animations/heroes/knight_m_run_anim/2.png",
                     "assets/animations/heroes/knight_m_run_anim/3.png"]
+                },
+                "attack_up": { "fps": 20, "loop": false,
+                    "frames": ["assets/animations/heroes/knight_m_attack_anim/up/0.png",
+                    "assets/animations/heroes/knight_m_attack_anim/up/1.png",
+                    "assets/animations/heroes/knight_m_attack_anim/up/2.png",
+                    "assets/animations/heroes/knight_m_attack_anim/up/3.png"
+                    ]
+                },
+                "attack_right": { "fps": 20, "loop": false,
+                    "frames": ["assets/animations/heroes/knight_m_attack_anim/right/0.png",
+                    "assets/animations/heroes/knight_m_attack_anim/right/1.png",
+                    "assets/animations/heroes/knight_m_attack_anim/right/2.png",
+                    "assets/animations/heroes/knight_m_attack_anim/right/3.png"
+                    ]
+                },
+                "attack_down": { "fps": 20, "loop": false,
+                    "frames": ["assets/animations/heroes/knight_m_attack_anim/down/0.png",
+                    "assets/animations/heroes/knight_m_attack_anim/down/1.png",
+                    "assets/animations/heroes/knight_m_attack_anim/down/2.png",
+                    "assets/animations/heroes/knight_m_attack_anim/down/3.png"
+                    ]
                 }
             }
         },
