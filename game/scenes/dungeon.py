@@ -45,6 +45,8 @@ class DungeonScene(Scene):
         #Spawn chort enemy entity with components that it will use
         self.chaser_1_id = create_enemy(self.world, kind="chort", pos=(100, 100), params={"target_id" : self.player_id, "agro_range" :200})
 
+         #Spawn chort enemy entity with components that it will use
+        self.chaser_1_id = create_enemy(self.world, kind="big_zombie", pos=(100, 50), params={"target_id" : self.player_id, "agro_range" :200})
 
 
         # Register systems in the order they should run each tick (order matters)

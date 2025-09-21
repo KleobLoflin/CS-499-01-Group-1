@@ -36,6 +36,25 @@
                     "assets/animations/enemys/chort_run_anim/3.png"]
                 }
             }
+        },
+
+        "enemy.big_zombie":{
+            "mirror_x": true,
+            "origin": [8, 8],
+            "clips":{
+                "idle": { "fps": 6, "loop": true,
+                    "frames": ["assets/animations/enemys/big_zombie_idle_anim/0.png",
+                    "assets/animations/enemys/big_zombie_idle_anim/1.png",
+                    "assets/animations/enemys/big_zombie_idle_anim/2.png",
+                    "assets/animations/enemys/big_zombie_idle_anim/3.png"]
+                },
+                "run": { "fps": 10, "loop": true,
+                    "frames": ["assets/animations/enemys/big_zombie_run_anim/0.png",
+                    "assets/animations/enemys/big_zombie_run_anim/1.png",
+                    "assets/animations/enemys/big_zombie_run_anim/2.png",
+                    "assets/animations/enemys/big_zombie_run_anim/3.png"]
+                }
+            }
         }
     }
 }

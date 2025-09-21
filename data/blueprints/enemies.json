@@ -10,7 +10,23 @@
             {"type": "Facing", "direction": 1}
 
         ]
+    },
+
+     "enemy.big_zombie": {
+        "components": [
+            {"type": "Transform"},
+            {"type": "Intent"},
+            {"type": "Movement", "speed": 35},
+            {"type": "AI", "kind": "chase", "agro_range": 150},
+            {"type": "Sprite", "atlas": "enemy.big_zombie", "z": 8},
+            {"type": "AnimationState", "clip": "idle"},
+            {"type": "Facing", "direction": 1}
+
+        ]
     }
+
+
+
 }
 
 
