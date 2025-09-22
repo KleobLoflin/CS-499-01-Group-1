@@ -6,6 +6,7 @@ class AttackSystem:
             it: Intent = comps[Intent]
             atk: Attack = comps[Attack]
 
+            # get attacking status from intent
             if it.basic_atk:
                 atk.active = True
                 if atk.remaining_cooldown <= 0.0:

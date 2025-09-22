@@ -12,6 +12,8 @@ def build_Transform(spec, ctx):
 
 def build_Intent(spec, ctx): return Intent()
 
+def build_InputState(spec, ctx): return InputState()
+
 def build_Movement(spec, ctx):
     return Movement(speed=float(spec.get("speed", 80)))
 
@@ -28,10 +30,7 @@ def build_AnimationState(spec, ctx):
                           loop=bool(spec.get("loop", True)),
                           changed=True)
 
-def build_Facing(spec, ctx): return Facing(horizontal_direction=int(spec.get("horizontal_direction", 1)),
-                                           up=spec.get("up", False),
-                                           down=spec.get("down", False)
-                                        )
+def build_Facing(spec, ctx): return Facing()
 
 def build_DebugRect(spec, ctx):
     return DebugRect(size=tuple(spec.get("size", (16, 16))), color=tuple(spec.get("color", (90, 180, 255))))
@@ -42,6 +41,7 @@ def build_Attack(spec, ctx): return Attack(max_cooldown=spec.get("max_cooldown",
 BUILDERS = {
     "Transform": build_Transform,
     "Intent": build_Intent,
+    "InputState": build_InputState,
     "Movement": build_Movement,
     "AI": build_AI,
     "Sprite": build_Sprite,

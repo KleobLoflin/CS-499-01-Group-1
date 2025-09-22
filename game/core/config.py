@@ -16,13 +16,5 @@ class Config:
     CLIENT_FPS = 120
     FIXED_DT = 1.0 / 60.0
 
-    # temporary player
-    RECT_SIZE = (16, 16)
-    RECT_COLOR = (90, 100, 255) 
-
-    DASH_SPEED = 250     # pixels per second while dashing
-    DASH_DURATION = 0.125   # how long the dash lasts
-    DASH_COOLDOWN = 1.0   # time before next dash
-
     # Knockback on collision
     KNOCKBACK_STRENGTH = 200

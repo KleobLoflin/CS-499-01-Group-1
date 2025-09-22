@@ -7,7 +7,7 @@
 # memory-wise but it behaves similarly.
 
 from dataclasses import dataclass, field
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Set, Literal, List
 
 # gameplay data ##################################################
 
@@ -22,6 +22,10 @@ class Transform:
 @dataclass
 class Movement:
     speed: int
+    dash_speed: int = 250
+    dash_duration: float = 0.125
+    dash_cooldown: float = 1.0
+    dash_timer: float = 0.0
 
 # intent: data representing what the player/enemy is trying to do
 # this describes a per-tick input intent that is either written by 
@@ -32,7 +36,20 @@ class Intent:
     move_y: float = 0.0   # -1..1
     dash_x: float = 0.0   # -1..1
     dash_y: float = 0.0   # -1..1
-    basic_atk: bool = False         
+    basic_atk: bool = False
+    basic_atk_held: bool = False
+    dash: bool = False
+    special_atk: bool = False
+    facing: str = Literal["up", "down", "left", "right"]
+
+@dataclass
+class InputState:
+    directions_held: Set[str] = field(default_factory=set)
+    directions_order: List[str] = field(default_factory=list)
+    action: Dict[str, bool] = field(default_factory=lambda: 
+                                    {"basic_attack": False, "special_attack": False, "dash": False}
+                                )
+
 
 @dataclass
 class Attack:
@@ -65,15 +82,7 @@ class AnimationState:
 
 @dataclass
 class Facing:
-    horizontal_direction: int = 1  # 1 = right, -1 = left (used to mirror the sprite)
-    up: bool = False
-    down: bool = False
-    directions: Dict[str, bool] = field(
-        default_factory=lambda: {"up": False, "down": False, "left": False, "right": True}
-    )
-    prev_directions: Dict[str, bool] = field(
-        default_factory=lambda: {"up": False, "down": False, "left": False, "right": False}
-    )
+    direction: str = Literal["up", "down", "left", "right"]
 
 @dataclass
 class DebugRect:
