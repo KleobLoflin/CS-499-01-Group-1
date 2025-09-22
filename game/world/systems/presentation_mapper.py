@@ -17,12 +17,10 @@ class PresentationMapperSystem:
             attacking = it.basic_atk
             moving = abs(it.move_x) > 0.01 or abs(it.move_y) > 0.01
 
-            if not any(face.directions.values()):
-                face.directions = face.prev_directions.copy()
             if attacking:
-                if face.directions["up"]:
+                if face.direction == "up":
                     new_clip = "attack_up"
-                elif face.directions["down"]:
+                elif face.direction == "down":
                     new_clip = "attack_down"
                 else:
                     new_clip = "attack_right"
