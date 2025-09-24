@@ -53,9 +53,9 @@ class DungeonScene(Scene):
         # Register systems in the order they should run each tick (order matters)
         self.world.systems = [
             InputSystem(self.player_id),
-            EnemyAISystem(),   
+            EnemyAISystem(),
+            AttackSystem(),   
             MovementSystem(),
-            AttackSystem(),
             CollisionSystem(self.player_id),
             PresentationMapperSystem(),
             AnimationSystem()
@@ -110,6 +110,9 @@ class DungeonScene(Scene):
             flip = (face.direction == "left") and mirror_x
             if flip:
                 img = pygame.transform.flip(img, True, False)
+            
+            # make attack up and down mirror every other attack
+            
             
             # get (x, y) position of sprite to draw
             pos = (int(tr.x - origin[0]), int(tr.y - origin[1]))

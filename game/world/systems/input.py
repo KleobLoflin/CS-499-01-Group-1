@@ -34,54 +34,48 @@ class InputSystem:
     
     def update(self, world, dt: float):
         comps = world.entities.get(self.player_id)
-        input_state: InputState = comps.get(InputState)
+        input: InputState = comps.get(InputState)
         intent: Intent = comps.get(Intent)
 
         # get key presses and write input state
+        pygame.event.pump()
         keys = pygame.key.get_pressed()
         
-        # directions ##########################################################
-        for key in keys:
-            if key in KEY_TO_DIRECTION:
-                input_state.directions_held.add(KEY_TO_DIRECTION[key])
-        
-        # add directions to order list
+        # get key order ##########################################################
+        now_pressed = set()
+        for key, direction in KEY_TO_DIRECTION.items():
+            if keys[key]:
+                now_pressed.add(direction)
+
         for direction in ("up", "down", "left", "right"):
-            if direction in input_state.directions_held:
-                input_state.directions_order.append(direction)
-        
-        # remove no longer held directions from the order list
-        for direction in list(input_state.directions_order):
-            if direction not in input_state.directions_held:
-                input_state.directions_order.remove(direction)
+            if direction not in now_pressed and direction in input.key_order:
+                input.key_order.remove(direction)
+            elif direction in now_pressed and direction not in input.key_order:
+                input.key_order.append(direction)
         
         # actions ############################################################
-        for key in keys:
-            if key in ATTACK_KEYS:
-                input_state.action["basic_attack"] = True
+        for key in ATTACK_KEYS:
+            if keys[key]:
+                intent.basic_atk = True
+                break
+                
+        for key in DASH_KEYS:
+            if keys[key]:
+                intent.dash = True
+                break
             else:
-                input_state.action["basic_attack"] = False
-            if key in DASH_KEYS:
-                input_state.action["dash"] = True
-            else:
-                input_state.action["dash"] = False
+                intent.dash = False
 
-        # write to intent component
-        # movement
-        dx = int("right" in input_state.directions_held) - int("left" in input_state.directions_held)
-        dy = int("down" in input_state.directions_held) - int("up" in input_state.directions_held)
+        # movement ##########################################################
+        dx = int("right" in now_pressed) - int("left" in now_pressed)
+        dy = int("down" in now_pressed) - int("up" in now_pressed)
         intent.move_x = float(dx)
         intent.move_y = float(dy)
 
         # facing
-        if input_state.directions_held:
-            for direction in input_state.directions_order:
-                if direction in input_state.directions_held:
+        if now_pressed:
+            for direction in input.key_order:
+                if direction in now_pressed:
                     intent.facing = direction
                     break
         
-        # attack
-        intent.basic_atk = input_state.action["basic_attack"]
-        
-        # dash
-        intent.dash = input_state.action["dash"]

@@ -15,13 +15,18 @@ class MovementSystem:
             atk: Attack = components[Attack]
 
             # dash ##################################################################################
-            # reset dash cooldown if dash is flagged, we are not attacking, and the cooldown is done
-            if it.dash and not atk.active and mv.dash_cooldown <= 0.0:
-                mv.dash_cooldown = mv.dash_duration
+            # reset cooldown and duration if dash is flagged, we are not attacking, and the cooldown is done
+            if it.dash and mv.dash_cooldown == 0.0 and not atk.active:
+                mv.dash_cooldown = mv.dash_max_cooldown
+                mv.dash_duration = mv.dash_max_duration
+                it.dash = False
 
             # run dash cooldown
             if mv.dash_cooldown > 0.0:
                 mv.dash_cooldown = max(0.0, mv.dash_cooldown - dt)
+            
+            if mv.dash_duration > 0.0:
+                mv.dash_duration = max(0.0, mv.dash_duration - dt)
 
             # write to transform ##################################################################
             # when we are not attacking
@@ -32,8 +37,8 @@ class MovementSystem:
                     inv = 0.70710678118
                     it.move_x *= inv; it.move_y *= inv
 
-                # regular movement if dash cooldown is not running, dash if it is
-                if mv.dash_cooldown > 0.0:
+                # movement 
+                if mv.dash_duration > 0.0:
                     # Dash applies high speed while active
                     tr.x += it.move_x * mv.dash_speed * dt
                     tr.y += it.move_y * mv.dash_speed * dt
