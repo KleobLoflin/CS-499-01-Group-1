@@ -23,10 +23,11 @@ class Transform:
 class Movement:
     speed: int
     dash_speed: int = 250
-    dash_duration: float = 0.125
-    dash_cooldown: float = 1.0
-    dash_timer: float = 0.0
-
+    dash_duration: float = 0.0
+    dash_cooldown: float = 0.0
+    dash_max_cooldown: float = 1.0
+    dash_max_duration: float = 0.125
+ 
 # intent: data representing what the player/enemy is trying to do
 # this describes a per-tick input intent that is either written by 
 # InputSystem (from client) or by the server. movement is [-1,1] on each axis
@@ -44,11 +45,7 @@ class Intent:
 
 @dataclass
 class InputState:
-    directions_held: Set[str] = field(default_factory=set)
-    directions_order: List[str] = field(default_factory=list)
-    action: Dict[str, bool] = field(default_factory=lambda: 
-                                    {"basic_attack": False, "special_attack": False, "dash": False}
-                                )
+    key_order: List[str] = field(default_factory=list)
 
 
 @dataclass
