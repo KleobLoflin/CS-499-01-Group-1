@@ -1,7 +1,7 @@
-code to run it in gitbash
+# code to run it in gitbash
 python -m game.app
 
-needed assets to run
+# needed assets to run
 pip install pytmx
 pip install pygames
 
