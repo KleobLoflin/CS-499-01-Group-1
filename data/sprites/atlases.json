@@ -2,7 +2,7 @@
     "atlases":{
         "hero.knight":{
             "mirror_x": true,
-            "origin": [8, 8],
+            "origin": [26, 35],
             "clips":{
                 "idle": { "fps": 6, "loop": true,
                     "frames": ["assets/animations/heroes/knight_m_idle_anim/0.png",

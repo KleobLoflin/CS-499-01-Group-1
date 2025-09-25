@@ -40,21 +40,10 @@ class EnemyAISystem:#System):
             pos: Transform = comps[Transform]
             intent: Intent = comps[Intent]
             
-
-
             target_pos: Transform = world.get(ai.target_id, Transform)
             if pos is None or target_pos is None:
                 continue
 
-            dx = target_pos.x - pos.x
-            dy = target_pos.y - pos.y
-            dist = (dx * dx + dy * dy) ** 0.5
-
-            target_pos: Transform = world.get(ai.target_id, Transform)
-                
-            if pos is None or target_pos is None:
-                continue
-                
             dx = target_pos.x - pos.x
             dy = target_pos.y - pos.y
             dist = (dx * dx + dy * dy) ** 0.5
@@ -67,6 +56,11 @@ class EnemyAISystem:#System):
                 intent.move_x = 0.0
                 intent.move_y = 0.0
 
+            # facing
+            if intent.move_x < -0.01:
+                intent.facing = "left"
+            elif intent.move_x > 0.01:
+                intent.facing = "right"
 
 
         # FLEE entities

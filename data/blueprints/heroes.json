@@ -7,7 +7,7 @@
             {"type":"Movement", "speed": 80},
             {"type":"Sprite", "atlas": "hero.knight", "z": 10},
             {"type":"AnimationState", "clip": "idle"},
-            {"type":"Facing", "horizontal_direction": 1, "up": false, "down": false},
+            {"type":"Facing"},
             {"type":"Attack", "max_cooldown": 0.25}
         ]
     }

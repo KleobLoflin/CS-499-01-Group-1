@@ -7,7 +7,7 @@
             {"type": "AI", "kind": "chase", "agro_range": 200},
             {"type": "Sprite", "atlas": "enemy.chort", "z": 8},
             {"type": "AnimationState", "clip": "idle"},
-            {"type": "Facing", "horizontal_direction": 1, "up": false, "down": false},
+            {"type": "Facing"},
             {"type": "Attack", "max_cooldown": 2}
         ]
     },
@@ -20,13 +20,8 @@
             {"type": "AI", "kind": "chase", "agro_range": 150},
             {"type": "Sprite", "atlas": "enemy.big_zombie", "z": 8},
             {"type": "AnimationState", "clip": "idle"},
-            {"type": "Facing", "direction": 1}
-
+            {"type": "Facing"},
+            {"type": "Attack", "max_cooldown": 2}
         ]
     }
-
-
-
 }
-
-
