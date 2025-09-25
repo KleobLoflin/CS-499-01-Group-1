@@ -45,7 +45,7 @@ class EnemyAISystem:#System):
             dy = target_pos.y - pos.y
             dist = (dx * dx + dy * dy) ** 0.5
             # only handle chase entities
-            if ai.kind != "chase":
+            if ai.kind == "chase":
                 if dist > 10 and dist < ai.agro_range:  
                     intent.move_x = dx / dist
                     intent.move_y = dy / dist
@@ -53,7 +53,7 @@ class EnemyAISystem:#System):
                     intent.move_x = 0.0
                     intent.move_y = 0.0
 
-            elif ai.kind != "flee":
+            elif ai.kind == "flee":
             
                 if dist < ai.agro_range and dist > 10:
                     intent.move_x = -dx / dist
@@ -62,7 +62,7 @@ class EnemyAISystem:#System):
                     intent.move_x = 0.0
                     intent.move_y = 0.0
 
-            elif ai.kind != "wander":
+            elif ai.kind == "wander":
                 dx = random.randint(-10, 10)
                 dy = random.randint(-10, 10)
             
