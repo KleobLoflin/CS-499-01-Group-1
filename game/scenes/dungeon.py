@@ -87,7 +87,7 @@ class DungeonScene(Scene):
 
         # get a list of all entities to render
         render_list = []
-        for _, comps in self.world.query(Transform, Sprite, AnimationState, Facing):
+        for eid, comps in self.world.query(Transform, Sprite, AnimationState, Facing):
             tr = comps[Transform]
             spr = comps[Sprite]
             anim = comps[AnimationState]
@@ -112,14 +112,17 @@ class DungeonScene(Scene):
                 img = pygame.transform.flip(img, True, False)
             
             # make attack up and down mirror every other attack
-            
+            # ...
             
             # get (x, y) position of sprite to draw
             pos = (int(tr.x - origin[0]), int(tr.y - origin[1]))
-            render_list.append((spr.z, img, pos))
+
+            # get depth
+            depth_y = int(tr.y)
+            render_list.append((spr.z, depth_y, eid, img, pos))
 
         # sort the render list by spr.z to control the draw order
-        render_list.sort(key=lambda t: t[0])
-        for _, img, pos in render_list:
+        render_list.sort(key=lambda t: (t[0], t[1], t[2]))
+        for _, _, _, img, pos in render_list:
             surface.blit(img, pos)
             

@@ -28,6 +28,26 @@
                     "assets/animations/heroes/knight_m_run_anim/right/2.png",
                     "assets/animations/heroes/knight_m_run_anim/right/3.png"]
                 },
+                "run_up": {"fps": 10, "loop": true,
+                    "frames": ["assets/animations/heroes/knight_m_run_anim/up/0.png",
+                    "assets/animations/heroes/knight_m_run_anim/up/1.png",
+                    "assets/animations/heroes/knight_m_run_anim/up/2.png",
+                    "assets/animations/heroes/knight_m_run_anim/up/3.png",
+                    "assets/animations/heroes/knight_m_run_anim/up/4.png",
+                    "assets/animations/heroes/knight_m_run_anim/up/5.png",
+                    "assets/animations/heroes/knight_m_run_anim/up/6.png",
+                    "assets/animations/heroes/knight_m_run_anim/up/7.png"]
+                },
+                "run_down": {"fps": 10, "loop": true,
+                    "frames": ["assets/animations/heroes/knight_m_run_anim/down/0.png",
+                    "assets/animations/heroes/knight_m_run_anim/down/1.png",
+                    "assets/animations/heroes/knight_m_run_anim/down/2.png",
+                    "assets/animations/heroes/knight_m_run_anim/down/3.png",
+                    "assets/animations/heroes/knight_m_run_anim/down/4.png",
+                    "assets/animations/heroes/knight_m_run_anim/down/5.png",
+                    "assets/animations/heroes/knight_m_run_anim/down/6.png",
+                    "assets/animations/heroes/knight_m_run_anim/down/7.png"]
+                },
                 "attack_up": { "fps": 20, "loop": false,
                     "frames": ["assets/animations/heroes/knight_m_attack_anim/up/0.png",
                     "assets/animations/heroes/knight_m_attack_anim/up/1.png",
@@ -54,7 +74,7 @@
 
         "enemy.chort":{
             "mirror_x": true,
-            "origin": [8, 8],
+            "origin": [8, 22],
             "clips":{
                 "idle": { "fps": 6, "loop": true,
                     "frames": ["assets/animations/enemys/chort_idle_anim/0.png",
@@ -73,7 +93,7 @@
 
         "enemy.big_zombie":{
             "mirror_x": true,
-            "origin": [8, 8],
+            "origin": [16, 35],
             "clips":{
                 "idle": { "fps": 6, "loop": true,
                     "frames": ["assets/animations/enemys/big_zombie_idle_anim/0.png",
