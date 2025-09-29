@@ -17,7 +17,7 @@ from game.core.config import Config
 from game.world.world import World
 from game.world.components import (
     Transform, Intent, DebugRect, Movement,
-    Sprite, AnimationState, Facing
+    Sprite, AnimationState, Facing, Map
     )
 from game.core import resources
 from game.world.actors.hero_factory import create as create_hero
@@ -30,16 +30,32 @@ from game.world.systems.presentation_mapper import PresentationMapperSystem
 from game.world.systems.animation import AnimationSystem
 from game.world.systems.collision import CollisionSystem
 from game.world.systems.attack import AttackSystem
+from game.world.systems.triggers import TriggerSystem
+
 
 class DungeonScene(Scene):
     def __init__(self) -> None:
         self.world = World()
         self.player_id: int | None = None
+        self.active_map = None
 
-        #inits the tiled map, currently hardcoded to testmap.tmx
-        self.world.tmx_data = pytmx.load_pygame("assets/maps/testmap.tmx")
+        #inits the tiled map, will be hardcoded to whatever "level 1" will be
+        map_entity = self.world.new_entity()
+        self.world.add(map_entity, Map(
+            name="testmap",
+            path="assets/maps/testmap.tmx",
+            tmx_data=pytmx.load_pygame("assets/maps/testmap.tmx"),
+            active=True  # mark this as the active map
+        ))
 
     def enter(self) -> None:
+        # define loaded map
+        for _, comps in self.world.query(Map):
+            mp = comps[Map]
+            if mp.active:
+                self.active_map = mp.tmx_data
+                break
+        
         # Spawn player knight entity with components that it will use
         self.player_id = create_hero(self.world, archetype="knight", owner_client_id=None, pos=(Config.WINDOW_W/2 - 16, Config.WINDOW_H/2 - 16))
 
@@ -49,6 +65,11 @@ class DungeonScene(Scene):
          #Spawn chort enemy entity with components that it will use
         self.chaser_1_id = create_enemy(self.world, kind="big_zombie", pos=(100, 50), params={"target_id" : self.player_id, "agro_range" :200})
 
+        # Load collision rects from the active map
+
+        collision_rects = Room.load_collision_objects(self.active_map, layer_name="collisions")
+
+        self.collision_system = CollisionSystem(self.player_id, collision_rects=collision_rects)
 
         # Register systems in the order they should run each tick (order matters)
         self.world.systems = [
@@ -56,7 +77,8 @@ class DungeonScene(Scene):
             EnemyAISystem(),
             AttackSystem(),   
             MovementSystem(),
-            CollisionSystem(self.player_id),
+            TriggerSystem(self),
+            self.collision_system,
             PresentationMapperSystem(),
             AnimationSystem()
         ]
@@ -77,13 +99,14 @@ class DungeonScene(Scene):
 
     # renders all graphics
     def draw(self, surface: Surface) -> None:
-
-        # fill the screen with black
+        # fill the screen with background color
         surface.fill(Config.BG_COLOR)
-        # render and draw the map
-        # note: anything here is drawn first and will be covered by sprites
-        # that are drawn later
-        Room.draw_map(surface, self.world.tmx_data)
+
+        # find the active map
+
+        # render and draw the map if found
+        if self.active_map:
+            Room.draw_map(surface, self.active_map)
 
         # get a list of all entities to render
         render_list = []
@@ -94,12 +117,9 @@ class DungeonScene(Scene):
             face = comps[Facing]
             
             # get sprite animation data using atlas id and type of animation clip
-            # frames = list of .pngs for animation
-            # mirror_x = True or False to mirror image
-            # origin = the center of the sprite
             frames, _, _, mirror_x, origin = resources.clip_info(spr.atlas_id, anim.clip)
 
-            # if no sprite frames found, exit loop
+            # if no sprite frames found, skip this entity
             if not frames:
                 continue
             
@@ -115,6 +135,7 @@ class DungeonScene(Scene):
             # ...
             
             # get (x, y) position of sprite to draw
+            # calculate position to draw the sprite
             pos = (int(tr.x - origin[0]), int(tr.y - origin[1]))
 
             # get depth
@@ -124,5 +145,58 @@ class DungeonScene(Scene):
         # sort the render list by spr.z to control the draw order
         render_list.sort(key=lambda t: (t[0], t[1], t[2]))
         for _, _, _, img, pos in render_list:
+        # sort render list by z-index to control draw order
+        render_list.sort(key=lambda t: t[0])
+        for _, img, pos in render_list:
             surface.blit(img, pos)
-            
+
+    def change_map(self, new_map_name: str, spawn_x: float = None, spawn_y: float = None):
+        map_found = False
+        new_map_data = None
+
+        # Check if map already exists
+        for _, comps in self.world.query(Map):
+            mp = comps[Map]
+            if mp.name == new_map_name:
+                if mp.tmx_data is None:
+                    mp.tmx_data = pytmx.load_pygame(mp.path)
+                mp.active = True
+                new_map_data = mp.tmx_data
+                map_found = True
+            else:
+                mp.active = False
+
+        # If map doesn't exist, create it
+        if not map_found:
+            map_entity = self.world.new_entity()
+            new_map_data = pytmx.load_pygame(f"assets/maps/{new_map_name}.tmx")
+            new_map = Map(
+                name=new_map_name,
+                path=f"assets/maps/{new_map_name}.tmx",
+                tmx_data=new_map_data,
+                active=True
+            )
+            self.world.add(map_entity, new_map)
+
+            # deactivate all others
+            for _, comps in self.world.query(Map):
+                mp = comps[Map]
+                if mp.name != new_map_name:
+                    mp.active = False
+
+        # Update active_map reference
+        self.active_map = new_map_data
+
+        # Load collision rects for the new map
+        self.collision_system.collision_rects = Room.load_collision_objects(self.active_map, layer_name="collisions")
+
+        # Move player to new spawn if provided
+        if spawn_x is not None and spawn_y is not None:
+            tr = self.world.get(self.player_id, Transform)
+            if tr:
+                tr.x = spawn_x
+                tr.y = spawn_y
+
+
+
+                
