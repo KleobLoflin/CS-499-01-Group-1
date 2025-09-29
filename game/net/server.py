@@ -6,14 +6,14 @@ from game.world.actors import hero_factory
 
 TICK_RATE = 30.0
 SPAWN_POINTS = [
-        (100, 100),
-        (200, 100),
-        (100, 200),
-        (200, 200)
-    ]
+    (100, 100),
+    (200, 100),
+    (100, 200),
+    (200, 200)
+]
 
 class GameServer:
-    def __init__(self, host="192.168.0.31", port=50000):
+    def __init__(self, host="0.0.0.0", port=50000):   # ✅ bind all interfaces
         # ECS world
         self.world = World()
         self.clients = {}          # player_id -> (conn, addr)
@@ -31,7 +31,7 @@ class GameServer:
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind((self.host, self.port))
         self.sock.listen()
-        print(f"Server listening on {self.host}:{self.port}")
+        print(f"Server listening on {self.host}:{self.port} (all interfaces)")
 
     def run(self):
         """Start server: accept clients and run main loop."""
@@ -40,11 +40,9 @@ class GameServer:
         self.run_loop()
 
     # ---- Networking ----
-    # Define spawn points (adjust to match your map)
-
-    def accept_loop(self, sock):
+    def accept_loop(self):   # ✅ no sock argument needed
         while True:
-            conn, addr = sock.accept()
+            conn, addr = self.sock.accept()
             with self.lock:
                 pid = self.next_player_id
                 self.next_player_id += 1
@@ -57,7 +55,7 @@ class GameServer:
                 # Spawn hero using your factory
                 eid = hero_factory.create(
                     self.world,
-                    archetype="hero.knight",  # or your actual archetype key
+                    archetype="knight",
                     owner_client_id=pid,
                     pos=spawn_pos,
                 )
