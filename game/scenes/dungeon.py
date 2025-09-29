@@ -142,13 +142,20 @@ class DungeonScene(Scene):
             depth_y = int(tr.y)
             render_list.append((spr.z, depth_y, eid, img, pos))
 
-        # sort the render list by spr.z to control the draw order
+        # sort the render list by z-index and depth_y
         render_list.sort(key=lambda t: (t[0], t[1], t[2]))
+
+        # draw all sprites
         for _, _, _, img, pos in render_list:
-        # sort render list by z-index to control draw order
-        render_list.sort(key=lambda t: t[0])
-        for _, img, pos in render_list:
             surface.blit(img, pos)
+        '''
+        # sort the render list by spr.z to control the draw order
+        sort(key=lambda t: (t[0], t[1], t[2]))
+        #for _, _, _, img, pos in render_list:
+        # sort render list by z-index to control draw order
+            render_list.sort(key=lambda t: t[0])
+        for _, img, pos in render_list:
+            surface.blit(img, pos)'''
 
     def change_map(self, new_map_name: str, spawn_x: float = None, spawn_y: float = None):
         map_found = False
