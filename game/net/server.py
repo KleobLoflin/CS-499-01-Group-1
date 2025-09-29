@@ -1,8 +1,13 @@
-import socket, threading, time
+import socket
+import threading
+import time
 from collections import deque
 from game.net import codec, protocol, snapshots
 from game.world.world import World
 from game.world.actors import hero_factory
+from game.world.actors.blueprint_index import load as load_blueprints
+# Load hero and enemy blueprints so server can spawn players
+load_blueprints("data/blueprints/heroes.json", "data/blueprints/enemies.json")
 
 TICK_RATE = 30.0
 SPAWN_POINTS = [
@@ -13,7 +18,7 @@ SPAWN_POINTS = [
 ]
 
 class GameServer:
-    def __init__(self, host="0.0.0.0", port=50000):   # ✅ bind all interfaces
+    def __init__(self, host="0.0.0.0", port=50000):
         # ECS world
         self.world = World()
         self.clients = {}          # player_id -> (conn, addr)
@@ -40,7 +45,7 @@ class GameServer:
         self.run_loop()
 
     # ---- Networking ----
-    def accept_loop(self):   # ✅ no sock argument needed
+    def accept_loop(self):
         while True:
             conn, addr = self.sock.accept()
             with self.lock:
@@ -52,16 +57,21 @@ class GameServer:
                 # Pick spawn location dynamically
                 spawn_pos = SPAWN_POINTS[(pid - 1) % len(SPAWN_POINTS)]
 
-                # Spawn hero using your factory
-                eid = hero_factory.create(
-                    self.world,
-                    archetype="knight",
-                    owner_client_id=pid,
-                    pos=spawn_pos,
-                )
-                self.player_entities[pid] = eid
+                # Spawn hero (archetype must match heroes.json key)
+                try:
+                    eid = hero_factory.create(
+                        self.world,
+                        archetype="knight",  # just "knight" → hero_factory prepends "hero."
+                        owner_client_id=pid,
+                        pos=spawn_pos,
+                    )
+                    self.player_entities[pid] = eid
+                except KeyError as e:
+                    print(f"[ERROR] Failed to spawn hero for player {pid}: {e}")
+                    conn.close()
+                    continue
 
-                # Send welcome
+                # Send welcome message
                 msg = {"type": protocol.MSG_WELCOME, "player_id": pid}
                 conn.sendall(codec.encode(msg))
                 print(f"Player {pid} connected from {addr}")
@@ -75,13 +85,14 @@ class GameServer:
         try:
             while True:
                 data = conn.recv(4096)
-                if not data: break
+                if not data:
+                    break
                 buffer += data.decode()
                 buffer = self.process_messages(buffer, pid)
         except Exception as e:
-            print("Client error:", e)
+            print(f"[Client {pid} error]:", e)
         finally:
-            print("Disconnect", pid)
+            print(f"Player {pid} disconnected")
             self.remove_client(pid)
 
     def process_messages(self, buffer, pid):
@@ -121,9 +132,11 @@ class GameServer:
             from game.world.components import Intent
             for pid, q in self.input_queues.items():
                 eid = self.player_entities.get(pid)
-                if eid is None: continue
+                if eid is None:
+                    continue
                 comps = self.world.entities.get(eid)
-                if comps is None: continue
+                if comps is None:
+                    continue
 
                 intent = comps.get(Intent)
                 if intent is None:

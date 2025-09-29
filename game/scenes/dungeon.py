@@ -32,10 +32,10 @@ from game.world.actors.enemy_factory import create as create_enemy
 
 
 class DungeonScene(Scene):
-    def __init__(self) -> None:
+    def __init__(self, net_client=None):
+        self.net = net_client if net_client is not None else GameClient()
         self.world = World()
         self.player_id: int | None = None
-        self.net = GameClient()
         self.world.tick = 0
         self.input_system = None
 
@@ -44,7 +44,7 @@ class DungeonScene(Scene):
 
     def enter(self) -> None:
         # Connect to server
-        self.net.connect()
+        #self.net.connect()
 
         # Spawn player hero entity first
         self.player_id = create_hero(

@@ -14,9 +14,11 @@ class GameClient:
         self.recv_buffer = ""
         self.snapshot_queue = deque()
         self.player_id = None
+        self.connected = False
 
     def connect(self):
         self.sock.connect((self.host, self.port))
+        self.connected = True
         threading.Thread(target=self.receive_loop, daemon=True).start()
 
     def receive_loop(self):
@@ -42,6 +44,8 @@ class GameClient:
             self.snapshot_queue.append(msg)
 
     def send_input(self, intent: Intent, tick: int):
+        if not self.connected:
+            return #skip until connected
         msg = {
             "type": protocol.MSG_INPUT,
             "tick": tick,
@@ -50,7 +54,11 @@ class GameClient:
             "dash_x": intent.dash_x,
             "dash_y": intent.dash_y,
         }
-        self.sock.sendall(codec.encode(msg))
+        try:
+            self.sock.sendall(codec.encode(msg))
+        except Exception as e:
+            print(f"[Client 1 error]: {e}")
+            self.connected = False
 
     def poll_snapshot(self):
         """Return the latest snapshot from the queue, if any."""

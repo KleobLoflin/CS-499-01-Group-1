@@ -1,15 +1,9 @@
-# Class: App
-
-# Entry point for the client, owns the Pygame window and the main loop
-# possible fields: scene_manager, resources, clock, screen, running
-# possible methods: run(), _process_events(), _fixed_update(dt), _draw()
-# Calls into SceneManager.update() and draw(). This is where control returns every frame.
-
-# (this will be the script to run to start the game client)
-
-import sys, pygame
+# app.py
+import sys
+import pygame
 import threading
 from game.net.server import GameServer
+from game.net.client import GameClient
 from game.core.config import Config
 from game.core.time import FixedClock
 from game.scene_manager import SceneManager
@@ -17,64 +11,85 @@ from game.scenes.dungeon import DungeonScene
 from game.core.window import Window
 from game.core.resources import load_atlases
 from game.world.actors.blueprint_index import load as load_blueprints
+import socket
 
-def run() -> None:
+# -------------------------------------------------------------------
+# Helper to detect LAN IP
+def get_local_ip():
+    """Returns the LAN IP of this machine."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+    except:
+        ip = "127.0.0.1"
+    finally:
+        s.close()
+    return ip
 
-    # init window and timing
+# -------------------------------------------------------------------
+# CONFIGURATION
+# On host machine: set SERVER_MODE = True
+# On client machine: set SERVER_MODE = False
+SERVER_MODE = True   # <-- Change to True on host machine
+HOST_IP = get_local_ip()  # LAN IP of the server (host machine)
+
+# -------------------------------------------------------------------
+def run_server():
+    """Start server (blocking)."""
+    server = GameServer(host="0.0.0.0")  # listen on all interfaces
+    print(f"[App] Server running on {HOST_IP}")
+    server.run()  # blocks, accepts clients, updates world
+
+def run_client(host=HOST_IP):
+    """Start a client and connect to the server."""
     pygame.init()
     window = Window()
     pygame.display.set_caption(Config.WINDOW_TITLE)
     clock = pygame.time.Clock()
     fixed = FixedClock()
 
-    # create virtual surface at fixed resolution
+    # virtual surface
     base_surface = pygame.Surface((Config.WINDOW_W, Config.WINDOW_H))
 
-    # load atlases and blueprints
+    # load assets
     load_atlases("data/sprites/atlases.json")
     load_blueprints("data/blueprints/heroes.json", "data/blueprints/enemies.json")
 
-    # --- Start local multiplayer server ---
-    server = GameServer()
-    server_thread = threading.Thread(target=server.run, daemon=True)
-    server_thread.start()
-    print("Local multiplayer server started on 127.0.0.1:50000")
+    # connect to server
+    client = GameClient(host=host, port=50000)
+    client.connect()
 
-    # this starts the dungeonscene for the movable rectangle
-    # eventually the titlescreen would start first
+    # start dungeon scene
     scenes = SceneManager()
-    scenes.set(DungeonScene())
+    scenes.set(DungeonScene(net_client=client))
 
-    # game loop #################################################################
+    # main loop
     running = True
     while running:
-        # 1) event checking
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             else:
                 scenes.handle_event(event)
 
-        # 2) update
         real_dt = clock.tick(Config.CLIENT_FPS) / 1000.0
         steps = fixed.step(real_dt, Config.FIXED_DT)
         for _ in range(steps):
             scenes.update(Config.FIXED_DT)
 
-        # 3) Draw
-        # draw everything to virtual surface first
+        # draw
         scenes.draw(base_surface)
-
-                # draw to base surface
         scenes.draw(window.get_surface())
-
-        # present final scaled image
         window.present()
-
         pygame.display.flip()
 
     pygame.quit()
     sys.exit(0)
 
+# -------------------------------------------------------------------
 if __name__ == "__main__":
-    run()
+    if SERVER_MODE:
+        run_server()
+    else:
+        run_client(host=HOST_IP)
