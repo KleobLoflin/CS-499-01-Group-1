@@ -54,6 +54,12 @@ class Attack:
     remaining_cooldown: float = max_cooldown
     active: bool = False
 
+# Hitbox Size
+@dataclass
+class HitboxSize:
+    radius: float = 10.0   # default hitbox size, can be overridden in JSON
+
+
 # Enemy AI Patterns
 @dataclass
 class AI:

@@ -37,6 +37,10 @@ def build_DebugRect(spec, ctx):
 
 def build_Attack(spec, ctx): return Attack(max_cooldown=spec.get("max_cooldown", 0.15))
 
+def build_HitboxSize(spec, ctx):
+    return HitboxSize(radius=spec.get("radius", 10))
+
+
 # gather all builder functions
 BUILDERS = {
     "Transform": build_Transform,
@@ -48,7 +52,8 @@ BUILDERS = {
     "AnimationState": build_AnimationState,
     "Facing": build_Facing,
     "Attack": build_Attack,
-    "DebugRect": build_DebugRect
+    "DebugRect": build_DebugRect,
+    "HitboxSize": build_HitboxSize
 }
 
 # uses builder functions to add components to an entity
