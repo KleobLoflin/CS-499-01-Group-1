@@ -11,6 +11,10 @@ from typing import Tuple, Dict, Set, Literal, List
 
 # gameplay data ##################################################
 
+@dataclass
+class PlayerTag:    # just to mark if an entity is a player
+    pass
+
 # transform: data representing world-space position
 # later will add velocity, rotation, etc... anything needed for size/location/orientation
 @dataclass

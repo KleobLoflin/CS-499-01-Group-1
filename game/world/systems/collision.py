@@ -1,12 +1,11 @@
 #Class collision
-from game.world.components import Transform
+from game.world.components import Transform, PlayerTag
 import pygame
 import math
 from game.core.config import Config
 
 class CollisionSystem:
-    def __init__(self, player_id: int, collision_rects=None):
-        self.player_id = player_id
+    def __init__(self, collision_rects=None):
         self.knockbacks = {}
         self.collision_rects = collision_rects or []
 
@@ -29,22 +28,29 @@ class CollisionSystem:
         for eid in expired:
             del self.knockbacks[eid]
 
+        # get list of player entities
+        players = []
+        for player_entity, _ in world.query(PlayerTag):
+            players.append(player_entity)
+
         # Check collisions for all entities
         for eid, comps in world.query(Transform):
             tr = comps[Transform]
 
-            # Player vs enemies knockback
-            if eid != self.player_id:
-                player_tr = world.get(self.player_id, Transform)
-                if player_tr:
-                    dx = player_tr.x - tr.x
-                    dy = player_tr.y - tr.y
-                    distance = math.sqrt(dx*dx + dy*dy)
-                    if distance < 10 and distance > 0:
-                        dx /= distance
-                        dy /= distance
-                        self.knockbacks[self.player_id] = {"timer": 0.2, "dir": (dx, dy)}
-                        self.knockbacks[eid] = {"timer": 0.2, "dir": (-dx, -dy)}
+            # for each player
+            for player_entity in players:
+                # Players vs enemies knockback
+                if eid not in players:
+                    player_tr = world.get(player_entity, Transform)
+                    if player_tr:
+                        dx = player_tr.x - tr.x
+                        dy = player_tr.y - tr.y
+                        distance = math.sqrt(dx*dx + dy*dy)
+                        if distance < 10 and distance > 0:
+                            dx /= distance
+                            dy /= distance
+                            self.knockbacks[player_entity] = {"timer": 0.2, "dir": (dx, dy)}
+                            self.knockbacks[eid] = {"timer": 0.2, "dir": (-dx, -dy)}
 
             # Wall collisions
             entity_rect = pygame.Rect(tr.x, tr.y, 16, 16)  # adjust to entity size
