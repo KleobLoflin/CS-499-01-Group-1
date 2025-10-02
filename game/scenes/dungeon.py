@@ -31,45 +31,36 @@ from game.world.systems.animation import AnimationSystem
 from game.world.systems.collision import CollisionSystem
 from game.world.systems.attack import AttackSystem
 from game.world.systems.triggers import TriggerSystem
+from game.world.systems.render import RenderSystem
+from game.world.systems.gameplay_spawn import GameplaySpawnSystem
+from game.maps.registry import load_registry
+from game.maps.factory import MapFactory
+from game.world.spawn_components import MapLoaded
 
 
 class DungeonScene(Scene):
-    def __init__(self) -> None:
+    def __init__(self, role) -> None:
         self.world = World()
         self.player_id: int | None = None
         self.active_map = None
+        self.role = role
+        self.render = RenderSystem()
 
-        #inits the tiled map, will be hardcoded to whatever "level 1" will be
-        map_entity = self.world.new_entity()
-        self.world.add(map_entity, Map(
-            name="testmap",
-            path="assets/maps/testmap.tmx",
-            tmx_data=pytmx.load_pygame("assets/maps/testmap.tmx"),
-            active=True  # mark this as the active map
-        ))
+        # map registry + factory
+        self.catalog = load_registry("data/map_registry.json")
+        self.factory = MapFactory(self.catalog)
+        self.map = None
 
     def enter(self) -> None:
-        # define loaded map
-        for _, comps in self.world.query(Map):
-            mp = comps[Map]
-            if mp.active:
-                self.active_map = mp.tmx_data
-                break
+        # initial map by id
+        mi = self.catalog["testmap"]
+        inst = self.factory.create(mi.id)
+
+        # activate it
+        self.activate_map_instance(inst)
         
         # Spawn player knight entity with components that it will use
         self.player_id = create_hero(self.world, archetype="knight", owner_client_id=None, pos=(Config.WINDOW_W/2 - 16, Config.WINDOW_H/2 - 16))
-
-        #Spawn chort enemy entity with components that it will use
-        self.chaser_1_id = create_enemy(self.world, kind="chort", pos=(100, 100), params={"target_id" : self.player_id, "agro_range" :200})
-
-         #Spawn chort enemy entity with components that it will use
-        self.chaser_1_id = create_enemy(self.world, kind="big_zombie", pos=(100, 50), params={"target_id" : self.player_id, "agro_range" :200})
-
-        # Load collision rects from the active map
-
-        collision_rects = Room.load_collision_objects(self.active_map, layer_name="collisions")
-
-        self.collision_system = CollisionSystem(self.player_id, collision_rects=collision_rects)
 
         # Register systems in the order they should run each tick (order matters)
         self.world.systems = [
@@ -78,9 +69,10 @@ class DungeonScene(Scene):
             AttackSystem(),   
             MovementSystem(),
             TriggerSystem(self),
-            self.collision_system,
+            CollisionSystem(collision_rects=inst.collisions),
             PresentationMapperSystem(),
-            AnimationSystem()
+            AnimationSystem(),
+            GameplaySpawnSystem()
         ]
 
     # method to release resources
@@ -99,63 +91,7 @@ class DungeonScene(Scene):
 
     # renders all graphics
     def draw(self, surface: Surface) -> None:
-        # fill the screen with background color
-        surface.fill(Config.BG_COLOR)
-
-        # find the active map
-
-        # render and draw the map if found
-        if self.active_map:
-            Room.draw_map(surface, self.active_map)
-
-        # get a list of all entities to render
-        render_list = []
-        for eid, comps in self.world.query(Transform, Sprite, AnimationState, Facing):
-            tr = comps[Transform]
-            spr = comps[Sprite]
-            anim = comps[AnimationState]
-            face = comps[Facing]
-            
-            # get sprite animation data using atlas id and type of animation clip
-            frames, _, _, mirror_x, origin = resources.clip_info(spr.atlas_id, anim.clip)
-
-            # if no sprite frames found, skip this entity
-            if not frames:
-                continue
-            
-            # get frame image to draw
-            img = frames[anim.frame]
-
-            # handles which way the sprite is facing
-            flip = (face.direction == "left") and mirror_x
-            if flip:
-                img = pygame.transform.flip(img, True, False)
-            
-            # make attack up and down mirror every other attack
-            # ...
-            
-            # get (x, y) position of sprite to draw
-            # calculate position to draw the sprite
-            pos = (int(tr.x - origin[0]), int(tr.y - origin[1]))
-
-            # get depth
-            depth_y = int(tr.y)
-            render_list.append((spr.z, depth_y, eid, img, pos))
-
-        # sort the render list by z-index and depth_y
-        render_list.sort(key=lambda t: (t[0], t[1], t[2]))
-
-        # draw all sprites
-        for _, _, _, img, pos in render_list:
-            surface.blit(img, pos)
-        '''
-        # sort the render list by spr.z to control the draw order
-        sort(key=lambda t: (t[0], t[1], t[2]))
-        #for _, _, _, img, pos in render_list:
-        # sort render list by z-index to control draw order
-            render_list.sort(key=lambda t: t[0])
-        for _, img, pos in render_list:
-            surface.blit(img, pos)'''
+        self.render.draw(self.world, surface, self.active_map)
 
     def change_map(self, new_map_name: str, spawn_x: float = None, spawn_y: float = None):
         map_found = False
@@ -204,6 +140,7 @@ class DungeonScene(Scene):
                 tr.x = spawn_x
                 tr.y = spawn_y
 
-
+def activate_map_instance(self, inst):
+    self.active_map = inst.tmx
 
                 

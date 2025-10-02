@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "meta": {
+    "name": "Test Map",
+    "music": "ost.title.light",
+    "ambience": "room.small"
+  },
+  "title_spawns": [
+    {
+      "kind": "enemy",
+      "enemy_type": "chort",
+      "count": 4,
+      "region": "center_ring"
+    },
+    {
+      "kind": "enemy",
+      "enemy_type": "big_zombie",
+      "count": 3,
+      "region": "north_strip"
+    }
+  ],
+  "game_spawns": {
+    "player_start": { "pos": [128, 192] },
+    "checkpoints": [
+      { "id": "cp_1", "pos": [128, 192] }
+    ],
+    "pickups": [
+      { "type": "potion_small", "pos": [256, 160] },
+      { "type": "key", "pos": [320, 96] }
+    ],
+    "static_enemies": [
+      { "type": "chort", "pos": [220, 150] },
+      { "type": "big_zombie", "pos": [260, 150] }
+    ],
+    "waves": [
+      {
+        "id": "wave_1",
+        "trigger": { "type": "on_enter_region", "region": "arena" },
+        "enemies": [
+          { "type": "big_zombie", "count": 3, "region": "arena" },
+          { "type": "chort", "count": 4, "region": "ceiling" }
+        ],
+        "next": "wave_2"
+      },
+      {
+        "id": "wave_2",
+        "trigger": { "type": "after_wave", "wave": "wave_1", "delay": 1.5 },
+        "enemies": [
+          { "type": "chort", "count": 6, "region": "arena" }
+        ]
+      }
+    ]
+  },
+  "regions": {
+    "center_ring": { "type": "ring", "center": [192, 128], "r_min": 24, "r_max": 96 },
+    "north_strip": { "type": "rect", "x": 48, "y": 24, "w": 288, "h": 40 },
+    "arena": { "type": "rect", "x": 96, "y": 64, "w": 256, "h": 160 },
+    "ceiling": { "type": "poly", "points": [[0, 0], [400, 0], [400, 36], [0, 36]] }
+  }
+}

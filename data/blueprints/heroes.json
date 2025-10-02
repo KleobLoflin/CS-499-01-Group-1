@@ -1,6 +1,7 @@
 {
     "hero.knight":{
         "components":[
+            {"type":"PlayerTag"},
             {"type":"Transform"},
             {"type":"Intent"},
             {"type":"InputState"},

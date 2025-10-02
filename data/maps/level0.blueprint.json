@@ -1,0 +1,58 @@
+{
+  "version": 1,
+  "meta": {
+    "name": "Level 0",
+    "music": "n/a",
+    "ambience": "room.small"
+  },
+  "title_spawns": [
+    {
+      "kind": "enemy",
+      "enemy_type": "chort",
+      "count": 5,
+      "region": "title_loop"
+    }
+  ],
+  "game_spawns": {
+    "player_start": { "pos": [96, 208] },
+    "pickups": [
+      { "type": "potion_small", "pos": [224, 176] },
+      { "type": "coin", "pos": [240, 176] },
+      { "type": "coin", "pos": [256, 176] }
+    ],
+    "static_enemies": [
+      { "type": "chort", "pos": [260, 120] },
+      { "type": "big_zombie", "pos": [240, 180]}
+    ],
+    "waves": [
+      {
+        "id": "intro_pack",
+        "trigger": { "type": "on_enter_region", "region": "chamber" },
+        "enemies": [
+          { "type": "chort", "count": 4, "region": "chamber" },
+          { "type": "big_zombie", "count": 3, "region": "rafters" }
+        ],
+        "next": "mini_clear"
+      },
+      {
+        "id": "mini_clear",
+        "trigger": { "type": "after_wave", "wave": "intro_pack", "delay": 1.0 },
+        "enemies": [
+          { "type": "chort", "count": 2, "region": "chamber" }
+        ],
+        "reward": [
+          { "type": "key", "pos": [304, 112] }
+        ]
+      }
+    ],
+    "exits": [
+      { "to": "level1", "region": "east_door" }
+    ]
+  },
+  "regions": {
+    "title_loop": { "type": "ring", "center": [176, 128], "r_min": 20, "r_max": 80 },
+    "chamber": { "type": "rect", "x": 80, "y": 72, "w": 240, "h": 144 },
+    "rafters": { "type": "poly", "points": [[64, 48], [352, 48], [352, 64], [64, 64]] },
+    "east_door": { "type": "rect", "x": 336, "y": 112, "w": 24, "h": 48 }
+  }
+}

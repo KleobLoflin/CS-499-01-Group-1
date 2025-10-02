@@ -11,7 +11,7 @@ import sys, pygame
 from game.core.config import Config
 from game.core.time import FixedClock
 from game.scene_manager import SceneManager
-from game.scenes.dungeon import DungeonScene
+from game.scenes.menu import TitleScene
 from game.core.window import Window
 from game.core.resources import load_atlases
 from game.world.actors.blueprint_index import load as load_blueprints
@@ -32,15 +32,14 @@ def run() -> None:
     load_atlases("data/sprites/atlases.json")
     load_blueprints("data/blueprints/heroes.json", "data/blueprints/enemies.json")
 
-    # this starts the dungeonscene for the movable rectangle
-    # eventually the titlescreen would start first
+    # this starts the title scene
     scenes = SceneManager()
-    scenes.set(DungeonScene())
+    scenes.set(TitleScene(scenes))
 
     # game loop #################################################################
     running = True
     while running:
-        # 1) event checking
+        # 1) event check for 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
