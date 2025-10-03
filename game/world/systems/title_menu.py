@@ -1,7 +1,7 @@
 import pygame
 from pygame import Surface
 from typing import Tuple
-from game.world.title_components import TitleMenu
+from game.world.components import TitleMenu
 
 class TitleMenuSystem:
     def __init__(self, font: pygame.font.Font, pos_title: Tuple[int, int]=(40, 26), pos_options: Tuple[int, int]=(60, 110), line_h: int=28):

@@ -12,7 +12,7 @@ import pygame
 from pygame import Surface
 from game.scenes.dungeon import DungeonScene
 from game.world.world import World
-from game.world.title_components import TitleMenu
+from game.world.components import TitleMenu
 from game.world.systems.title_menu import TitleMenuSystem
 from game.world.systems.render import RenderSystem
 from game.world.systems.animation import AnimationSystem
@@ -20,10 +20,9 @@ from game.world.systems.presentation_mapper import PresentationMapperSystem
 from game.world.systems.movement import MovementSystem
 from game.world.systems.collision import CollisionSystem
 from game.world.systems.room import Room
-from game.world.spawn_components import MapLoaded
-from game.world.systems.title_spawn import TitleSpawnSystem
-from game.maps.registry import load_registry, pick_random
-from game.maps.factory import MapFactory
+from game.world.systems.spawn import SpawnSystem
+from game.world.maps.registry import load_registry, pick_random
+from game.world.maps.map_factory import MapFactory
 
 class TitleScene(Scene):
     def __init__(self, scene_manager):
@@ -33,45 +32,36 @@ class TitleScene(Scene):
         # map info
         self.catalog = load_registry("data/map_registry.json")
         self.factory = MapFactory(self.catalog)
-        self.map = None
-
-        # logic systems
-        self.present = PresentationMapperSystem()
-        self.anim = AnimationSystem()
-        self.move = MovementSystem()
-        self.collision = CollisionSystem(self.factory.collisions)
-        self.spawn = TitleSpawnSystem()
-
-        # render system
-        self.render = RenderSystem()
+        self.active_map = None
 
         # UI
         pygame.font.init()
         self.menu_ui = TitleMenuSystem(pygame.font.SysFont("consolas", 20))
 
-        
+        # render system ran in draw function, not with logic systems
+        self.render = RenderSystem()
 
     def enter(self) -> None:
         # choose any map tagged "title_ok"
         mi = pick_random(self.catalog, require_tags=["title_ok"])
-        self.map = self.factory.create(mi.id)
+        self.active_map = self.factory.create(mi.id)
 
         # title menu singleton
         eid = self.world.new_entity()
-        self.world.add(eid, TitleMenu(title=self.map.name))
+        self.world.add(eid, TitleMenu(title=self.active_map.name))
 
         # Emit MapLoaded so TitleSpawnSystem can react
         ml = self.world.new_entity()
-        self.world.add(ml, MapLoaded(map_id=self.map.id, blueprint=self.map.blueprint))
+        self.world.add(ml, MapLoaded(map_id=self.active_map.id, blueprint=self.active_map.blueprint))
 
-        # register systems in order
+        # register logic systems in order
         self.world.systems = [
-            self.present,
-            self.anim,
-            self.move,
-            self.collision,
-            self.spawn,
-            self.menu_ui
+            PresentationMapperSystem(),
+            AnimationSystem(),
+            MovementSystem(),
+            CollisionSystem(),
+            TitleSpawnSystem(),
+            self.menu_ui,
         ]
 
         # music stuff here or probably make an audio system
@@ -94,5 +84,5 @@ class TitleScene(Scene):
                 return
     
     def draw(self, surface: Surface) -> None:
-        self.render.draw(self.world, surface, self.map.tmx if self.map else None)
+        self.render.draw(self.world, surface, self.active_map.tmx if self.active_map else None)
         self.menu_ui.draw_overlay(self.world, surface)
