@@ -7,12 +7,18 @@
 # memory-wise but it behaves similarly.
 
 from dataclasses import dataclass, field
-from typing import Tuple, Dict, Set, Literal, List
+from typing import Tuple, Dict, Set, Literal, List, Optional, Any
 
-# gameplay data ##################################################
+# gameplay tags ##################################################
 
+# to mark an entity as a player
 @dataclass
-class PlayerTag:    # just to mark if an entity is a player
+class PlayerTag:  
+    pass
+
+# for local only control
+@dataclass
+class LocalControlled:
     pass
 
 # transform: data representing world-space position
@@ -39,8 +45,6 @@ class Movement:
 class Intent:
     move_x: float = 0.0   # -1..1
     move_y: float = 0.0   # -1..1
-    dash_x: float = 0.0   # -1..1
-    dash_y: float = 0.0   # -1..1
     basic_atk: bool = False
     basic_atk_held: bool = False
     dash: bool = False
@@ -50,7 +54,6 @@ class Intent:
 @dataclass
 class InputState:
     key_order: List[str] = field(default_factory=list)
-
 
 @dataclass
 class Attack:
@@ -96,9 +99,63 @@ class DebugRect:
     size: Tuple[int, int] = (32, 32)
     color: Tuple[int, int, int] = (90, 180, 255)
 
+# Map and Spawn ##############################################################
+
+# map data
 @dataclass
 class Map:
     name: str                # file name
     path: str                # file path to .tmx
     tmx_data: any = None     # loaded pytmx map
     active: bool = False     # is this the current map
+
+    id: Optional[str] = None                # registry id, ex: "level0"
+    collisions: Optional[List[Any]] = None  # list[pygame.rect] or (x, y, w, h)
+    music: Optional[str] = None
+    ambience: Optional[str] = None
+    blueprint: Optional[Dict[str, Any]] = None  # parsed <map>.blueprint.json
+
+# client-side which map to render/simulate
+@dataclass
+class ActiveMapId:
+    id: str         
+
+# attach to any entity that belongs to a specific Map.id
+@dataclass
+class OnMap:
+    id: str         
+
+# lives on the Map entity, ensures spawns happen once per map
+@dataclass
+class MapSpawnState:
+    did_initial_spawns: bool = False    
+
+# run/scene-level policy used by SpawnSystem
+@dataclass
+class SpawnPolicy:      
+    spawn_player: bool = False
+    spawn_static_enemies: bool = True
+    spawn_pickups: bool = True
+    spawn_objects: bool = True
+
+    run_title_spawns: bool = False
+    run_game_spawns: bool = True
+
+# pickups/objects placeholders ##############
+
+@dataclass
+class Pickup:
+    kind: str = "potion_health"     # powerups, potions, weapons, keys, coins, etc...
+
+@dataclass
+class WorldObject:
+    kind: str = "chest"         # chests, fountains, columns, barriers, spikes, doors, etc...
+
+# Menus ############################################
+
+@dataclass
+class TitleMenu:
+    title: str = "GateCrashers"
+    options: List[str] = field(default_factory=lambda: ["Single Player", "Host", "Join"])
+    selected_index: int = 0
+    selected_role: Optional[str] = None
