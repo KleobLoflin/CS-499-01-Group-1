@@ -65,24 +65,24 @@ def _run_game_spawns(world, mp: Map, active_id: str, policy: SpawnPolicy):
         world.add(pid, OnMap(id=active_id))
 
     # 2) Objects
-    if policy.spawn_objects:
-        for o in gs.get("objects", []):
-            kind = o.get("type", "crate")
-            ox, oy = o.get("pos", [0, 0])
-            eid = world.new_entity()
-            world.add(eid, WorldObject(kind=kind))
-            world.add(eid, Transform(float(ox), float(oy)))
-            world.add(eid, OnMap(id=active_id))
+    # if policy.spawn_objects:
+    #     for o in gs.get("objects", []):
+    #         kind = o.get("type", "crate")
+    #         ox, oy = o.get("pos", [0, 0])
+    #         eid = world.new_entity()
+    #         world.add(eid, WorldObject(kind=kind))
+    #         world.add(eid, Transform(float(ox), float(oy)))
+    #         world.add(eid, OnMap(id=active_id))
 
     # 3) Pickups
-    if policy.spawn_pickups:
-        for p in gs.get("pickups", []):
-            kind = p.get("type", "potion_small")
-            px, py = p.get("pos", [0, 0])
-            eid = world.new_entity()
-            world.add(eid, Pickup(kind=kind))
-            world.add(eid, Transform(float(px), float(py)))
-            world.add(eid, OnMap(id=active_id))
+    # if policy.spawn_pickups:
+    #     for p in gs.get("pickups", []):
+    #         kind = p.get("type", "potion_small")
+    #         px, py = p.get("pos", [0, 0])
+    #         eid = world.new_entity()
+    #         world.add(eid, Pickup(kind=kind))
+    #         world.add(eid, Transform(float(px), float(py)))
+    #         world.add(eid, OnMap(id=active_id))
 
     # 4) Static enemies
     if policy.spawn_static_enemies:
