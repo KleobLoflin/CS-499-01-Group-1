@@ -10,69 +10,80 @@
 
 from game.scenes.base import Scene
 import pygame
-import pytmx
-from pygame import Surface, Rect
-from game.scene_manager import Scene
+from pygame import Surface
 from game.core.config import Config
+
 from game.world.world import World
 from game.world.components import (
-    Transform, Intent, DebugRect, Movement,
-    Sprite, AnimationState, Facing, Map
+    Transform, Map, OnMap, SpawnPolicy, PlayerTag
     )
-from game.core import resources
 from game.world.actors.hero_factory import create as create_hero
-from game.world.actors.enemy_factory import create as create_enemy
 from game.world.systems.input import InputSystem
 from game.world.systems.movement import MovementSystem
 from game.world.systems.ai import EnemyAISystem
-from game.world.systems.room import Room
 from game.world.systems.presentation_mapper import PresentationMapperSystem
 from game.world.systems.animation import AnimationSystem
 from game.world.systems.collision import CollisionSystem
 from game.world.systems.attack import AttackSystem
 from game.world.systems.triggers import TriggerSystem
 from game.world.systems.render import RenderSystem
-from game.world.systems.gameplay_spawn import GameplaySpawnSystem
-from game.maps.registry import load_registry
-from game.maps.factory import MapFactory
-from game.world.spawn_components import MapLoaded
+from game.world.systems.spawn import SpawnSystem
 
+from game.world.maps.map_index import load_registry, pick
+from game.world.maps.map_factory import create_or_activate, resolve_map_hint_to_id
 
 class DungeonScene(Scene):
     def __init__(self, role) -> None:
         self.world = World()
         self.player_id: int | None = None
-        self.active_map = None
         self.role = role
         self.render = RenderSystem()
 
-        # map registry + factory
-        self.catalog = load_registry("data/map_registry.json")
-        self.factory = MapFactory(self.catalog)
-        self.map = None
-
     def enter(self) -> None:
-        # initial map by id
-        mi = self.catalog["testmap"]
-        inst = self.factory.create(mi.id)
+        # initial map, or pick a fixed id 
+        load_registry("data/map_registry.json")
+        mi = pick(require_all=["tier0"])
+        create_or_activate(self.world, mi.id)
 
-        # activate it
-        self.activate_map_instance(inst)
-        
-        # Spawn player knight entity with components that it will use
-        self.player_id = create_hero(self.world, archetype="knight", owner_client_id=None, pos=(Config.WINDOW_W/2 - 16, Config.WINDOW_H/2 - 16))
+        # Spawn player once here (or set SpawnPolicy.spawn_player=True to use blueprint)
+        self.player_id = create_hero(
+            self.world,
+            archetype="knight",
+            owner_client_id=None,
+            pos=(Config.WINDOW_W/2 - 16, Config.WINDOW_H/2 - 16)
+        )
+        # Tag player with the active map id
+        active_id = None
+        for _, comps in self.world.query(Map):
+            if comps[Map].active:
+                active_id = getattr(comps[Map], "id", None)
+                break
+        if active_id:
+            self.world.add(self.player_id, OnMap(id=active_id))
+        self.world.add(self.player_id, PlayerTag())
 
-        # Register systems in the order they should run each tick (order matters)
+        # Scene/run policy for SpawnSystem (gameplay)
+        e = self.world.new_entity()
+        self.world.add(e, SpawnPolicy(
+            run_title_spawns=False,
+            run_game_spawns=True,
+            spawn_player=False,          # already spawned above
+            spawn_static_enemies=True,
+            spawn_pickups=True,
+            spawn_objects=True
+        ))
+
+        # Systems in order
         self.world.systems = [
             InputSystem(self.player_id),
             EnemyAISystem(),
-            AttackSystem(),   
+            AttackSystem(),
             MovementSystem(),
-            TriggerSystem(self),
-            CollisionSystem(collision_rects=inst.collisions),
+            TriggerSystem(self),     # calls self.change_map(...)
+            CollisionSystem(),       
             PresentationMapperSystem(),
             AnimationSystem(),
-            GameplaySpawnSystem()
+            SpawnSystem(),           
         ]
 
     # method to release resources
@@ -91,56 +102,25 @@ class DungeonScene(Scene):
 
     # renders all graphics
     def draw(self, surface: Surface) -> None:
-        self.render.draw(self.world, surface, self.active_map)
+        self.render.draw(self.world, surface)
 
+    # called by TriggerSystem() when player hits an exit trigger
     def change_map(self, new_map_name: str, spawn_x: float = None, spawn_y: float = None):
-        map_found = False
-        new_map_data = None
+         # Accept registry id or legacy ".tmx" names
+        target_id = resolve_map_hint_to_id(new_map_name) or new_map_name
+        create_or_activate(self.world, target_id)
 
-        # Check if map already exists
-        for _, comps in self.world.query(Map):
-            mp = comps[Map]
-            if mp.name == new_map_name:
-                if mp.tmx_data is None:
-                    mp.tmx_data = pytmx.load_pygame(mp.path)
-                mp.active = True
-                new_map_data = mp.tmx_data
-                map_found = True
-            else:
-                mp.active = False
-
-        # If map doesn't exist, create it
-        if not map_found:
-            map_entity = self.world.new_entity()
-            new_map_data = pytmx.load_pygame(f"assets/maps/{new_map_name}.tmx")
-            new_map = Map(
-                name=new_map_name,
-                path=f"assets/maps/{new_map_name}.tmx",
-                tmx_data=new_map_data,
-                active=True
-            )
-            self.world.add(map_entity, new_map)
-
-            # deactivate all others
-            for _, comps in self.world.query(Map):
-                mp = comps[Map]
-                if mp.name != new_map_name:
-                    mp.active = False
-
-        # Update active_map reference
-        self.active_map = new_map_data
-
-        # Load collision rects for the new map
-        self.collision_system.collision_rects = Room.load_collision_objects(self.active_map, layer_name="collisions")
-
-        # Move player to new spawn if provided
-        if spawn_x is not None and spawn_y is not None:
+        # Move player and retag OnMap
+        if self.player_id is not None:
             tr = self.world.get(self.player_id, Transform)
-            if tr:
-                tr.x = spawn_x
-                tr.y = spawn_y
+            if tr and spawn_x is not None and spawn_y is not None:
+                tr.x = float(spawn_x)
+                tr.y = float(spawn_y)
 
-def activate_map_instance(self, inst):
-    self.active_map = inst.tmx
+            # flip the player's OnMap to the new id
+            om = self.world.get(self.player_id, OnMap)
+            if om:
+                om.id = target_id
+            else:
+                self.world.add(self.player_id, OnMap(id=target_id))
 
-                

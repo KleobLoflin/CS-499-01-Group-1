@@ -1,7 +1,7 @@
 import os, json, pytmx
 from typing import Any, Dict
 from game.world.components import Map
-from game.world.systems.room import Room
+from game.world.maps.room import Room
 from game.world.maps.map_index import MapInfo
 
 def build_Map_component(mi: MapInfo) -> Map:
