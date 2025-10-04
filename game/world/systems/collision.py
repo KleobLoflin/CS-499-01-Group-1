@@ -1,8 +1,7 @@
 #Class collision
-
-import math
+from game.world.components import Transform, HitboxSize, PlayerTag, Map, ActiveMapId, OnMap
 import pygame
-from game.world.components import Transform, HitboxSize, PlayerTag
+import math
 from game.core.config import Config
 
 class CollisionSystem:
@@ -56,13 +55,42 @@ class CollisionSystem:
                         self.knockbacks[eid] = {"timer": 0.2, "dir": (-dx, -dy)}
         
         # get list of player entities
+        # Determine the active map id (if present)
+        active_map_id = None
+        for _, comps in world.query(ActiveMapId):
+            active_map_id = comps[ActiveMapId].id
+            break
+        
+        # Grab collision rects from the active Map component (fallback to self.collision_rects)
+        collisions = self.collision_rects
+        for _, comps in world.query(Map):
+            m = comps[Map]
+            if m.active and (active_map_id is None or m.id == active_map_id):
+                if m.collisions:
+                    collisions = m.collisions
+                break
+        if not collisions:
+            return
+        
+        # get list of player entities, filter to active map
         players = []
-        for player_entity, _ in world.query(PlayerTag):
+        for player_entity, comps in world.query(PlayerTag):
+            on = None
+            if active_map_id is not None:
+                on = world.get(player_entity, OnMap)
+                if on and on.id != active_map_id:
+                    continue
             players.append(player_entity)
 
         # Check collisions for all entities
         for eid, comps in world.query(Transform):
             tr = comps[Transform]
+
+            # If entity is tagged with OnMap and we have an active map id, skip if not on it
+            if active_map_id is not None:
+                on = comps.get(OnMap)
+                if on and on.id != active_map_id:
+                    continue
 
             # for each player
             for player_entity in players:

@@ -1,4 +1,4 @@
-# With standardized names, we still keep generic sampling for future use.
+# With standardized names, still keep generic sampling for future use.
 import random, math
 from typing import Dict, Tuple, List, Optional
 
