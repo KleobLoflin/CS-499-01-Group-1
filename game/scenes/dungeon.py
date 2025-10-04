@@ -60,7 +60,6 @@ class DungeonScene(Scene):
                 break
         if active_id:
             self.world.add(self.player_id, OnMap(id=active_id))
-        self.world.add(self.player_id, PlayerTag())
 
         # Scene/run policy for SpawnSystem (gameplay)
         e = self.world.new_entity()

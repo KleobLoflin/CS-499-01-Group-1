@@ -9,9 +9,7 @@
 
 import random
 import time
-from game.world.components import Transform, Intent, AI
-
-#enemy ai system currently just chases. could and will probably check to see if it is the chase ai or another.
+from game.world.components import Transform, Intent, AI, PlayerTag, OnMap, ActiveMapId
 
 # Moved AI dataclasses to components and now there is a "kind" label for the different kinds of AI.
 # I filtered each code block for ai.kind so that it only runs if the kind of AI matches.
@@ -28,18 +26,54 @@ from game.world.components import Transform, Intent, AI
 class EnemyAISystem:#System):
     
     def update(self, world, dt: float) -> None:
+        
+        # get active map ID
+        active_id = None
+        for _, comps in world.query(ActiveMapId):
+             active_id = comps[ActiveMapId].id
+             break
+        
+        # pick a player on this map
+        # just picks the first player in the entity list for now
+        # later, get a list of players that are on the map and then use the list
+        # to find the right target_id for each of the enemy ai types depending on distance
+        player_tr = None
+        for _, comps in world.query(Transform, PlayerTag):
+            if active_id is not None:
+                om = comps.get(OnMap)
+                if om is None or om.id != active_id:
+                    continue
+            player_tr = comps[Transform]
+            break
+        if player_tr is None:
+            return
 
-        # chase entities
-        for entity_id, comps in world.query(Transform, Intent, AI): #possible later addition WonderAI
+
+        # drive AI for entities with AI + Transform + Intent
+        for entity_id, comps in world.query(Transform, Intent, AI): 
+            # only move entities that are on the map
+            if active_id is not None:
+                om = comps.get(OnMap)
+                if om is None or om.id != active_id:
+                    continue
+
             ai: AI = comps[AI]
             pos: Transform = comps[Transform]
             intent: Intent = comps[Intent]
 
-            
-            target_pos: Transform = world.get(ai.target_id, Transform)
-            if pos is None or target_pos is None:
-                continue
-
+            # choose target position
+            target_pos: Transform | None = None
+            if ai.kind in ("chase", "flee"):
+                # prefer AI.target_id if provided, else use first player on this map
+                if getattr(ai, "target_id", None) is not None:
+                    target_pos = world.get(ai.target_id, Transform)
+                if target_pos is None:
+                    target_pos = player_tr
+                if target_pos is None:
+                    # no valid target
+                    intent.move_x = 0.0
+                    intent.move_y = 0.0
+                    continue
                
             dx = target_pos.x - pos.x
             dy = target_pos.y - pos.y
