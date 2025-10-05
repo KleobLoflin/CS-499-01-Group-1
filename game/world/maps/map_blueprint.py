@@ -13,9 +13,11 @@ def build_Map_component(mi: MapInfo) -> Map:
         with open(mi.blueprint_path, "r", encoding="utf-8") as f:
             bp = json.load(f)
 
-    # 
+    
     meta = bp.get("meta", {})
     name = os.path.basename(mi.tmx_path)
+
+    # print(f"[Map] {mi.id}: loaded {len(collisions)} collision rects")
 
     return Map(
         name=name,

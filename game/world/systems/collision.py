@@ -107,9 +107,9 @@ class CollisionSystem:
                             self.knockbacks[player_entity] = {"timer": 0.2, "dir": (dx, dy)}
                             self.knockbacks[eid] = {"timer": 0.2, "dir": (-dx, -dy)}
 
-            # Wall collisions (using a simple 16x16 rect, could be adjusted)
-            entity_rect = pygame.Rect(tr.x, tr.y, entity_radius * 2, entity_radius * 2)
-            for rect in self.collision_rects:
+            # Wall collisions
+            entity_rect = pygame.Rect(tr.x, tr.y, entity_radius * 2, entity_radius * 2)  # adjust to entity size
+            for rect in collisions:
                 if entity_rect.colliderect(rect):
                     # Calculate minimum push distance
                     dx_left = rect.right - entity_rect.left
