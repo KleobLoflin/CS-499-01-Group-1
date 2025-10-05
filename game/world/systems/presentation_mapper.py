@@ -25,7 +25,12 @@ class PresentationMapperSystem:
                 else:
                     new_clip = "attack_right"
             else:
-                new_clip = "run" if moving else "idle"
+                if face.direction == "up":
+                    new_clip = "run_up" if moving else "idle_up"
+                elif face.direction == "down":
+                    new_clip = "run_down" if moving else "idle_down"
+                else:
+                    new_clip = "run" if moving else "idle"
 
             if new_clip != anim.clip:
                 anim.clip = new_clip

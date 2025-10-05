@@ -54,6 +54,12 @@ class Attack:
     remaining_cooldown: float = max_cooldown
     active: bool = False
 
+# Hitbox Size
+@dataclass
+class HitboxSize:
+    radius: float = 10.0   # default hitbox size, can be overridden in JSON
+
+
 # Enemy AI Patterns
 @dataclass
 class AI:
@@ -85,3 +91,10 @@ class Facing:
 class DebugRect:
     size: Tuple[int, int] = (32, 32)
     color: Tuple[int, int, int] = (90, 180, 255)
+
+@dataclass
+class Map:
+    name: str                # file name
+    path: str                # file path to .tmx
+    tmx_data: any = None     # loaded pytmx map
+    active: bool = False     # is this the current map
