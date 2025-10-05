@@ -25,7 +25,7 @@ from game.world.components import Transform, Intent, AI
 #need a place for them to stop if to close or to far agro range again i guess.
 #need another way to make a porjectile attack.
 
-class EnemyAISystem:#System):
+class AISystem:#System):
     
     def update(self, world, dt: float) -> None:
 
@@ -45,13 +45,16 @@ class EnemyAISystem:#System):
             dy = target_pos.y - pos.y
             dist = (dx * dx + dy * dy) ** 0.5
             # only handle chase entities
-            if ai.kind == "chase":
+            if ai.kind == "chase" or "projectileHoming":
                 if dist > 10 and dist < ai.agro_range:  
                     intent.move_x = dx / dist
                     intent.move_y = dy / dist
                 else:
                     intent.move_x = 0.0
                     intent.move_y = 0.0
+                if ai.kind == "projectileHoming":
+                    
+                
 
             elif ai.kind == "flee":
             

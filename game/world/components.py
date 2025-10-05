@@ -98,3 +98,9 @@ class Map:
     path: str                # file path to .tmx
     tmx_data: any = None     # loaded pytmx map
     active: bool = False     # is this the current map
+
+
+@dataclass
+class lifeSpan:
+    duration: float = 5.0    # seconds until entity is removed
+    elapsed: float = 0.0     # time elapsed since creation

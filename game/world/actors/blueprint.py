@@ -41,6 +41,10 @@ def build_HitboxSize(spec, ctx):
     return HitboxSize(radius=spec.get("radius", 10))
 
 
+def build_lifeSpan(spec, ctx):
+    return lifeSpan(duration=spec.get("duration", 5))
+
+
 # gather all builder functions
 BUILDERS = {
     "Transform": build_Transform,

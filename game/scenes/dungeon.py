@@ -24,7 +24,7 @@ from game.world.actors.hero_factory import create as create_hero
 from game.world.actors.enemy_factory import create as create_enemy
 from game.world.systems.input import InputSystem
 from game.world.systems.movement import MovementSystem
-from game.world.systems.ai import EnemyAISystem
+from game.world.systems.ai import AISystem
 from game.world.systems.room import Room
 from game.world.systems.presentation_mapper import PresentationMapperSystem
 from game.world.systems.animation import AnimationSystem
@@ -74,7 +74,7 @@ class DungeonScene(Scene):
         # Register systems in the order they should run each tick (order matters)
         self.world.systems = [
             InputSystem(self.player_id),
-            EnemyAISystem(),
+            AISystem(),
             AttackSystem(),   
             MovementSystem(),
             TriggerSystem(self),
