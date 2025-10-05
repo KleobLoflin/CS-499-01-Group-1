@@ -31,7 +31,7 @@ class TitleScene(Scene):
 
         # title menu system to run in event handler
         pygame.font.init()
-        self.menu_ui = TitleMenuSystem(pygame.font.SysFont("consolas", 20))
+        self.menu_ui = TitleMenuSystem(pygame.font.SysFont("consolas", 28), pygame.font.SysFont("consolas", 20))
 
         # render system runs in draw function, not with logic systems
         self.render = RenderSystem()

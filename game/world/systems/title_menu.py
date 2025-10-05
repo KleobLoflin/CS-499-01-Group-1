@@ -4,8 +4,16 @@ from typing import Tuple
 from game.world.components import TitleMenu
 
 class TitleMenuSystem:
-    def __init__(self, font: pygame.font.Font, pos_title: Tuple[int, int]=(40, 26), pos_options: Tuple[int, int]=(60, 110), line_h: int=28):
-        self.font = font
+    def __init__(
+            self, 
+            title_font: pygame.font.Font,
+            menu_font: pygame.font.Font,
+            pos_title: Tuple[int, int]=(230, 72), 
+            pos_options: Tuple[int, int]=(230, 175), 
+            line_h: int=28):
+    
+        self.title_font = title_font
+        self.menu_font = menu_font
         self.pos_title = pos_title
         self.pos_options = pos_options
         self.line_h = line_h
@@ -29,10 +37,10 @@ class TitleMenuSystem:
     def draw_overlay(self, world, surface: Surface) -> None:
         for _, comps in world.query(TitleMenu):
             menu: TitleMenu = comps[TitleMenu]
-            surface.blit(self.font.render(menu.title, True, (235, 235, 245)), self.pos_title)
+            surface.blit(self.title_font.render(menu.title, True, (235, 235, 245)), self.pos_title)
             x, y = self.pos_options
             for i, text in enumerate(menu.options):
                 selected = (i == menu.selected_index)
                 color = (255, 255, 255) if selected else (175, 175, 185)
                 prefix = "> " if selected else " "
-                surface.blit(self.font.render(prefix + text, True, color), (x, y + i * self.line_h))
+                surface.blit(self.menu_font.render(prefix + text, True, color), (x, y + i * self.line_h))
