@@ -1,0 +1,18 @@
+{
+
+ "projectile.homing1": {
+        "components": [
+            {"type": "Transform"},
+            {"type": "Intent"},
+            {"type": "Movement", "speed": 35},
+            {"type": "AI", "kind": "chase", "agro_range": 999},
+            {"type": "Sprite", "atlas": "projectile.homing1", "z": 8},
+            {"type": "AnimationState", "clip": "idle"},
+            {"type": "Facing"},
+            {"type": "Attack", "max_cooldown": 2}
+        ]
+    }
+
+    
+
+}
