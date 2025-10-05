@@ -6,6 +6,8 @@
 
 from game.world.components import *
 
+def build_PlayerTag(spec, ctx): return PlayerTag()
+
 def build_Transform(spec, ctx):
     x, y = ctx.get("pos", (0,0))
     return Transform(spec.get("x", x), spec.get("y", y))
@@ -47,6 +49,7 @@ def build_lifeSpan(spec, ctx):
 
 # gather all builder functions
 BUILDERS = {
+    "PlayerTag": build_PlayerTag,
     "Transform": build_Transform,
     "Intent": build_Intent,
     "InputState": build_InputState,

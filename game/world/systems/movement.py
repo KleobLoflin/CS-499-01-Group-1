@@ -1,13 +1,26 @@
 # class: MovementSystem
 
-from game.world.components import Transform, Intent, Movement, Facing, Attack
+from game.world.components import Transform, Intent, Movement, Facing, Attack, OnMap, ActiveMapId
 from game.core.config import Config
 
 class MovementSystem:
     def update(self, world, dt: float) -> None:
+        # get active map id
+        active_id = None
+        for _, comps in world.query(ActiveMapId):
+            active_id = comps[ActiveMapId].id
+            break
+        
         # loops through all entities that have transform and Intent components
         # and adjusts the transform values according to intent and movespeed
         for _, components in world.query(Transform, Intent, Movement, Facing, Attack):
+
+            # guard for active map entities
+            if active_id is not None:
+                om = components.get(OnMap)
+                if om is None or om.id != active_id:
+                    continue
+
             tr: Transform = components[Transform]
             it: Intent = components[Intent]
             mv: Movement = components[Movement]

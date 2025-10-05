@@ -1,6 +1,7 @@
 {
     "hero.knight":{
         "components":[
+            {"type":"PlayerTag"},
             {"type":"Transform"},
             {"type":"Intent"},
             {"type":"InputState"},
@@ -8,7 +9,8 @@
             {"type":"Sprite", "atlas": "hero.knight", "z": 10},
             {"type":"AnimationState", "clip": "idle"},
             {"type":"Facing"},
-            {"type":"Attack", "max_cooldown": 0.25}
+            {"type":"Attack", "max_cooldown": 0.25},
+            {"type":"HitboxSize"}
         ]
     }
 }

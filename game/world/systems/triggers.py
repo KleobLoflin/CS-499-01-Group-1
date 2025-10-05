@@ -1,7 +1,7 @@
 # game/world/systems/triggers.py
 
 import pygame
-from game.world.components import Transform, Map
+from game.world.components import Transform, Map, OnMap
 
 class TriggerSystem:
     def __init__(self, scene):
@@ -14,22 +14,30 @@ class TriggerSystem:
             print("[TriggerSystem] No player transform found")
             return
 
+        # only process triggers if the player is on the active map 
+        player_onmap = world.get(self.scene.player_id, OnMap)
+
         # Represent player as a rect for collision checking
         player_rect = pygame.Rect(player_transform.x, player_transform.y, 32, 32)  # adjust size
 
-
         # Find the active map
         active_map = None
+        active_map_id = None
         for _, comps in world.query(Map):
             mp = comps[Map]
             if mp.active:
                 active_map = mp.tmx_data
+                active_map_id = getattr(mp, "id", None)
                 break
 
         if not active_map:
             print("[TriggerSystem] No active map found")
             return
 
+        # If player has an OnMap tag and it doesn't match the active map id, skip
+        if player_onmap and active_map_id and player_onmap.id != active_map_id:
+            return
+        
         # Find the triggers layer
         trigger_layer = None
         for layer in active_map.objectgroups:
@@ -38,6 +46,7 @@ class TriggerSystem:
                 break
 
         if not trigger_layer:
+            # some maps may not have triggers
             print("[TriggerSystem] No layer named 'triggers'")
             return
 

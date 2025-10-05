@@ -29,7 +29,14 @@ class World:
 
     # get a component instance from an entity
     def get(self, eid: int, comp_type: Type) -> Any:
-        return self.entities[eid].get(comp_type)
+        comps = self.entities.get(eid)
+        if comps is None:
+            return None
+        return comps.get(comp_type)
+    
+    # return the component dict for the entity
+    def components_of(self, eid: int) -> Dict[Type, Any]:
+        return self.entities.setdefault(eid, {})
 
     # iterates through entities that have all of the requested component types
     # yields (entity_id, component_dict) pairs 
