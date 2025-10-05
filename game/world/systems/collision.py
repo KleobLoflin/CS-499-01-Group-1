@@ -27,32 +27,6 @@ class CollisionSystem:
         # Clean up finished knockbacks
         for eid in expired:
             del self.knockbacks[eid]
-
-        # Check collisions for all entities with Transform
-        for eid, comps in world.query(Transform):
-            tr = comps[Transform]
-
-            # Get this entity's hitbox radius (default 10 if not defined)
-            hitbox = world.get(eid, HitboxSize)
-            entity_radius = hitbox.radius if hitbox else 10
-
-            # Player vs enemy knockback
-            if eid != self.player_id:
-                player_tr = world.get(self.player_id, Transform)
-                if player_tr:
-                    player_hitbox = world.get(self.player_id, HitboxSize)
-                    player_radius = player_hitbox.radius if player_hitbox else 10
-
-                    dx = player_tr.x - tr.x
-                    dy = player_tr.y - tr.y
-                    distance = math.sqrt(dx*dx + dy*dy)
-
-                    # Use sum of radii for circle overlap check
-                    if distance < (player_radius + entity_radius) and distance > 0:
-                        dx /= distance
-                        dy /= distance
-                        self.knockbacks[self.player_id] = {"timer": 0.2, "dir": (dx, dy)}
-                        self.knockbacks[eid] = {"timer": 0.2, "dir": (-dx, -dy)}
         
         # get list of player entities
         # Determine the active map id (if present)
@@ -91,13 +65,21 @@ class CollisionSystem:
                 on = comps.get(OnMap)
                 if on and on.id != active_map_id:
                     continue
+            
+            # Get this entity's hitbox radius (default 10 if not defined)
+            hitbox = world.get(eid, HitboxSize)
+            entity_radius = hitbox.radius if hitbox else 10
 
             # for each player
             for player_entity in players:
+
                 # Players vs enemies knockback
                 if eid not in players:
                     player_tr = world.get(player_entity, Transform)
                     if player_tr:
+                        player_hitbox = world.get(player_entity, HitboxSize)
+                        player_radius = player_hitbox.radius if player_hitbox else 10
+
                         dx = player_tr.x - tr.x
                         dy = player_tr.y - tr.y
                         distance = math.sqrt(dx*dx + dy*dy)
