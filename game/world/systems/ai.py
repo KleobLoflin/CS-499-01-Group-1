@@ -23,7 +23,7 @@ from game.world.components import Transform, Intent, AI, PlayerTag, OnMap, Activ
 #need a place for them to stop if to close or to far agro range again i guess.
 #need another way to make a porjectile attack.
 
-class AISystem:#System):
+class EnemyAISystem:#System):
     
     def update(self, world, dt: float) -> None:
         
@@ -86,8 +86,8 @@ class AISystem:#System):
                 else:
                     intent.move_x = 0.0
                     intent.move_y = 0.0
-                if ai.kind == "projectileHoming":
-                    
+                #if ai.kind == "projectileHoming":
+
                 
 
             elif ai.kind == "flee":

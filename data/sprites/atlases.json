@@ -108,7 +108,29 @@
                     "assets/animations/enemys/big_zombie_run_anim/3.png"]
                 }
             }
+        },
+
+        "enemy.angle":{
+            "mirror_x": true,
+            "origin": [16, 35],
+            "clips":{
+                "idle": { "fps": 6, "loop": true,
+                    "frames": ["assets/animations/enemys/angle__idle_anim/0.png",
+                    "assets/animations/enemys/angle__idle_anim/1.png",
+                    "assets/animations/enemys/angle__idle_anim/2.png",
+                    "assets/animations/enemys/angle__idle_anim/3.png"]
+                },
+                "run": { "fps": 10, "loop": true,
+                    "frames": ["assets/animations/enemys/angle__run_anim/0.png",
+                    "assets/animations/enemys/angle__run_anim/1.png",
+                    "assets/animations/enemys/angle__run_anim/2.png",
+                    "assets/animations/enemys/angle__run_anim/3.png"]
+                }
+            }
         }
+
+
+
     }
 }
 
