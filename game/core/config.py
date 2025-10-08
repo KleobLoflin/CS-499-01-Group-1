@@ -9,7 +9,7 @@ class Config:
     # window
     WINDOW_W = 640
     WINDOW_H = 360
-    WINDOW_TITLE = "TBD"
+    WINDOW_TITLE = "GateCrashers"
     BG_COLOR = (18, 18, 24)
 
     # ticks
