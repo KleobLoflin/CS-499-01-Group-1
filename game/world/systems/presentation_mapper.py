@@ -1,7 +1,7 @@
 # System that adjusts sprite and animation components based on intent
 # adjusts the animation clip type and whether frames need to be mirrored
 
-from game.world.components import Intent, AnimationState, Facing
+from game.world.components import Intent, AnimationState, Facing, Attack
 
 class PresentationMapperSystem:
     def update(self, world, dt):
@@ -9,12 +9,13 @@ class PresentationMapperSystem:
         # loop through all entities with intent, animationstate, and facing components
         for eid, comps in world.query(Intent, AnimationState, Facing):
             it: Intent = comps[Intent]
+            atk: Attack = comps[Attack]
             anim: AnimationState = comps[AnimationState]
             face: Facing = comps[Facing]
 
             # adjust clip type depending on intent to move or not
             # moving = "run", not moving = "idle"
-            attacking = it.basic_atk
+            attacking = atk.active
             moving = abs(it.move_x) > 0.01 or abs(it.move_y) > 0.01
 
             if attacking:
