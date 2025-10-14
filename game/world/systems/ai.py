@@ -78,37 +78,59 @@ class EnemyAISystem:#System):
             dx = target_pos.x - pos.x
             dy = target_pos.y - pos.y
             dist = (dx * dx + dy * dy) ** 0.5
-            # only handle chase entities
-            if ai.kind == "chase" or "projectileHoming":
-                if dist > 10 and dist < ai.agro_range:  
-                    intent.move_x = dx / dist
-                    intent.move_y = dy / dist
-                else:
-                    intent.move_x = 0.0
-                    intent.move_y = 0.0
-                #if ai.kind == "projectileHoming":
 
+            if dist > ai.agro_range:
+        # Give each AI its own cooldown + direction if not already present
+                if not hasattr(ai, "wander_timer"):
+                    ai.wander_timer = 0.0
+                if not hasattr(ai, "wander_dir"):
+                    ai.wander_dir = (0.0, 0.0)
+
+                ai.wander_timer -= dt
+                if ai.wander_timer <= 0:
+                    dx = random.randint(-10, 10)
+                    dy = random.randint(-10, 10)
+                    mag = max((dx * dx + dy * dy) ** 0.5, 1.0)
+                    ai.wander_dir = (dx / mag, dy / mag)
+                    ai.wander_timer = 1.0  # pick new direction every 1 second
+
+                # keep moving in that direction
+                intent.move_x = ai.wander_dir[0]
+                intent.move_y = ai.wander_dir[1]
+
+
+            else:
+                # only handle chase entities
+                if ai.kind == "chase" or "projectileHoming":
+                    if dist > 10 and dist < ai.agro_range:  
+                        intent.move_x = dx / dist
+                        intent.move_y = dy / dist
+                    else:
+                        intent.move_x = 0.0
+                        intent.move_y = 0.0
+                    #if ai.kind == "projectileHoming":
+
+                    
+
+                elif ai.kind == "flee":
                 
+                    if dist < ai.agro_range and dist > 10:
+                        intent.move_x = -dx / dist
+                        intent.move_y = -dy / dist
+                    else:
+                        intent.move_x = 0.0
+                        intent.move_y = 0.0
 
-            elif ai.kind == "flee":
-            
-                if dist < ai.agro_range and dist > 10:
-                    intent.move_x = -dx / dist
-                    intent.move_y = -dy / dist
-                else:
-                    intent.move_x = 0.0
-                    intent.move_y = 0.0
-
-            elif ai.kind == "wander":
-                dx = random.randint(-10, 10)
-                dy = random.randint(-10, 10)
-            
-                if dist < 200 and dist > 0:
-                    intent.move_x = -dx / dist
-                    intent.move_y = -dy / dist
-                else:
-                    intent.move_x = 0.0
-                    intent.move_y = 0.0
+                elif ai.kind == "wander":
+                    dx = random.randint(-10, 10)
+                    dy = random.randint(-10, 10)
+                
+                    if dist < 200 and dist > 0:
+                        intent.move_x = -dx / dist
+                        intent.move_y = -dy / dist
+                    else:
+                        intent.move_x = 0.0
+                        intent.move_y = 0.0
             #elif ai.kind == "straight_line":
             #    intent.move_x = dx / dist
             #    intent.move_y = dy / dist
