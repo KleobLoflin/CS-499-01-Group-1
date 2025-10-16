@@ -48,7 +48,7 @@ class DungeonScene(Scene):
         # Spawn player once here (or set SpawnPolicy.spawn_player=True to use blueprint)
         self.player_id = create_hero(
             self.world,
-            archetype="knight",
+            archetype="knight_yellow",
             owner_client_id=None,
             pos=(Config.WINDOW_W/2 - 16, Config.WINDOW_H/2 - 16)
         )
