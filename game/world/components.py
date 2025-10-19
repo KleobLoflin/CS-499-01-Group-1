@@ -74,6 +74,13 @@ class AI:
     target_id: int|None = None  # explicit target; None = auto-pick nearest player
     agro_range: int = 0   # distance to start chasing
 
+
+
+@dataclass
+class lifeSpan:
+    duration: float = 5.0    # seconds until entity is removed
+    elapsed: float = 0.0     # time elapsed since creation
+
 # presentation #####################################################
 
 @dataclass
