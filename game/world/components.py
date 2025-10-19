@@ -156,12 +156,19 @@ class WorldObject:
 @dataclass
 class TitleMenu:
     title: str = "GateCrashers"
-    options: List[str] = field(default_factory=lambda: ["Single Player", "Host", "Join"])
+    options: List[str] = field(default_factory=lambda: ["single_player", "host", "join", "settings", "quit"])
     selected_index: int = 0
     selected_role: Optional[str] = None
 
-
 @dataclass
-class lifeSpan:
-    duration: float = 5.0    # seconds until entity is removed
-    elapsed: float = 0.0     # time elapsed since creation
+class TitleIntro:
+    phase: str = "pre_delay"    # pre_delay -> logo_fade -> hold -> bg_fade -> ready
+    t: float = 0.0              # elapsed time in current phase
+    logo_alpha: int = 0         # 0...255
+    bg_alpha: int = 0           # 0...255
+
+    # tunable constants
+    pre_delay_dur: float = 0.75
+    logo_fade_dur: float = 2.5
+    logo_hold_dur: float = 1.25
+    bg_fade_dur: float = 2.0
