@@ -85,18 +85,37 @@ class EnemyAISystem:#System):
                     ai.wander_timer = 0.0
                 if not hasattr(ai, "wander_dir"):
                     ai.wander_dir = (0.0, 0.0)
+                if not hasattr(ai, "wander_waiting"):
+                    ai.wander_waiting = False
+
 
                 ai.wander_timer -= dt
-                if ai.wander_timer <= 0:
-                    dx = random.randint(-10, 10)
-                    dy = random.randint(-10, 10)
-                    mag = max((dx * dx + dy * dy) ** 0.5, 1.0)
-                    ai.wander_dir = (dx / mag, dy / mag)
-                    ai.wander_timer = 1.0  # pick new direction every 1 second
+                if ai.wander_waiting:
+                    if ai.wander_timer <= 0:
 
-                # keep moving in that direction
-                intent.move_x = ai.wander_dir[0]
-                intent.move_y = ai.wander_dir[1]
+                        ai.wander_waiting = False
+                        dx = random.randint(-10, 10)
+                        dy = random.randint(-10, 10)
+                        mag = max((dx * dx + dy * dy) ** 0.5, 1.0)
+                        ai.wander_dir = (dx / mag, dy / mag)
+                        ai.wander_timer = 1.0  # pick new direction every 1 second
+
+                    # keep moving in that direction
+                    intent.move_x = 0.0
+                    intent.move_y = 0.0
+                else:
+                    if ai.wander_timer <= 0:
+                        ai.wander_waiting = True
+                        ai.wander_timer = random.uniform(3.0,4.0)  # wait between 1-3 seconds
+                        intent.move_x = 0.0
+                        intent.move_y = 0.0
+                    else:
+                        # keep moving in that direction
+                        intent.move_x = ai.wander_dir[0]
+                        intent.move_y = ai.wander_dir[1]
+
+
+
 
 
             else:
