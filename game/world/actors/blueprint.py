@@ -45,6 +45,7 @@ def build_HitboxSize(spec, ctx):
 
 def build_lifeSpan(spec, ctx):
     return lifeSpan(duration=spec.get("duration", 5))
+    
 
 
 # gather all builder functions
