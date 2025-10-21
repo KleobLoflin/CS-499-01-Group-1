@@ -81,6 +81,12 @@ class lifeSpan:
     duration: float = 5.0    # seconds until entity is removed
     elapsed: float = 0.0     # time elapsed since creation
 
+
+@dataclass
+class Life:
+    hp: float = 5.0    # hp it currently has
+    
+
 # presentation #####################################################
 
 @dataclass

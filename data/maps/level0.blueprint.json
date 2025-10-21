@@ -21,7 +21,8 @@
     ],
     "static_enemies": [
       { "type": "chort", "pos": [260, 120] },
-      { "type": "big_zombie", "pos": [240, 180]}
+      { "type": "big_zombie", "pos": [240, 180]},
+      { "type": "goblin", "pos": [150, 150]}
     ],
     "exits": [
       { "to": "level1", "region": "east" }

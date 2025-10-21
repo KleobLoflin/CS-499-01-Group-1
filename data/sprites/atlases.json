@@ -132,7 +132,7 @@
 
         "enemy.goblin":{
             "mirror_x": true,
-            "origin": [16, 35],
+            "origin":  [8, 15],
             "clips":{
                 "idle": { "fps": 6, "loop": true,
                     "frames": ["assets/animations/enemys/goblin_idle_anim/0.png",

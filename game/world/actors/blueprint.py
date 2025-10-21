@@ -46,6 +46,8 @@ def build_HitboxSize(spec, ctx):
 def build_lifeSpan(spec, ctx):
     return lifeSpan(duration=spec.get("duration", 5))
     
+def build_Life(spec,ctx):
+    return Life(hp=spec.get("hp",10))
 
 
 # gather all builder functions
@@ -62,7 +64,8 @@ BUILDERS = {
     "Attack": build_Attack,
     "DebugRect": build_DebugRect,
     "HitboxSize": build_HitboxSize,
-    "lifeSpan": build_lifeSpan
+    "lifeSpan": build_lifeSpan,
+    "Life":build_Life
 }
 
 # uses builder functions to add components to an entity
