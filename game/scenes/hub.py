@@ -6,3 +6,10 @@
 # to DungeonScene
 
 from game.scenes.base import Scene
+
+
+class HubScene(Scene):
+    def __init__(self, scene_manager, role):
+        self.sm = scene_manager
+        self.role = role
+        
