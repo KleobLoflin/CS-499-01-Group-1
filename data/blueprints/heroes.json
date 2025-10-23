@@ -1,0 +1,76 @@
+{
+    "hero.knight_blue":{
+        "components":[
+            {"type":"PlayerTag"},
+            {"type":"Transform"},
+            {"type":"Intent"},
+            {"type":"InputState"},
+            {"type":"Movement", "speed": 80},
+            {"type":"Sprite", "atlas": "hero.knight_blue", "z": 10},
+            {"type":"AnimationState", "clip": "idle"},
+            {"type":"Facing"},
+            {"type":"Attack", "max_cooldown": 0.25},
+            {"type":"HitboxSize"}
+        ]
+    },
+
+    "hero.knight_green":{
+        "components":[
+            {"type":"PlayerTag"},
+            {"type":"Transform"},
+            {"type":"Intent"},
+            {"type":"InputState"},
+            {"type":"Movement", "speed": 80},
+            {"type":"Sprite", "atlas": "hero.knight_green", "z": 10},
+            {"type":"AnimationState", "clip": "idle"},
+            {"type":"Facing"},
+            {"type":"Attack", "max_cooldown": 0.25},
+            {"type":"HitboxSize"}
+        ]
+    },
+
+    "hero.knight_red":{
+        "components":[
+            {"type":"PlayerTag"},
+            {"type":"Transform"},
+            {"type":"Intent"},
+            {"type":"InputState"},
+            {"type":"Movement", "speed": 80},
+            {"type":"Sprite", "atlas": "hero.knight_red", "z": 10},
+            {"type":"AnimationState", "clip": "idle"},
+            {"type":"Facing"},
+            {"type":"Attack", "max_cooldown": 0.25},
+            {"type":"HitboxSize"}
+        ]
+    },
+
+    "hero.knight_yellow":{
+        "components":[
+            {"type":"PlayerTag"},
+            {"type":"Transform"},
+            {"type":"Intent"},
+            {"type":"InputState"},
+            {"type":"Movement", "speed": 80},
+            {"type":"Sprite", "atlas": "hero.knight_yellow", "z": 10},
+            {"type":"AnimationState", "clip": "idle"},
+            {"type":"Facing"},
+            {"type":"Attack", "max_cooldown": 0.25},
+            {"type":"HitboxSize"}
+        ]
+    },
+
+    "hero.knight_purple":{
+        "components":[
+            {"type":"PlayerTag"},
+            {"type":"Transform"},
+            {"type":"Intent"},
+            {"type":"InputState"},
+            {"type":"Movement", "speed": 80},
+            {"type":"Sprite", "atlas": "hero.knight_purple", "z": 10},
+            {"type":"AnimationState", "clip": "idle"},
+            {"type":"Facing"},
+            {"type":"Attack", "max_cooldown": 0.25},
+            {"type":"HitboxSize"}
+        ]
+    }
+}
