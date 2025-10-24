@@ -336,7 +336,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup id="6" name="collisions 1">
+ <objectgroup id="6" name="collisions">
   <object id="3" x="672" y="21" width="16" height="33"/>
   <object id="4" x="593" y="21" width="14" height="33"/>
   <object id="5" x="390" y="27" width="499" height="22"/>
