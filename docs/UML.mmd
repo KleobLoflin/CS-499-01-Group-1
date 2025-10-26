@@ -1,0 +1,31 @@
+flowchart LR
+%% --------- Layout: Left -> Right ----------
+%% App → SceneManager → Scene (with subclasses) → World → {Systems, Components}
+
+A["**App**<br/><u>Methods</u><br/>+ run()<br/>- _process_events()<br/>- _fixed_update(dt)<br/>- _draw()"] --> 
+B["**SceneManager**<br/><u>Fields</u><br/>- active: Scene<br/><u>Methods</u><br/>+ set(scene: Scene)<br/>+ update(dt)<br/>+ draw(surface)<br/>+ handle_event(ev)"] --> 
+S["**Scene (abstract)**<br/><u>Methods</u><br/>+ enter()<br/>+ exit()<br/>+ update(dt)<br/>+ draw(surface)<br/>+ handle_event(ev)"]
+
+S <--> ST["**TitleScene**"]
+S <--> SH["**HubScene**"]
+S <--> SD["**DungeonScene**"]
+
+ST --> W
+SH --> W
+SD --> W
+
+W["**World**<br/><u>Fields</u><br/>- entities: Dict&lt;int, Dict&lt;Type, Any&gt;&gt;<br/>- systems: List&lt;System&gt;<br/><u>Methods</u><br/>+ create(): int<br/>+ add(eid:int, comp:Any)<br/>+ get(eid:int, T:Type): Any<br/>+ query(*Types): Iterator<br/>+ add_system(sys)<br/>+ update(dt)"]
+
+W --> SYS
+W --> CMP
+
+SYS["**Systems**<br/>InputSystem<br/>MovementSystem<br/>CollisionSystem<br/>AttackSystem<br/>AnimationSystem<br/>PresentationMapperSystem<br/>RenderSystem<br/>LifeSpanSystem<br/>SpawnSystem<br/>TriggerSystem<br/>TitleMenuSystem<br/>EnemyAISystem"]
+
+CMP["**Components**<br/>Transform<br/>Movement<br/>Intent<br/>Facing<br/>Sprite<br/>AnimationState<br/>HitboxSize<br/>Attack<br/>InputState<br/>PlayerTag<br/>LocalControlled<br/>OnMap<br/>ActiveMapId<br/>Map<br/>MapSpawnState<br/>SpawnPolicy<br/>TitleMenu<br/>TitleIntro"]
+
+%% --------- Optional styling (safe to remove) ----------
+classDef classbox fill:#f9f9ff,stroke:#3949ab,stroke-width:2px,color:#161a2b;
+classDef listbox fill:#fff8dc,stroke:#b8860b,stroke-width:2px,color:#201a00;
+
+class A,B,S,ST,SH,SD,W classbox;
+class SYS,CMP listbox;
