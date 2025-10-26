@@ -25,7 +25,7 @@
             {"type": "Facing"},
             {"type": "Attack", "max_cooldown": 2},
             {"type": "HitboxSize", "radius": 8},
-            {"type": "Life", "hp": 2}
+            {"type": "Life", "hp": 0}
         ]
     },
 

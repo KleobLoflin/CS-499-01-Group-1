@@ -24,10 +24,11 @@ class death:
 
             ai: AI = comps[AI]
             life: Life = comps[Life]
-            lifespan: lifeSpan =comps[Life]
+            lifespan: lifeSpan =comps[lifeSpan]
         
-            if life.hp <= 0 or lifespan <=0:
+            if life.hp <= 0: #or lifespan <=0:
                 world.delete_entity(entity_id)
+                
 
 
 
