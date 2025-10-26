@@ -28,7 +28,8 @@ from game.world.systems.attack import AttackSystem
 from game.world.systems.triggers import TriggerSystem
 from game.world.systems.render import RenderSystem
 from game.world.systems.spawn import SpawnSystem
-
+#from game.world.systems.lifespan import lifeSpanSystem
+from game.world.systems.death import death
 from game.world.maps.map_index import load_registry, pick
 from game.world.maps.map_factory import create_or_activate, resolve_map_hint_to_id
 
@@ -83,6 +84,9 @@ class DungeonScene(Scene):
             PresentationMapperSystem(),
             AnimationSystem(),
             SpawnSystem(),           
+           # LifeSpanSystem(),
+            death(),
+
         ]
 
     # method to release resources
