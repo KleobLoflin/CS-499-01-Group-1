@@ -13,6 +13,7 @@ class World:
         self.entities: Dict[int, Dict[Type, Any]] = {}      # id -> {CompType: comp}
         self.systems: List[Any] = []                        # ordered list of systems
         self._next_id = 1                                   # next integer id to be given
+        self._to_delete: List[int] = []
 
     # entity & component management #########################################################
 
@@ -50,3 +51,17 @@ class World:
     def update(self, dt: float) -> None:
         for sys in self.systems:
             sys.update(self, dt)
+        self.cleanup_deleted()
+
+      # completely remove an entity and all its components
+    def delete_entity(self, eid: int) -> None:
+        #"""Removes the given entity and all of its components from the world."""
+        if eid in self.entities:
+            del self.entities[eid]
+
+
+    def cleanup_deleted(self) -> None:
+        """Remove all entities queued for deletion."""
+        for eid in self._to_delete:
+            self.entities.pop(eid, None)
+        self._to_delete.clear()
