@@ -1,0 +1,61 @@
+classDiagram 
+direction LR
+class World
+
+
+class EnemyAISystem {
+    +update(dt)
+}
+class AnimationSystem {
+    +update(dt)
+}
+class AttackSystem {
+    +update(dt)
+}
+
+World o-- EnemyAISystem
+World o-- AnimationSystem
+World o-- AttackSystem
+
+class CollisionSystem {
+    +update(dt)
+}
+class InputSystem {
+    +update(dt)
+}
+class LifeSpanSystem{
+    +update(dt)
+}
+
+World o-- CollisionSystem
+World o-- InputSystem
+World o-- LifeSpanSystem
+
+class MovementSystem{
+    +update(dt)
+}
+class PresentationMapperSystem{
+    +update(dt)
+}
+class RenderSystem{
+    +draw()
+}
+
+MovementSystem --o World
+PresentationMapperSystem --o World
+RenderSystem --o World
+
+class SpawnSystem{
+    +update(dt)
+}
+class TitleMenuSystem{
+    +update(dt)
+}
+class TriggerSystem{
+    +update(dt)
+}
+
+SpawnSystem --o World
+TitleMenuSystem --o World
+TriggerSystem --o World
+

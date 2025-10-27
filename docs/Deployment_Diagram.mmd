@@ -1,0 +1,13 @@
+flowchart LR
+%% === Singleplayer Deployment ===
+
+subgraph PlayerMachine["Node: Player Machine"]
+  direction TB
+  GameProc["Process: GateCrashers Game<br/><b>Artifacts:</b><br/>- app.py (main)<br/>- scenes/, world/, systems/<br/>- assets/, blueprints/, maps/<br/><b>Responsibilities:</b><br/>- Run Pygame main loop<br/>- Handle input, audio, rendering<br/>- Perform full ECS simulation (World, Systems, Components)<br/>- Save/load local data"]
+end
+
+Pygame["Library: Pygame / SDL2<br/>Rendering, Audio, Input Handling, Window Management"]
+FileSys["Local Filesystem<br/>JSON blueprints, TMX maps, Sprites, Audio, Fonts"]
+
+GameProc --> Pygame
+GameProc --> FileSys
