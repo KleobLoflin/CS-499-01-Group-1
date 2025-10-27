@@ -1,0 +1,70 @@
+classDiagram
+%% ========= Core / App layer =========
+class App {
+  +run()
+  -_process_events()
+  -_fixed_update(dt: float)
+  -_draw()
+}
+
+class Config
+
+class Time {
+  +now(): float
+  +step(dt: float): float
+}
+
+class Window {
+  +width: int
+  +height: int
+  +create_surface()
+}
+
+%% ========= Scene control =========
+class SceneManager {
+  -active: Scene
+  +set(scene: Scene)
+  +update(dt: float)
+  +draw(surface)
+  +handle_event(ev)
+}
+
+class Scene {
+  <<abstract>>
+  +enter()
+  +exit()
+  +update(dt: float)
+  +draw(surface)
+  +handle_event(ev)
+}
+
+class TitleScene
+class HubScene
+class DungeonScene
+
+%% ========= ECS core =========
+class World {
+  -entities: Dict[eid, Dict[Type, Any]]
+  -systems: List
+  +create(): int
+  +add(eid: int, comp)
+  +get(eid: int, T)
+  +query(*Types)
+  +add_system(sys)
+  +update(dt: float)
+}
+
+%% ========= Relationships =========
+App --> SceneManager
+App ..> Config
+App ..> Time
+App ..> Window
+
+Scene <|-- TitleScene
+Scene <|-- HubScene
+Scene <|-- DungeonScene
+
+SceneManager --> Scene : manages
+TitleScene *-- World : composes
+HubScene *-- World : composes
+DungeonScene *-- World : composes

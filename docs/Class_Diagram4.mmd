@@ -1,0 +1,70 @@
+classDiagram
+direction LR
+class World
+
+class Facing { +direction: str }
+
+class DebugRect {
+  +size: Tuple~int,int~
+  +color: Tuple~int,int,int~
+}
+
+class Map {
+  +name: str
+  +path: str
+  +tmx_data
+  +active: bool
+  +id: str?
+  +collisions: List~any~?
+  +music: str?
+  +ambience: str?
+  +blueprint: Dict~str,any~?
+}
+
+class ActiveMapId { +id: str }
+class OnMap { +id: str }
+
+class MapSpawnState { +did_initial_spawns: bool }
+
+class SpawnPolicy {
+  +spawn_player: bool
+  +spawn_static_enemies: bool
+  +spawn_pickups: bool
+  +spawn_objects: bool
+  +run_title_spawns: bool
+  +run_game_spawns: bool
+}
+
+class Pickup { +kind: str }
+class WorldObject { +kind: str }
+
+class TitleMenu {
+  +title: str
+  +options: List~str~
+  +selected_index: int
+  +selected_role: str?
+}
+
+class TitleIntro {
+  +phase: str
+  +t: float
+  +logo_alpha: int
+  +bg_alpha: int
+  +pre_delay_dur: float
+  +logo_fade_dur: float
+  +logo_hold_dur: float
+  +bg_fade_dur: float
+}
+
+World o-- Facing
+World o-- DebugRect
+World o-- Map
+World o-- ActiveMapId
+World o-- OnMap
+
+MapSpawnState --o World
+SpawnPolicy --o World
+Pickup --o World
+WorldObject --o World
+TitleMenu --o World
+TitleIntro --o World

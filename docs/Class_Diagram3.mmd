@@ -1,0 +1,88 @@
+classDiagram
+direction LR
+class World
+
+class PlayerTag
+class LocalControlled
+
+class Transform {
+  +x: float
+  +y: float
+}
+
+class Movement {
+  +speed: int
+  +dash_speed: int
+  +dash_duration: float
+  +dash_cooldown: float
+  +dash_max_cooldown: float
+  +dash_max_duration: float
+}
+
+class Intent {
+  +move_x: float
+  +move_y: float
+  +basic_atk: bool
+  +basic_atk_held: bool
+  +dash: bool
+  +special_atk: bool
+  +facing: str
+}
+
+class InputState {
+  +key_order: List~str~
+}
+
+class Attack {
+  +max_cooldown: float
+  +remaining_cooldown: float
+  +active: bool
+}
+
+class HitboxSize {
+  +radius: float
+}
+
+class AI {
+  +kind: str
+  +target_id: int
+  +agro_range: int
+}
+
+class LifeSpan {
+  +duration: float
+  +elapsed: float
+}
+
+class Sprite {
+  +atlas_id: str
+  +z: int
+}
+
+class AnimationState {
+  +clip: str
+  +frame: int
+  +time: float
+  +fps: float
+  +loop: bool
+  +changed: bool
+}
+
+
+
+World o-- PlayerTag
+World o-- LocalControlled
+World o-- Transform
+World o-- Movement
+World o-- Intent
+World o-- InputState
+
+Attack --o World
+HitboxSize --o World
+AI --o World
+LifeSpan --o World
+Sprite --o World
+AnimationState --o World
+
+
+

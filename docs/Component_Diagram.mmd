@@ -1,0 +1,19 @@
+flowchart LR
+%% === Logical Components for Singleplayer Mode ===
+%% Boxes = code modules / components; arrows = dependencies
+
+App["Component: App<br/>(Pygame main loop)"] --> SceneMgr["Component: SceneManager"]
+SceneMgr --> Scenes["Component: Scenes<br/>- Scene (abstract)<br/>- TitleScene<br/>- HubScene<br/>- DungeonScene"]
+Scenes --> WorldCore["Component: World (ECS Core)"]
+
+subgraph Runtime["Runtime Data & Logic"]
+  direction LR
+  Systems["Component: Systems<br/>InputSystem, MovementSystem, CollisionSystem,<br/>AttackSystem, AnimationSystem, PresentationMapperSystem,<br/>RenderSystem, LifeSpanSystem, SpawnSystem,<br/>TriggerSystem, TitleMenuSystem, EnemyAISystem"]
+  Components["Component: Components<br/>Transform, Movement, Intent, Facing, Sprite,<br/>AnimationState, HitboxSize, Attack, InputState,<br/>PlayerTag, LocalControlled, OnMap, ActiveMapId,<br/>Map, MapSpawnState, SpawnPolicy, Pickup,<br/>WorldObject, TitleMenu, TitleIntro"]
+end
+
+WorldCore --- Runtime
+
+WorldCore -. uses .- Actors["Component: Actors & Blueprints<br/>hero_factory, enemy_factory,<br/>blueprint, blueprint_index"]
+WorldCore -. uses .- Maps["Component: Maps<br/>MapInfo, Room, registry/factory,<br/>spawn/regions"]
+App -. platform .- Pygame["External: Pygame / SDL2"]
