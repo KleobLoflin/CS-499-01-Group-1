@@ -17,6 +17,12 @@
       "enemy_type": "big_zombie",
       "count": 3,
       "region": "north"
+    },
+     {
+      "kind": "projectile",
+      "enemy_type": "homingarrow",
+      "count": 3,
+      "region": "north"
     }
   ],
   "game_spawns": {

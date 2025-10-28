@@ -63,17 +63,17 @@ class EnemyAISystem:#System):
 
             # choose target position
             target_pos: Transform | None = None
-            if ai.kind in ("chase", "flee"):
+            #if ai.kind in ("chase", "flee"):
                 # prefer AI.target_id if provided, else use first player on this map
-                if getattr(ai, "target_id", None) is not None:
-                    target_pos = world.get(ai.target_id, Transform)
-                if target_pos is None:
-                    target_pos = player_tr
-                if target_pos is None:
-                    # no valid target
-                    intent.move_x = 0.0
-                    intent.move_y = 0.0
-                    continue
+            if getattr(ai, "target_id", None) is not None:
+                target_pos = world.get(ai.target_id, Transform)
+            if target_pos is None:
+                target_pos = player_tr
+            if target_pos is None:
+                # no valid target
+                intent.move_x = 0.0
+                intent.move_y = 0.0
+                continue
                
             dx = target_pos.x - pos.x
             dy = target_pos.y - pos.y

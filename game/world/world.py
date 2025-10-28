@@ -61,7 +61,7 @@ class World:
 
 
     def cleanup_deleted(self) -> None:
-        """Remove all entities queued for deletion."""
+        #Remove all entities queued for deletion.
         for eid in self._to_delete:
             self.entities.pop(eid, None)
         self._to_delete.clear()
