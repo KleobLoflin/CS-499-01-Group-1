@@ -85,6 +85,12 @@ class lifeSpan:
 @dataclass
 class Life:
     hp: float = 5.0    # hp it currently has
+
+@dataclass
+class Damage:
+    amount: float = 1.0   # damage to apply
+    owner_id: Optional[int] = None  # entity that caused the damage
+    # friendly fire option here later?
     
 
 # presentation #####################################################
