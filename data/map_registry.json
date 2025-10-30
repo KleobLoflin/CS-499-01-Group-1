@@ -19,7 +19,7 @@
             "id": "hub",
             "tmx_path": "assets/maps/hub.tmx",
             "blueprint_path": "data/maps/hub.blueprint.json",
-            "tags": ["hub"],
+            "tags": ["hub", "tier0"], 
             "weight": 1
         }
     ]

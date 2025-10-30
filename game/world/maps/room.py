@@ -4,14 +4,35 @@ import pygame
 
 class Room:
     @staticmethod
-    def draw_map(surface, tmx_data, entities):
-        """
-        Draws the room map with Y-sorted tiles and entities.
-        Draw order:
-          1. floor and abyss layers
-          2. Walls + decorations + entities sorted by vertical depth (depth_y)
-        """
-        # draw static layers first (floor, abyss)
+    def visible_tile_bounds(tmx_data, view_left, view_top, view_w, view_h):
+        # return (first_tx, first_ty, last_tx, last_ty) clamped to map size.
+
+        tw, th = tmx_data.tilewidth, tmx_data.tileheight
+        map_w, map_h = tmx_data.width, tmx_data.height
+
+        first_tx = max(0, int(view_left // tw))
+        first_ty = max(0, int(view_top  // th))
+        last_tx  = min(map_w - 1, int((view_left + view_w) // tw) + 1)
+        last_ty  = min(map_h - 1, int((view_top  + view_h) // th) + 1)
+        return first_tx, first_ty, last_tx, last_ty
+    
+    @staticmethod
+    def draw_map_view(surface, tmx_data, entities_world, view_left, view_top, view_w, view_h):
+        # culls tiles to the cameras view
+        # offsets tiles and entities by (view_left, view_top)
+        # entities_world: iterable of (z, depth_y, eid, img, (wx, wy))
+        #   - (wx, wy) entities top-left in world pixels
+
+        tw, th = tmx_data.tilewidth, tmx_data.tileheight
+        ox = -int(view_left)  
+        oy = -int(view_top)  
+
+        # Compute visible tile range once
+        first_tx, first_ty, last_tx, last_ty = Room.visible_tile_bounds(
+            tmx_data, view_left, view_top, view_w, view_h
+        )
+
+        # 1) Draw static layers first (floor, abyss)
         for layer_name in ("abyss", "floor"):
             try:
                 layer = tmx_data.get_layer_by_name(layer_name)
@@ -20,65 +41,134 @@ class Room:
             if not isinstance(layer, pytmx.TiledTileLayer):
                 continue
 
-            for x, y, gid in layer:
-                tile = tmx_data.get_tile_image_by_gid(gid)
-                if tile:
-                    surface.blit(tile, (x * tmx_data.tilewidth, y * tmx_data.tileheight))
+            # Iterate only visible tiles
+            for x in range(first_tx, last_tx + 1):
+                for y in range(first_ty, last_ty + 1):
+                    # pytmx lets you get gid with layer.data[y][x] 
+                    try:
+                        gid = layer.data[y][x]
+                    except Exception:
+                        gid = 0
+                    if not gid:
+                        continue
+                    tile = tmx_data.get_tile_image_by_gid(gid)
+                    if tile:
+                        surface.blit(tile, (x * tw + ox, y * th + oy))
 
-        # get drawable items for walls & decorations
-        # this computes per-tile depth using the bottom pixel of the tile
-        tile_items = Room.get_sorted_tiles(tmx_data, ("walls", "dec"))
+        # 2) Build y-sorted list for wall/dec tiles
+        tile_items = Room.get_sorted_tiles_view(tmx_data, ("walls", "dec"),
+                                                first_tx, first_ty, last_tx, last_ty)
 
-        #compute min depth of all wall/dec tiles so we can draw some entities under entire layer
-        #if there are no wall/dec tiles, set to inf so entities won't be forced under.
+        # Compute min depth of wall/dec tiles; if none, set INF so entities won't be forced under
         if tile_items:
-            min_wall_dec_depth = min(depth_y for depth_y, img, pos in tile_items)
+            min_wall_dec_depth = min(depth_y for depth_y, img, pos_screen, _pos_world in tile_items)
         else:
             min_wall_dec_depth = float('inf')
 
-        #cmbine tiles and entities for Y-sorting
+        # 3) Collect drawables (tiles + entities) for unified y-sort.
         drawables = []
 
-        # Add tile items: (depth_y, kind_rank, image, (x, y))
-        for depth_y, img, pos in tile_items:
-            drawables.append((depth_y, 0, img, pos))  # kind_rank 0 for tiles
+        # Add tiles: (depth_y_world, kind_rank, image, (sx, sy))
+        for depth_y, img, pos_screen, _pos_world in tile_items:
+            drawables.append((depth_y, 0, img, pos_screen))  # kind_rank 0 for tiles
 
-        # determine tile coords occupied by walls/dec
+        # Determine tile coords occupied by walls/dec for perspective rule 
         wall_dec_coords = Room.get_occupied_coords(tmx_data, ("walls", "dec"))
 
-        #add entities: (depth_y, kind_rank, img, (x, y))
-        for z, depth_y, eid, img, pos in entities:
-            #compute entity feet pixel (bottom of sprite in world pixels)
-            feet_y = pos[1] + img.get_height()
-            feet_x = pos[0] + img.get_width() // 2
+        # 4) Add entities, applying perspective rule against wall/dec tiles.
+        for z, depth_y, eid, img, pos_world in entities_world:
+            wx, wy = pos_world  # world top-left of sprite
+            # feet in world pixels 
+            feet_y = wy + img.get_height()
+            feet_x = wx + img.get_width() // 2
 
-            #convert to tile coords
-            tile_x = int(feet_x // tmx_data.tilewidth)
-            tile_y = int(feet_y // tmx_data.tileheight)
+            tile_x = int(feet_x // tw)
+            tile_y = int(feet_y // th)
 
-            # this is where perspective logic is handled
-            #if bottom of entity's rect is touching a tile in wall or dec layer, they are drawn under both layers
+            # If the feet are on a wall/dec tile, draw under that whole layer.
             if (tile_x, tile_y) in wall_dec_coords:
-                # set entity depth to just above the minimum wall/dec tile depth so it sorts before them.
                 depth_y_for_sort = int(min_wall_dec_depth) - 1
             else:
                 depth_y_for_sort = depth_y
 
-            drawables.append((depth_y_for_sort, 1, img, pos))  # kind_rank 1 for entities
+            # Convert world -> screen with camera offset
+            sx = int(wx + ox)
+            sy = int(wy + oy)
 
-        # sort by vertical depth (and draw tiles before entities at equal depth)
+            drawables.append((depth_y_for_sort, 1, img, (sx, sy)))  # kind_rank 1 for entities
+
+        # 5) Sort & draw
         drawables.sort(key=lambda d: (d[0], d[1]))
-
-        # draw everything in sorted order
         for _, _, img, pos in drawables:
             surface.blit(img, pos)
 
     @staticmethod
+    def draw_map(surface, tmx_data, entities_world):
+        # backwards compatible with old system
+        # uses draw_map_view with a full-view rect anchored at (0,0)
+        view_left = 0
+        view_top = 0
+        view_w = tmx_data.width * tmx_data.tilewidth
+        view_h = tmx_data.height * tmx_data.tileheight
+        Room.draw_map_view(surface, tmx_data, entities_world, view_left, view_top, view_w, view_h)
+
+    @staticmethod
+    def get_sorted_tiles_view(tmx_data, layer_names, first_tx, first_ty, last_tx, last_ty):
+        
+        # Returns a list of (depth_y_world, image, (sx, sy), (wx, wy)) for the given layers,
+        # culled to the visible tile range. Screen position is computed assuming a camera
+        # offset of (view_left, view_top). Caller should pass in ox/oy by subtracting
+        # view_left/view_top before blitting.
+        
+        items = []
+        tw, th = tmx_data.tilewidth, tmx_data.tileheight
+
+        for layer_name in layer_names:
+            try:
+                layer = tmx_data.get_layer_by_name(layer_name)
+            except ValueError:
+                continue
+
+            if not isinstance(layer, pytmx.TiledTileLayer):
+                continue
+
+            for x in range(first_tx, last_tx + 1):
+                for y in range(first_ty, last_ty + 1):
+                    try:
+                        gid = layer.data[y][x]
+                    except Exception:
+                        gid = 0
+                    if not gid:
+                        continue
+
+                    tile = tmx_data.get_tile_image_by_gid(gid)
+                    if not tile:
+                        continue
+
+                    # world top-left of this tile cell
+                    draw_x_world = x * tw
+                    draw_y_world = y * th
+
+                    # Offset for taller tiles
+                    img_h = tile.get_height()
+                    draw_y_offset_world = draw_y_world + (th - img_h)
+
+                    # Depth is world bottom pixel of the tile
+                    depth_y_world = draw_y_offset_world + img_h
+
+                    # return both world pos and a placeholder for screen pos
+                    items.append(
+                        (depth_y_world, tile, (draw_x_world, draw_y_offset_world), (draw_x_world, draw_y_offset_world))
+                    )
+
+        # Sort by world depth
+        items.sort(key=lambda i: i[0])
+        return items
+
+    @staticmethod
     def get_sorted_tiles(tmx_data, layer_names):
-        """
-        Returns a list of (depth_y, image, (x, y)) for the given layers.
-        depth_y = bottom of the tile image in world pixels.
-        """
+        # legacy helper for compatability
+        # not used in draw_map_view
         items = []
 
         for layer_name in layer_names:
@@ -124,9 +214,14 @@ class Room:
                 continue
             if not isinstance(layer, pytmx.TiledTileLayer):
                 continue
-            for x, y, gid in layer:
-                if gid:
-                    coords.add((x, y))
+            for y in range(tmx_data.height):
+                for x in range(tmx_data.width):
+                    try:
+                        gid = layer.data[y][x]
+                    except Exception:
+                        gid = 0
+                    if gid:
+                        coords.add((x, y))
         return coords
 
     @staticmethod
