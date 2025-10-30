@@ -2,7 +2,7 @@ import pygame
 from pygame import Surface
 from typing import Optional
 from game.world.components import (
-    Transform, Sprite, AnimationState, Facing, Map, ActiveMapId, OnMap
+    Transform, Sprite, AnimationState, Facing, Map, ActiveMapId, OnMap, Camera
 )
 from game.world.maps.room import Room
 from game.core.config import Config
@@ -29,8 +29,14 @@ class RenderSystem:
         if tmx_data is None:
             return  # no map to draw
 
+        # get camera
+        cam = None
+        for _, comps in world.query(Camera):
+            cam = comps[Camera]
+            break
+
         # get a list of all entities to render
-        render_list = []
+        entities_world = []
         for eid, comps in world.query(Transform, Sprite, AnimationState, Facing):
             
             # filter to active map if OnMap tags are present
@@ -64,13 +70,20 @@ class RenderSystem:
             
             # get (x, y) position of sprite to draw
             # calculate position to draw the sprite
-
             pos = (int(tr.x - origin[0]), int(tr.y - origin[1]))
             
             # get depth
             depth_y = int(tr.y)
-            render_list.append((spr.z, depth_y, eid, img, pos))
+            entities_world.append((spr.z, depth_y, eid, img, pos))
 
         # pass entities + map to unified Room drawing
         # note: The new layering and sorting logic happens inside Room.draw_map()
-        Room.draw_map(surface, tmx_data, render_list)
+        if cam is not None:
+            view_left = cam.x - cam.viewport_w // 2
+            view_top  = cam.y - cam.viewport_h // 2
+            Room.draw_map_view(surface, tmx_data, entities_world,
+                               view_left, view_top, cam.viewport_w, cam.viewport_h)
+        else:
+            # Fallback: no camera; draw whole map as before
+            Room.draw_map(surface, tmx_data, entities_world)
+        

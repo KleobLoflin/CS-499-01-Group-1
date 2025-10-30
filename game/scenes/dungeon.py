@@ -28,6 +28,10 @@ from game.world.systems.attack import AttackSystem
 from game.world.systems.triggers import TriggerSystem
 from game.world.systems.render import RenderSystem
 from game.world.systems.spawn import SpawnSystem
+from game.world.systems.camera_spawn import EnsureCameraSystem
+from game.world.systems.camera_bootstrap import CameraBootstrapSystem
+from game.world.systems.camera_follow import CameraFollowSystem
+from game.world.systems.camera_clamp import CameraClampSystem
 
 from game.world.maps.map_index import load_registry, pick
 from game.world.maps.map_factory import create_or_activate, resolve_map_hint_to_id
@@ -82,7 +86,11 @@ class DungeonScene(Scene):
             CollisionSystem(),       
             PresentationMapperSystem(),
             AnimationSystem(),
-            SpawnSystem(),           
+            SpawnSystem(),
+            EnsureCameraSystem(),
+            CameraBootstrapSystem(),
+            CameraFollowSystem(),
+            CameraClampSystem()           
         ]
 
     # method to release resources

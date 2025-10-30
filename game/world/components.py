@@ -179,3 +179,20 @@ class TitleIntro:
     logo_fade_dur: float = 2.5
     logo_hold_dur: float = 1.25
     bg_fade_dur: float = 2.0
+
+# Camera ##################################################
+@dataclass
+class Camera:
+    x: float = 0.0
+    y: float = 0.0
+    zoom: float = 1.0
+    viewport_w: int = 640
+    viewport_h: int = 360
+    deadzone_w: int = 96
+    deadzone_h: int = 64
+    clamp_rect: Optional[Tuple[int, int, int ,int]] = None
+    pixel_snap: bool = True
+
+@dataclass
+class CameraFollowLocalPlayer:
+    pass
