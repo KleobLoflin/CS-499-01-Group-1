@@ -34,7 +34,7 @@ class CameraFollowSystem:
             return
         
         # compute deadzone rectangle in world space
-        hw, hh = cam.veiwport_w // 2, cam.veiwport_h // 2
+        hw, hh = cam.viewport_w // 2, cam.viewport_h // 2
         view_left = cam.x - hw
         view_top = cam.y - hh
         dz_left = view_left + (cam.viewport_w - cam.deadzone_w) // 2

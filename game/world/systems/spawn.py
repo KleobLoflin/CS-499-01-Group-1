@@ -26,7 +26,7 @@ class SpawnSystem:
         # Title spawns
         if policy.run_title_spawns and not getattr(state, "did_title_spawns", False):
             _run_title_spawns(world, mp, active_id)
-            state.did_title_spawns = True  # add this attr lazily for backward-compat
+            state.did_title_spawns = True  
 
         # Gameplay spawns
         if policy.run_game_spawns and not state.did_initial_spawns:

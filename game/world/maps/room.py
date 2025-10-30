@@ -69,8 +69,11 @@ class Room:
         drawables = []
 
         # Add tiles: (depth_y_world, kind_rank, image, (sx, sy))
-        for depth_y, img, pos_screen, _pos_world in tile_items:
-            drawables.append((depth_y, 0, img, pos_screen))  # kind_rank 0 for tiles
+        for depth_y, img, _pos_screen, pos_world in tile_items:
+            wx, wy = pos_world
+            sx = int(wx + ox)
+            sy = int(wy + oy)
+            drawables.append((depth_y, 0, img, (sx, sy)))
 
         # Determine tile coords occupied by walls/dec for perspective rule 
         wall_dec_coords = Room.get_occupied_coords(tmx_data, ("walls", "dec"))

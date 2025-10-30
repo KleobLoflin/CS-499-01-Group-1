@@ -15,7 +15,7 @@ from game.core.config import Config
 
 from game.world.world import World
 from game.world.components import (
-    Transform, Map, OnMap, SpawnPolicy, PlayerTag
+    Transform, Map, OnMap, SpawnPolicy, LocalControlled
     )
 from game.world.actors.hero_factory import create as create_hero
 from game.world.systems.input import InputSystem
@@ -64,6 +64,9 @@ class DungeonScene(Scene):
                 break
         if active_id:
             self.world.add(self.player_id, OnMap(id=active_id))
+
+        # set LocalControlled
+        self.world.add(self.player_id, LocalControlled())
 
         # Scene/run policy for SpawnSystem (gameplay)
         e = self.world.new_entity()
