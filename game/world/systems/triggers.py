@@ -31,7 +31,6 @@ class TriggerSystem:
                 break
 
         if not active_map:
-            print("[TriggerSystem] No active map found")
             return
 
         # If player has an OnMap tag and it doesn't match the active map id, skip
