@@ -21,6 +21,13 @@
             "blueprint_path": "data/maps/hub.blueprint.json",
             "tags": ["hub"], 
             "weight": 1
+        },
+                {
+            "id": "level1",
+            "tmx_path": "assets/maps/level1.tmx",
+            "blueprint_path": "data/maps/level1.blueprint.json",
+            "tags": ["tier1"],
+            "weight": 1
         }
     ]
 }

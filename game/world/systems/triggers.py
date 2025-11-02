@@ -40,6 +40,8 @@ class TriggerSystem:
         # Find the triggers layer
         trigger_layer = None
         for layer in active_map.objectgroups:
+            if not getattr(layer, "name", None):
+                continue  # skip layers without a name
             if layer.name.lower() == "triggers":
                 trigger_layer = layer
                 break

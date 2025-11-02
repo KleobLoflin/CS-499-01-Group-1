@@ -46,7 +46,7 @@ class DungeonScene(Scene):
     def enter(self) -> None:
         # initial map, or pick a fixed id 
         load_registry("data/map_registry.json")
-        mi = pick(require_all=["tier0"])
+        mi = pick(require_all=["tier1"])
         create_or_activate(self.world, mi.id)
 
         # Spawn player once here (or set SpawnPolicy.spawn_player=True to use blueprint)
