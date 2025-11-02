@@ -28,6 +28,6 @@
             "blueprint_path": "data/maps/level1.blueprint.json",
             "tags": ["tier1"],
             "weight": 1
-        },
+        }
     ]
 }
