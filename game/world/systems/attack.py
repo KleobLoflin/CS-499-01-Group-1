@@ -1,4 +1,4 @@
-from game.world.components import Intent, Attack, Transform, HitboxSize, PlayerTag, AI
+from game.world.components import Intent, Attack, Transform, HitboxSize, PlayerTag, AI, Life
 import math
 
 class AttackSystem:
@@ -14,6 +14,7 @@ class AttackSystem:
             it: Intent = comps[Intent]
             atk: Attack = comps[Attack]
             tr: Transform = comps[Transform]
+            
 
             if it.basic_atk and atk.remaining_cooldown <= 0.0:
                 print(f"START SWING for {eid}")
@@ -58,13 +59,25 @@ class AttackSystem:
                     enemy_tr: Transform = enemy_comps[Transform]
                     enemy_hitbox: HitboxSize = enemy_comps[HitboxSize]
 
+                    
+
+
+                    
                     if self._line_hit(tr.x, tr.y, sx, sy, enemy_tr.x, enemy_tr.y, enemy_hitbox.radius):
                         hit_this_frame.add(enemy_id)
 
                 # register knockback only once per swing
                 for enemy_id in hit_this_frame:
                     if enemy_id not in self.already_hit[eid]:
-                        print(f"{enemy_id} hit")
+                        enemy_life = world.get(enemy_id, Life)
+                    
+
+                        if enemy_life:
+                            enemy_life.hp -= atk.damage
+                            print(f"Enemy {enemy_id} HP: {enemy_life.hp}")
+                            #print(f"{enemy_id} hit")
+
+                     
 
                         # compute knockback direction (from player to enemy)
                         enemy_tr = world.get(enemy_id, Transform)

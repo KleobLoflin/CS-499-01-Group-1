@@ -37,7 +37,7 @@ def build_Facing(spec, ctx): return Facing()
 def build_DebugRect(spec, ctx):
     return DebugRect(size=tuple(spec.get("size", (16, 16))), color=tuple(spec.get("color", (90, 180, 255))))
 
-def build_Attack(spec, ctx): return Attack(max_cooldown=spec.get("max_cooldown", 0.15))
+def build_Attack(spec, ctx): return Attack(max_cooldown=spec.get("max_cooldown", 0.15), damage=spec.get("damage", 1.0))
 
 def build_HitboxSize(spec, ctx):
     return HitboxSize(radius=spec.get("radius", 10))
