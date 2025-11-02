@@ -60,6 +60,7 @@ class Attack:
     max_cooldown: float = 0.15
     remaining_cooldown: float = max_cooldown
     active: bool = False
+    damage: float = 1
 
 # Hitbox Size
 @dataclass
@@ -80,6 +81,20 @@ class AI:
 class lifeSpan:
     duration: float = 5.0    # seconds until entity is removed
     elapsed: float = 0.0     # time elapsed since creation
+
+
+
+@dataclass
+class Life:
+    hp: float = 5.0    # hp it currently has
+
+@dataclass
+class Damage:
+    amount: float = 1.0   # damage to apply
+    owner_id: Optional[int] = None  # entity that caused the damage
+    # friendly fire option here later?
+    
+
 
 # presentation #####################################################
 
