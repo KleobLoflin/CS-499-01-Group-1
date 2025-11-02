@@ -61,7 +61,7 @@ BUILDERS = {
     "Attack": build_Attack,
     "DebugRect": build_DebugRect,
     "HitboxSize": build_HitboxSize,
-    "lifeSpan": build_lifeSpan
+    "lifeSpan": build_lifeSpan,
 }
 
 # uses builder functions to add components to an entity

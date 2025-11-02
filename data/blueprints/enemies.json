@@ -9,7 +9,8 @@
             {"type": "AnimationState", "clip": "idle"},
             {"type": "Facing"},
             {"type": "Attack", "max_cooldown": 2},
-            {"type": "HitboxSize", "radius": 5}
+            {"type": "HitboxSize", "radius": 5},
+            {"type": "Life", "hp": 4}
         ]
     },
 
@@ -23,15 +24,32 @@
             {"type": "AnimationState", "clip": "idle"},
             {"type": "Facing"},
             {"type": "Attack", "max_cooldown": 2},
-            {"type": "HitboxSize", "radius": 8}
+            {"type": "HitboxSize", "radius": 8},
+            {"type": "Life", "hp": 5}
         ]
     },
 
 
-    
+    "enemy.goblin": {
+        "components": [
+            {"type": "Transform"},
+            {"type": "Intent"},
+            {"type": "Movement", "speed": 75},
+            {"type": "AI", "kind": "chase", "agro_range": 200},
+            {"type": "Sprite", "atlas": "enemy.goblin", "z": 10},
+            {"type": "AnimationState", "clip": "idle"},
+            {"type": "Facing"},
+            {"type": "Attack", "max_cooldown": 2},
+            {"type": "HitboxSize", "radius": 2},
+            {"type": "Life", "hp": 2}
+        ]
+    },
 
 
-    "projectile.homingarrow": {
+
+
+
+    "enemy.homingarrow": {
         "components": [
             {"type": "Transform"},
             {"type": "Intent"},
