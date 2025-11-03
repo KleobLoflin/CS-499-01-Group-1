@@ -24,7 +24,7 @@
             {"type": "AnimationState", "clip": "idle"},
             {"type": "Facing"},
             {"type": "Attack", "max_cooldown": 2},
-            {"type": "HitboxSize", "radius": 8},
+            {"type": "HitboxSize", "radius": 10},
             {"type": "Life", "hp": 5}
         ]
     },
