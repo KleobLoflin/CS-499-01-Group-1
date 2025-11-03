@@ -32,6 +32,9 @@ from game.world.systems.camera_spawn import EnsureCameraSystem
 from game.world.systems.camera_bootstrap import CameraBootstrapSystem
 from game.world.systems.camera_follow import CameraFollowSystem
 from game.world.systems.camera_clamp import CameraClampSystem
+from game.world.systems.lifespan import LifeSpanSystem
+from game.world.systems.death import death
+
 
 from game.world.maps.map_index import load_registry, pick
 from game.world.maps.map_factory import create_or_activate, resolve_map_hint_to_id
@@ -93,7 +96,9 @@ class DungeonScene(Scene):
             EnsureCameraSystem(),
             CameraBootstrapSystem(),
             CameraFollowSystem(),
-            CameraClampSystem()           
+            CameraClampSystem(),
+            LifeSpanSystem(),
+            death(),           
         ]
 
     # method to release resources

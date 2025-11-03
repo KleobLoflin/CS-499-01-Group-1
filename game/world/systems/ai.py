@@ -63,17 +63,17 @@ class EnemyAISystem:#System):
 
             # choose target position
             target_pos: Transform | None = None
-            if ai.kind in ("chase", "flee"):
+            #if ai.kind in ("chase", "flee"):
                 # prefer AI.target_id if provided, else use first player on this map
-                if getattr(ai, "target_id", None) is not None:
-                    target_pos = world.get(ai.target_id, Transform)
-                if target_pos is None:
-                    target_pos = player_tr
-                if target_pos is None:
-                    # no valid target
-                    intent.move_x = 0.0
-                    intent.move_y = 0.0
-                    continue
+            if getattr(ai, "target_id", None) is not None:
+                target_pos = world.get(ai.target_id, Transform)
+            if target_pos is None:
+                target_pos = player_tr
+            if target_pos is None:
+                # no valid target
+                intent.move_x = 0.0
+                intent.move_y = 0.0
+                continue
                
             dx = target_pos.x - pos.x
             dy = target_pos.y - pos.y
@@ -140,19 +140,20 @@ class EnemyAISystem:#System):
                         intent.move_x = 0.0
                         intent.move_y = 0.0
 
-                elif ai.kind == "wander":
-                    dx = random.randint(-10, 10)
-                    dy = random.randint(-10, 10)
-                
-                    if dist < 200 and dist > 0:
-                        intent.move_x = -dx / dist
-                        intent.move_y = -dy / dist
-                    else:
-                        intent.move_x = 0.0
-                        intent.move_y = 0.0
-            #elif ai.kind == "straight_line":
-            #    intent.move_x = dx / dist
-            #    intent.move_y = dy / dist
+                #believed to work not sure tho
+                elif ai.kind == "StraightLine":
+                    if not hasattr(ai, "fixed_dir"):
+                        # Calculate player direction at creation
+                        dx = player_tr.x - pos.x
+                        dy = player_tr.y - pos.y
+                        dist = max((dx * dx + dy * dy) ** 0.5, 1.0)
+                        ai.fixed_dir = (dx / dist, dy / dist)
+                    
+                    # Move along the fixed direction each frame
+                    intent.move_x = ai.fixed_dir[0]
+                    intent.move_y = ai.fixed_dir[1]
+
+
 
                 #BELOW THIS needs to be worked on
             #elif ai.kind == "ranged" and target_pos:
