@@ -16,25 +16,31 @@
       "kind": "enemy",
       "enemy_type": "big_zombie",
       "count": 3,
-      "region": "north"
+      "region": "center"
+    },
+    {
+      "kind": "enemy",
+      "enemy_type": "goblin",
+      "count": 6,
+      "region": "center"
     }
   ],
   "game_spawns": {
-    "player_start": { "pos": [128, 192] },
+    "player_start": { "tile_pos": [128, 192] },
     "objects": [],
     "pickups": [
-      { "type": "potion_health", "pos": [256, 160] }
+      { "type": "potion_health", "tile_pos": [256, 160] }
     ],
     "static_enemies": [
-      { "type": "chort", "pos": [220, 150] },
-      { "type": "big_zombie", "pos": [260, 150] }
+      { "type": "chort", "tile_pos": [220, 150] },
+      { "type": "big_zombie", "tile_pos": [260, 150] }
     ],
     "exits": []
   },
   "regions": {
-    "center": { "type": "ring", "center": [192, 128], "r_min": 24, "r_max": 96 },
-    "north": { "type": "rect", "x": 48, "y": 24, "w": 288, "h": 40 },
-    "east": { "type": "rect", "x": 96, "y": 64, "w": 256, "h": 160 },
+    "center": { "type": "ring", "center": [19, 11], "r_min": 1, "r_max": 9 },
+    "north": { "type": "rect", "x": 19, "y": 3, "w": 35, "h": 3 },
+    "east": { "type": "rect", "x": 7, "y": 13, "w": 12, "h": 5 },
     "west": { "type": "poly", "points": [[0, 0], [400, 0], [400, 36], [0, 36]] },
     "south": {}
   }

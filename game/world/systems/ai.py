@@ -45,8 +45,8 @@ class EnemyAISystem:#System):
                     continue
             player_tr = comps[Transform]
             break
-        if player_tr is None:
-            return
+        # if player_tr is None:
+        #     return
 
 
         # drive AI for entities with AI + Transform + Intent
@@ -69,17 +69,19 @@ class EnemyAISystem:#System):
                 target_pos = world.get(ai.target_id, Transform)
             if target_pos is None:
                 target_pos = player_tr
-            if target_pos is None:
-                # no valid target
-                intent.move_x = 0.0
-                intent.move_y = 0.0
-                continue
-               
-            dx = target_pos.x - pos.x
-            dy = target_pos.y - pos.y
-            dist = (dx * dx + dy * dy) ** 0.5
+            # if target_pos is None:
+            #     # no valid target
+            #     intent.move_x = 0.0
+            #     intent.move_y = 0.0
+            #     continue
+            
+            dist = float('inf')
+            if target_pos != None:
+                dx = target_pos.x - pos.x
+                dy = target_pos.y - pos.y
+                dist = (dx * dx + dy * dy) ** 0.5
 
-            if dist > ai.agro_range:
+            if dist > ai.agro_range or target_pos == None:
         # Give each AI its own cooldown + direction if not already present
                 if not hasattr(ai, "wander_timer"):
                     ai.wander_timer = 0.0
