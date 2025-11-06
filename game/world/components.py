@@ -36,7 +36,7 @@ class Movement:
     dash_duration: float = 0.0
     dash_cooldown: float = 0.0
     dash_max_cooldown: float = 1.0
-    dash_max_duration: float = 0.15
+    dash_max_duration: float = 0.175
  
 # intent: data representing what the player/enemy is trying to do
 # this describes a per-tick input intent that is either written by 
