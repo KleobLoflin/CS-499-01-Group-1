@@ -1,7 +1,7 @@
 # game/world/systems/spawn.py
 from game.world.components import (
     Map, OnMap, MapSpawnState, ActiveMapId, SpawnPolicy,
-    WorldObject, Pickup, Transform, Intent, Movement, Facing
+    WorldObject, Pickup, Transform, Intent, Movement, Facing, LocalControlled
 )
 from game.world.actors.enemy_factory import create as create_enemy
 from game.world.actors.hero_factory import create as create_hero
@@ -59,10 +59,16 @@ def _run_game_spawns(world, mp: Map, active_id: str, policy: SpawnPolicy):
 
     # 1) Player start 
     if policy.spawn_player and "player_start" in gs:
-        px, py = gs["player_start"].get("pos", [128, 192])
-        pid = create_hero(world, pos=(px, py))
+        px, py = gs["player_start"].get("pos")
+        pid = create_hero(
+            world,
+            archetype="knight_blue",
+            owner_client_id=None,
+            pos=(px, py)
+        )
         _ensure_basics(world, pid)
         world.add(pid, OnMap(id=active_id))
+        world.add(pid, LocalControlled())
 
     # 2) Objects
     # if policy.spawn_objects:

@@ -9,7 +9,7 @@
             {"type": "AnimationState", "clip": "idle"},
             {"type": "Facing"},
             {"type": "Attack", "max_cooldown": 2},
-            {"type": "HitboxSize", "radius": 5},
+            {"type": "HitboxSize", "radius": 6},
             {"type": "Life", "hp": 4}
         ]
     },
@@ -40,7 +40,7 @@
             {"type": "AnimationState", "clip": "idle"},
             {"type": "Facing"},
             {"type": "Attack", "max_cooldown": 2},
-            {"type": "HitboxSize", "radius": 5},
+            {"type": "HitboxSize", "radius": 6},
             {"type": "Life", "hp": 2}
         ]
     },

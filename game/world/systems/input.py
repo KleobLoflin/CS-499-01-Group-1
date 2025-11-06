@@ -1,7 +1,7 @@
 # Class input
 
 import pygame
-from game.world.components import Intent, InputState
+from game.world.components import Intent, InputState, LocalControlled
 
 KEY_TO_DIRECTION = {
     pygame.K_w: "up",
@@ -18,15 +18,14 @@ ATTACK_KEYS = {pygame.K_SPACE}
 DASH_KEYS = {pygame.K_LSHIFT, pygame.K_RSHIFT}
 
 class InputSystem:
-    def __init__(self, player_id: int) -> None:
-        self.player_id = player_id
+    def __init__(self) -> None:
         self.prev_attack_pressed = False  # edge detection
         self.prev_dash_pressed = False    # edge detection
 
     def update(self, world, dt: float):
-        comps = world.entities.get(self.player_id)
-        input: InputState = comps.get(InputState)
-        intent: Intent = comps.get(Intent)
+        for _, comps in world.query(LocalControlled):
+            input: InputState = comps.get(InputState)
+            intent: Intent = comps.get(Intent)
 
         # process events and key state
         pygame.event.pump()

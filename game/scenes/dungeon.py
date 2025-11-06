@@ -53,30 +53,30 @@ class DungeonScene(Scene):
         create_or_activate(self.world, mi.id)
 
         # Spawn player once here (or set SpawnPolicy.spawn_player=True to use blueprint)
-        self.player_id = create_hero(
-            self.world,
-            archetype="knight_blue",
-            owner_client_id=None,
-            pos=(Config.WINDOW_W/2 - 16, Config.WINDOW_H/2 - 16)
-        )
-        # Tag player with the active map id
-        active_id = None
-        for _, comps in self.world.query(Map):
-            if comps[Map].active:
-                active_id = getattr(comps[Map], "id", None)
-                break
-        if active_id:
-            self.world.add(self.player_id, OnMap(id=active_id))
+        # self.player_id = create_hero(
+        #     self.world,
+        #     archetype="knight_blue",
+        #     owner_client_id=None,
+        #     pos=(Config.WINDOW_W/2 - 16, Config.WINDOW_H/2 - 16)
+        # )
+        # # Tag player with the active map id
+        # active_id = None
+        # for _, comps in self.world.query(Map):
+        #     if comps[Map].active:
+        #         active_id = getattr(comps[Map], "id", None)
+        #         break
+        # if active_id:
+        #     self.world.add(self.player_id, OnMap(id=active_id))
 
-        # set LocalControlled
-        self.world.add(self.player_id, LocalControlled())
+        # # set LocalControlled
+        # self.world.add(self.player_id, LocalControlled())
 
         # Scene/run policy for SpawnSystem (gameplay)
         e = self.world.new_entity()
         self.world.add(e, SpawnPolicy(
             run_title_spawns=False,
             run_game_spawns=True,
-            spawn_player=False,          # already spawned above
+            spawn_player=True,          # already spawned above
             spawn_static_enemies=True,
             spawn_pickups=True,
             spawn_objects=True
@@ -84,7 +84,8 @@ class DungeonScene(Scene):
 
         # Systems in order
         self.world.systems = [
-            InputSystem(self.player_id),
+            SpawnSystem(),
+            InputSystem(),
             EnemyAISystem(),
             AttackSystem(),
             MovementSystem(),
@@ -92,7 +93,6 @@ class DungeonScene(Scene):
             CollisionSystem(),       
             PresentationMapperSystem(),
             AnimationSystem(),
-            SpawnSystem(),
             EnsureCameraSystem(),
             CameraBootstrapSystem(),
             CameraFollowSystem(),
