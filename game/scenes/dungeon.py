@@ -76,7 +76,7 @@ class DungeonScene(Scene):
         self.world.add(e, SpawnPolicy(
             run_title_spawns=False,
             run_game_spawns=True,
-            spawn_player=True,          # already spawned above
+            spawn_player=True,          
             spawn_static_enemies=True,
             spawn_pickups=True,
             spawn_objects=True

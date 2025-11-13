@@ -18,14 +18,11 @@ ATTACK_KEYS = {pygame.K_SPACE}
 DASH_KEYS = {pygame.K_LSHIFT, pygame.K_RSHIFT}
 
 class InputSystem:
-    def __init__(self) -> None:
-        self.prev_attack_pressed = False  # edge detection
-        self.prev_dash_pressed = False    # edge detection
-
     def update(self, world, dt: float):
         for _, comps in world.query(LocalControlled):
             input: InputState = comps.get(InputState)
             intent: Intent = comps.get(Intent)
+            break
 
         # process events and key state
         pygame.event.pump()
@@ -47,14 +44,14 @@ class InputSystem:
         # ---------------- Actions ----------------
         # Attack (edge detection)
         attack_pressed = any(keys[k] for k in ATTACK_KEYS)
-        if attack_pressed and not self.prev_attack_pressed:
+        if attack_pressed and not input.prev_attack_pressed:
             intent.basic_atk = True
-        self.prev_attack_pressed = attack_pressed
+        input.prev_attack_pressed = attack_pressed
 
         # Dash (edge detection)
         dash_pressed = any(keys[k] for k in DASH_KEYS)
         intent.dash = dash_pressed  # allow holding dash
-        self.prev_dash_pressed = dash_pressed
+        input.prev_dash_pressed = dash_pressed
 
         # ---------------- Movement axes ----------------
         dx = int("right" in now_pressed) - int("left" in now_pressed)

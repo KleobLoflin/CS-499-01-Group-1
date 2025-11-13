@@ -26,14 +26,14 @@
     }
   ],
   "game_spawns": {
-    "player_start": { "tile_pos": [128, 192] },
+    "player_start": { "tile_pos": [4, 10] },
     "objects": [],
     "pickups": [
       { "type": "potion_health", "tile_pos": [256, 160] }
     ],
     "static_enemies": [
-      { "type": "chort", "tile_pos": [220, 150] },
-      { "type": "big_zombie", "tile_pos": [260, 150] }
+      { "type": "chort", "tile_pos": [18, 5] },
+      { "type": "big_zombie", "tile_pos": [18, 15] }
     ],
     "exits": []
   },

@@ -8,6 +8,7 @@
 
 from dataclasses import dataclass, field
 from typing import Tuple, Dict, Set, Literal, List, Optional, Any
+from enum import Enum
 
 # gameplay tags ##################################################
 
@@ -54,6 +55,14 @@ class Intent:
 @dataclass
 class InputState:
     key_order: List[str] = field(default_factory=list)
+    up: bool = False
+    down: bool = False
+    left: bool = False
+    right: bool = False
+    accept: bool = False
+    back: bool = False
+    prev_attack_pressed: bool = False
+    prev_dash_pressed: bool = False
 
 @dataclass
 class Attack:
@@ -173,7 +182,7 @@ class Pickup:
 class WorldObject:
     kind: str = "chest"         # chests, fountains, columns, barriers, spikes, doors, etc...
 
-# Menus ############################################
+# Title Menu ############################################
 
 @dataclass
 class TitleMenu:
@@ -211,3 +220,48 @@ class Camera:
 @dataclass
 class CameraFollowLocalPlayer:
     pass
+
+# Hub / Lobby ##################################################
+class LobbyMode(str, Enum):
+    SINGLE = "SINGLE"
+    HOST = "HOST"
+    JOIN = "JOIN"
+
+@dataclass
+class NetworkRole:
+    role: str       # "SOLO" | "HOST" | "CLIENT"
+
+@dataclass
+class ConnectionHandle:
+    connection_id: Optional[str] = None
+
+@dataclass
+class LobbySlot:
+    # one slot per player. up to five.
+    index: int
+    player_eid: Optional[int] = None    # eid of PlayerTag when occupied
+    is_local: bool = False              
+    selected_char_index: int = 0        # which hero in the catalog
+    ready: bool = False
+    name: str = "Player"
+    preview_eid: Optional[int] = None   # entity that displays idle animation
+
+@dataclass
+class LobbyState:
+    mode: LobbyMode = LobbyMode.SINGLE
+    substate: str = "SELECT"    # "BROWSER" for Join server list, else "SELECT"
+    max_slots: int = 5
+    character_catalog: List[str] = field(default_factory=list)
+
+@dataclass
+class AvailableHosts:
+    hosts: List[str] = field(default_factory=list)
+    selected_index: int = 0
+
+@dataclass
+class SpawnRequest:     # use to pass player spawn info to DungeonScene
+    hero_key: str       # example: "hero.knight_blue"
+    is_local: bool      # if true, attach LocalControlled at gameplay
+    player_name: str = "Player"
+    net_id: Optional[str] = None    # use for networking
+

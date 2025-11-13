@@ -14,14 +14,14 @@
     }
   ],
   "game_spawns": {
-    "player_start": { "pos": [96, 208] },
+    "player_start": { "pos": [37, 10] },
     "objects": [],
     "pickups": [
       { "type": "potion_health", "pos": [224, 176] }
     ],
     "static_enemies": [
-      { "type": "chort", "pos": [260, 120] },
-      { "type": "big_zombie", "pos": [240, 180]}
+      { "type": "chort", "pos": [22, 8] },
+      { "type": "big_zombie", "pos": [22, 13]}
     ],
     "exits": [
       { "to": "level1", "region": "east" }
