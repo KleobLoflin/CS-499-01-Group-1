@@ -10,7 +10,6 @@ from game.scenes.base import Scene
 import pygame
 from pygame import Surface
 
-from game.scenes.dungeon import DungeonScene
 from game.scenes.hub import HubScene
 from game.world.world import World
 from game.world.components import TitleMenu, SpawnPolicy, TitleIntro
@@ -158,7 +157,7 @@ class TitleScene(Scene):
                 elif menu.selected_role == "settings":
                     return
                 else:
-                    self.sm.set(DungeonScene(role=menu.selected_role))
+                    self.sm.set(HubScene(self.sm, role=menu.selected_role))
                     return
 
     def _ensure_buffers(self, surface: Surface) -> None:
