@@ -13,8 +13,6 @@
 #   - Spawns animated hero preview entities in 5 columns.
 #   - When ready, builds SpawnRequest components and hands them to DungeonScene.
 #
-# NOTE: Real network I/O is intentionally left as TODO (net modules are empty in the zip).
-#       All hooks are in place via NetIdentity / Owner / LobbySlot.peer_id / SpawnRequest.
 
 from __future__ import annotations
 from typing import List, Optional, Tuple
