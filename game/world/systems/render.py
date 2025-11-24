@@ -11,23 +11,11 @@ from game.core import resources
 
 class RenderSystem:
     def draw(self, world, surface: Surface) -> None:
-        surface.fill(Config.BG_COLOR)
-
         # find active map id and get tmx data
         active_id: Optional[str] = None
         for _, comps in world.query(ActiveMapId):
             active_id = comps[ActiveMapId].id
             break
-
-        tmx_data = None
-        for _, comps in world.query(Map):
-            m = comps[Map]
-            if (active_id is None and m.active) or (active_id is not None and m.id == active_id):
-                tmx_data = m.tmx_data
-                break
-
-        if tmx_data is None:
-            return  # no map to draw
 
         # get camera
         cam = None
@@ -76,8 +64,25 @@ class RenderSystem:
             depth_y = int(tr.y)
             entities_world.append((spr.z, depth_y, eid, img, pos))
 
+        # get tmx data if it exists
+        tmx_data = None
+        for _, comps in world.query(Map):
+            m = comps[Map]
+            if (active_id is None and m.active) or (active_id is not None and m.id == active_id):
+                tmx_data = m.tmx_data
+                break
+        
+        # if no tmx data draw entities only and don't clear surface
+        if tmx_data is None:
+            # z and y-depth sort
+            entities_world.sort(key=lambda d: (d[0], d[1]))
+            for _, _, _, img, pos in entities_world:
+                surface.blit(img, pos)
+            return
+        
         # pass entities + map to unified Room drawing
-        # note: The new layering and sorting logic happens inside Room.draw_map()
+        surface.fill(Config.BG_COLOR)
+        
         if cam is not None:
             view_left = cam.x - cam.viewport_w // 2
             view_top  = cam.y - cam.viewport_h // 2

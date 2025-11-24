@@ -34,15 +34,10 @@ from game.world.components import (
 from game.world.actors.hero_factory import create as create_hero
 from game.world.systems.animation import AnimationSystem
 from game.world.systems.render import RenderSystem
-from game.world.systems.hub_preview import HubPreviewSystem
-from game.world.maps.map_index import load_registry
-from game.world.maps.map_factory import create_or_activate, resolve_map_hint_to_id
 
 
 class HubScene(Scene):
-    """
-    mode: "SINGLE", "HOST", or "JOIN"
-    """
+    # mode = "Single" | "Host" | "Join"
 
     HERO_CATALOG: List[str] = [
         "knight_blue",
@@ -71,16 +66,22 @@ class HubScene(Scene):
 
         # minimal systems: just animation; rendering is called manually
         self.world.systems = [
-            HubPreviewSystem(),
-            AnimationSystem(),
+            AnimationSystem()
         ]
         self.render_system = RenderSystem()
 
-        # basic font for overlay UI
+        # font
         pygame.font.init()
-        self.font = pygame.font.SysFont("consolas", 16)
+        self.font = pygame.font.Font("assets/fonts/Retro Gaming.ttf", 16)
 
-        # Net identity for this process
+        # player slot images
+        self.slot_normal_img = pygame.image.load("assets/ui/hub_screen/hub_slot_normal.png").convert_alpha()
+        self.slot_ready_img = pygame.image.load("assets/ui/hub_screen/hub_slot_ready.png").convert_alpha()
+
+        self.slot_w = self.slot_normal_img.get_width()
+        self.slot_h = self.slot_normal_img.get_height()
+
+        # Net identity
         if self.mode == "SINGLE":
             self.peer_id = "solo"
             self.role = "SOLO"
@@ -96,16 +97,12 @@ class HubScene(Scene):
     # -------------------------------------------------------------------------
 
     def enter(self) -> None:
-        # 1) Load hub map as background
-        load_registry("data/map_registry.json")
-        hub_id = resolve_map_hint_to_id("hub") or "hub"
-        create_or_activate(self.world, hub_id)
 
-        # 2) Create NetIdentity singleton
+        # Create NetIdentity singleton
         e_net = self.world.new_entity()
         self.world.add(e_net, NetIdentity(my_peer_id=self.peer_id, role=self.role))
 
-        # 3) Create LobbyState singleton
+        # Create LobbyState singleton
         lobby_e = self.world.new_entity()
         substate = "BROWSER" if self.mode == "JOIN" else "SELECT"
         lobby_state = LobbyState(
@@ -115,11 +112,11 @@ class HubScene(Scene):
         )
         self.world.add(lobby_e, lobby_state)
 
-        # 4) AvailableHosts singleton (JOIN only)
+        # AvailableHosts singleton for "JOIN" mode
         if self.mode == "JOIN":
             self.world.add(lobby_e, AvailableHosts())
 
-        # 5) Create up to 5 LobbySlot entities
+        # Create up to 5 LobbySlot entities
         # Slot assignment policy:
         #   SINGLE: slot 0 is local.
         #   HOST:   slot 0 is local host; others wait for remote peers.
@@ -145,20 +142,19 @@ class HubScene(Scene):
             if is_local:
                 self._refresh_slot_preview(e_slot, slot)
 
-        # (Networking TODO) In HOST mode, you would start listening here.
-        # (Networking TODO) In JOIN mode, you would kick off host discovery here.
+        # (Networking TODO) In HOST mode, start listening here.
+        # (Networking TODO) In JOIN mode, kick off host discovery here.
 
     def exit(self) -> None:
         # nothing special yet
         pass
 
     # -------------------------------------------------------------------------
-    # Event handling (keyboard)
+    # Event handling
     # -------------------------------------------------------------------------
 
     def handle_event(self, event) -> None:
         if event.type == pygame.QUIT:
-            # Let the App handle quitting – nothing special here.
             return
 
         if event.type != pygame.KEYDOWN:
@@ -189,7 +185,7 @@ class HubScene(Scene):
     # -------------------------------------------------------------------------
 
     def update(self, dt: float) -> None:
-        # Drive ECS animation
+        # animation for character previews
         self.world.update(dt)
 
         # Update previews if anyone changed selection, etc. (no-op most frames)
@@ -213,18 +209,37 @@ class HubScene(Scene):
                     self.scene_manager.set(next_scene)
 
     def draw(self, surface: Surface) -> None:
-         # 1) Draw the tiled hub map + any world entities (hero previews)
-        self.render_system.draw(self.world, surface)
+        # clear screen
+        surface.fill(Config.BG_COLOR)
         
-        # 2) Draw lobby overlay UI
         lobby_state = self._get_lobby_state()
         if lobby_state is None:
             return
 
+        # draw host browser UI if "JOIN"
         if self.mode == "JOIN" and lobby_state.substate == "BROWSER":
             self._draw_join_browser(surface, lobby_state)
-        else:
-            self._draw_lobby_overlay(surface, lobby_state)
+            return
+        
+        # draw player slots
+        slots = list(self._iter_slots())
+        for _, slot in slots:
+            x = slot.index * self.slot_w
+            img = self.slot_ready_img if slot.ready else self.slot_normal_img
+            surface.blit(img, (x, 0))
+
+        # draw hero previews
+        self.render_system.draw(self.world, surface)
+
+        # draw slot labels
+        for _, slot in self._iter_slots():
+            x = slot.index * self.slot_w
+            if slot.peer_id is None and not slot.is_local:
+                label = "Waiting..."
+            else:
+                label = f"Player {slot.index + 1}"
+            txt = self.font.render(label, True, (255, 255, 255))
+            surface.blit(txt, (x + 25, 12))
 
     # -------------------------------------------------------------------------
     # Helpers: Lobby / slots
@@ -245,7 +260,7 @@ class HubScene(Scene):
                 return eid, slot
         return None
 
-    # --- key handling for JOIN browser --------------------------------------
+    # --- JOIN browser --------------------------------------
 
     def _handle_join_browser_key(self, lobby_state: LobbyState, key: int) -> None:
         # NOTE: This is a pure stub – replace host list handling with real net code.
@@ -317,7 +332,7 @@ class HubScene(Scene):
             if is_local:
                 self._refresh_slot_preview(e_slot, slot)
 
-    # --- key handling for SELECT (actual 5-column lobby UI) -----------------
+    # --- SELECT state input -----------------
 
     def _handle_lobby_select_key(self, lobby_state: LobbyState, key: int) -> None:
         local = self._find_local_slot()
@@ -337,6 +352,7 @@ class HubScene(Scene):
             self._refresh_slot_preview(slot_eid, slot)
         elif key in (pygame.K_RETURN, pygame.K_SPACE):
             slot.ready = not slot.ready
+
         # Host-only shortcut: R key toggles all non-empty slots to ready (debug)
         elif key == pygame.K_r and self.mode == "HOST":
             for _, s in self._iter_slots():
@@ -346,10 +362,9 @@ class HubScene(Scene):
     # --- preview hero entities ----------------------------------------------
 
     def _slot_preview_position(self, index: int) -> Tuple[float, float]:
-        # Evenly spaced columns across the window, center vertically.
-        # index ∈ [0, 4]
+        # center of the Nth 128 x 360 column
         columns = 5
-        x = (Config.WINDOW_W / (columns + 1)) * (index + 1)
+        x = index * self.slot_w + self.slot_w / 2
         y = Config.WINDOW_H / 2
         return x, y
 
@@ -358,6 +373,37 @@ class HubScene(Scene):
         if slot.preview_eid is not None:
             self.world.delete_entity(slot.preview_eid)
             slot.preview_eid = None
+        
+        # dont show anything if slot is empty
+        if slot.peer_id is None and not slot.is_local:
+            return
+        
+        idx = slot.selected_char_index % len(self.HERO_CATALOG)
+        hero_name = self.HERO_CATALOG[idx]
+        archetype = hero_name
+
+        x, y = self._slot_preview_position(slot.index)
+
+        eid = create_hero(
+            self.world,
+            archetype=archetype,
+            owner_client_id=slot.peer_id,
+            pos=(x, y)
+        )
+
+        comps = self.world.components_of(eid)
+        anim = comps.get(AnimationState)
+        if anim is not None:
+            anim.clip = "run"
+            anim.frame = 0
+            anim.time = 0.0
+            anim.changed = True
+        
+        face = comps.get(Facing)
+        if face is not None:
+            face.direction = "right"
+
+        slot.preview_eid = eid
 
     def _sync_previews(self) -> None:
         # Currently a no-op. Left here incase we want to set/check some kind of flags later
@@ -384,7 +430,7 @@ class HubScene(Scene):
         spawn_requests: List[SpawnRequest] = []
         for _, slot in self._iter_slots():
             if slot.ready and (slot.peer_id is not None or slot.is_local):
-                hero_name = self.HERO_CATALOG[slot.selected_char_index]
+                hero_name = self.HERO_CATALOG[slot.selected_char_index % len(self.HERO_CATALOG)]
                 hero_key = f"hero.{hero_name}"
                 req = SpawnRequest(
                     hero_key=hero_key,
@@ -396,64 +442,8 @@ class HubScene(Scene):
         return spawn_requests
 
     # -------------------------------------------------------------------------
-    # Drawing overlay: 5 columns + labels / ready state
+    # Draw JOIN browser
     # -------------------------------------------------------------------------
-
-    def _draw_lobby_overlay(self, surface: Surface, lobby_state: LobbyState) -> None:
-        # Column rectangles + text
-        padding = 8
-        col_width = Config.WINDOW_W // 5
-        top = 20
-        bottom = Config.WINDOW_H - 40
-
-        for _, slot in self._iter_slots():
-            left = slot.index * col_width
-            rect = pygame.Rect(left + padding, top, col_width - 2 * padding, bottom - top)
-
-            # BG color based on slot state
-            if slot.peer_id is None and not slot.is_local:
-                color = (40, 40, 50)  # waiting
-            elif slot.ready:
-                color = (40, 80, 40)  # ready
-            else:
-                color = (80, 80, 40)  # active but not ready
-
-            pygame.draw.rect(surface, color, rect, border_radius=8)
-            pygame.draw.rect(surface, (200, 200, 220), rect, width=2, border_radius=8)
-
-            # Slot label
-            title = slot.name
-            label = self.font.render(title, True, (255, 255, 255))
-            surface.blit(label, (rect.x + 6, rect.y + 4))
-
-            # Character name
-            hero_name = self.HERO_CATALOG[slot.selected_char_index]
-            char_text = f"{hero_name.replace('_', ' ').title()}"
-            char_surf = self.font.render(char_text, True, (230, 230, 230))
-            surface.blit(char_surf, (rect.x + 6, rect.y + 26))
-
-            # Status text
-            if slot.peer_id is None and not slot.is_local:
-                status = "Waiting for player"
-            elif slot.ready:
-                status = "READY"
-            else:
-                status = "Press Enter to ready"
-
-            status_surf = self.font.render(status, True, (230, 230, 230))
-            surface.blit(status_surf, (rect.x + 6, rect.bottom - 24))
-
-        # Footer instructions
-        footer = ""
-        if self.mode == "SINGLE":
-            footer = "↑/↓: choose hero   Enter/Space: ready   Esc: back"
-        elif self.mode == "HOST":
-            footer = "↑/↓: choose hero   Enter/Space: ready   R: ready all (debug)   Esc: back"
-        else:
-            footer = "↑/↓: choose hero   Enter/Space: ready   Esc: back"
-
-        footer_surf = self.font.render(footer, True, (255, 255, 255))
-        surface.blit(footer_surf, (16, Config.WINDOW_H - 24))
 
     def _draw_join_browser(self, surface: Surface, lobby_state: LobbyState) -> None:
         hosts_comp: Optional[AvailableHosts] = None

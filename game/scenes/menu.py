@@ -9,6 +9,7 @@
 from game.scenes.base import Scene
 import pygame
 from pygame import Surface
+from game.core.config import Config
 
 from game.scenes.hub import HubScene
 from game.world.world import World
@@ -167,6 +168,7 @@ class TitleScene(Scene):
             self._ui_buf = pygame.Surface((w, h), flags=pygame.SRCALPHA).convert_alpha()
 
     def draw(self, surface: Surface) -> None:
+        surface.fill(Config.BG_COLOR)
         self._ensure_buffers(surface)
 
         # Clear buffers
