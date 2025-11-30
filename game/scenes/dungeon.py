@@ -69,12 +69,13 @@ class DungeonScene(Scene):
 
         # Scene/run policy for SpawnSystem (gameplay)
         has_lobby_spawns = bool(self.spawn_requests)
+        spawn_player = (self.role == "SOLO" and not has_lobby_spawns)
 
         e = self.world.new_entity()
         self.world.add(e, SpawnPolicy(
             run_title_spawns=False,
             run_game_spawns=True,
-            spawn_player=not has_lobby_spawns,          
+            spawn_player=spawn_player,          
             spawn_static_enemies=True,
             spawn_pickups=True,
             spawn_objects=True

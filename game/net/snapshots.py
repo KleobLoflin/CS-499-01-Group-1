@@ -210,9 +210,6 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
         peer_id = pdata.get("peer_id")
         if peer_id is None:
             continue
-        if peer_id == my_peer_id:
-            # Don't stomp local-controlled player here.
-            continue
 
         found = False
         for _eid, comps in world.query(PlayerTag, Owner, Transform, Facing, AnimationState):
