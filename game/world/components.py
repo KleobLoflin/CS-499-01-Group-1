@@ -49,7 +49,7 @@ class Intent:
     basic_atk_held: bool = False
     dash: bool = False
     special_atk: bool = False
-    facing: str = Literal["up", "down", "left", "right"]
+    facing: Literal["up", "down", "left", "right"] = "down"
 
 @dataclass
 class InputState:
@@ -122,7 +122,7 @@ class AnimationState:
 
 @dataclass
 class Facing:
-    direction: str = Literal["up", "down", "left", "right"]
+    direction: Literal["up", "down", "left", "right"] = "right"
 
 @dataclass
 class DebugRect:

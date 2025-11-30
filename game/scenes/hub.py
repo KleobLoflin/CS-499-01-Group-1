@@ -595,7 +595,7 @@ class HubScene(Scene):
 
         net.lobby_data = {
             "heroes": heroes_by_peer,
-            "map_id": "level0",  # you can pick something else later
+            "map_id": "level1",  # you can pick something else later
         }
 
         if net.server:
