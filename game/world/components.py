@@ -14,7 +14,7 @@ from typing import Tuple, Dict, Set, Literal, List, Optional, Any
 # to mark an entity as a player
 @dataclass
 class PlayerTag:  
-    pass
+    pid: int | None = None
 
 # for local only control
 @dataclass

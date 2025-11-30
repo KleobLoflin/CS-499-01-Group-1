@@ -6,7 +6,13 @@
 
 from game.world.components import *
 
-def build_PlayerTag(spec, ctx): return PlayerTag()
+def build_PlayerTag(spec, ctx):
+    owner = ctx.get("owner", None)
+    # If it's something like "host" or "peer:abcd", we can ignore it for now
+    # and only store real int pids when we have them.
+    if isinstance(owner, int):
+        return PlayerTag(pid=owner)
+    return PlayerTag()
 
 def build_Transform(spec, ctx):
     x, y = ctx.get("pos", (0,0))
