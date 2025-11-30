@@ -263,3 +263,32 @@ class SpawnRequest:     # use to pass player spawn info to DungeonScene
     player_name: str = "Player"
     net_id: Optional[str] = None    # use for networking
 
+# Networking host/client state #####################################################
+
+@dataclass
+class NetHostState:
+    server: Any = None                      # game.net.server.NetServer instance
+    tick: int = 0                           # simulation/network tick
+    accumulator: float = 0.0                # time accumulator for snapshot sends
+    send_interval: float = 1.0 / 20.0       # send snapshots at ~20Hz by default
+    max_clients: int = 4                    # up to 4 clients (5 total players w/ host)
+    # peer_id -> (ip, port)
+    peers: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class NetClientState:
+    client: Any = None                      # game.net.client.NetClient instance
+    tick: int = 0                           # local input tick
+    accumulator: float = 0.0                # time accumulator for input sends
+    send_interval: float = 1.0 / 60.0       # send inputs at ~60Hz
+    last_snapshot_tick: int = 0             # last snapshot we applied
+    prediction: bool = True                 # hook for client-side prediction
+    interpolation: bool = True              # hook for snapshot interpolation
+
+# marks an entity as a client-side proxy for something that actually lives on the host
+@dataclass
+class RemoteEntity:
+    remote_id: int
+    category: str = "generic"
+

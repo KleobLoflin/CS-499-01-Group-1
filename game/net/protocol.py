@@ -12,6 +12,8 @@ MessageType = Literal[
     "input",        # client -> host: input snapshot
     "snapshot",     # host  -> client: world snapshot
     "start_game",   # host  -> clients: transition hub -> dungeon
+    "lobby_update", # client -> host (hero/ready change)
+    "lobby_state",  # host -> clients (lobby slots)
     "ping",         # ping
     "pong",         # pong
     "disconnect",   # either direction: polite disconnect
@@ -23,6 +25,8 @@ MSG_JOIN_DENY   = "join_denied"
 MSG_INPUT       = "input"
 MSG_SNAPSHOT    = "snapshot"
 MSG_START_GAME  = "start_game"
+MSG_LOBBY_UPDATE = "lobby_state"
+MSG_LOBBY_STATE = "lobby_state"
 MSG_PING        = "ping"
 MSG_PONG        = "pong"
 MSG_DISCONNECT  = "disconnect"

@@ -15,7 +15,7 @@
 #
 
 from __future__ import annotations
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict, Any
 
 import pygame
 from pygame import Surface
@@ -35,6 +35,18 @@ from game.world.actors.hero_factory import create as create_hero
 from game.world.systems.animation import AnimationSystem
 from game.world.systems.render import RenderSystem
 
+from game.net.context import net
+from game.net.server import NetServer
+from game.net.client import NetClient
+from game.net.protocol import (
+    PROTOCOL_VERSION,
+    MSG_HELLO,
+    MSG_WELCOME,
+    MSG_JOIN_DENY,
+    MSG_LOBBY_UPDATE,
+    MSG_LOBBY_STATE,
+    MSG_START_GAME,
+)
 
 class HubScene(Scene):
     # mode = "Single" | "Host" | "Join"
@@ -64,7 +76,7 @@ class HubScene(Scene):
 
         self.world = World()
 
-        # minimal systems: just animation; rendering is called manually
+        # systems
         self.world.systems = [
             AnimationSystem()
         ]
@@ -91,6 +103,10 @@ class HubScene(Scene):
         else:
             self.peer_id = "client"
             self.role = "CLIENT"
+        
+        # net context
+        net.role = self.role
+        net.my_peer_id = self.peer_id
 
     # -------------------------------------------------------------------------
     # Scene life cycle
@@ -122,9 +138,14 @@ class HubScene(Scene):
         #   HOST:   slot 0 is local host; others wait for remote peers.
         #   JOIN:   no local slot yet; becomes available when we "join" a host lobby.
         for i in range(5):
-            is_local = (self.mode in ("SINGLE", "HOST") and i == 0)
-            peer_id = self.peer_id if is_local else None
-            name = "You" if is_local else f"Player {i + 1}"
+            if self.mode in ("SINGLE", "HOST") and i == 0:
+                is_local = True
+                peer_id = self.peer_id 
+                name = "You"
+            else:
+                is_local = False if self.mode != "SINGLE" else False
+                peer_id = self.peer_id if (self.mod == "SINGLE" and i == 0) else None
+                name = f"Player {i + 1}"
 
             e_slot = self.world.new_entity()
             slot = LobbySlot(
@@ -142,11 +163,14 @@ class HubScene(Scene):
             if is_local:
                 self._refresh_slot_preview(e_slot, slot)
 
-        # (Networking TODO) In HOST mode, start listening here.
-        # (Networking TODO) In JOIN mode, kick off host discovery here.
+        # networking setup
+        if self.mode == "HOST":
+            self._init_host_network()
+        elif self.mode == "JOIN":
+            pass
 
     def exit(self) -> None:
-        # nothing special yet
+        # nothing yet
         pass
 
     # -------------------------------------------------------------------------
@@ -191,22 +215,40 @@ class HubScene(Scene):
         # Update previews if anyone changed selection, etc. (no-op most frames)
         self._sync_previews()
 
-        # In HOST / SINGLE, check ready state and transition to DungeonScene
+        # networking
+        if self.mode == "HOST":
+            self._host_net_pump()
+        elif self.mode == "JOIN":
+            self._client_net_pump()
+
+        
         lobby_state = self._get_lobby_state()
         if lobby_state and lobby_state.substate == "SELECT":
-            if self._should_transition_to_dungeon(lobby_state):
-                spawn_requests = self._build_spawn_requests()
-                if spawn_requests:
-                    # Role: SOLO / HOST / CLIENT changed by menu → here we map:
-                    if self.mode == "SINGLE":
-                        role = "SOLO"
-                    elif self.mode == "HOST":
-                        role = "HOST"
-                    else:
-                        role = "CLIENT"
+            # SINGLE
+            if self.mode == "SINGLE":
+                if self._should_transition_to_dungeon_single():
+                    spawn_requests = self._build_spawn_requests()
+                    if spawn_requests:
+                        # fill lobby_data (Solo)
+                        heroes_by_peer = {}
+                        for req in spawn_requests:
+                            pid = req.net_id or "solo"
+                            heroes_by_peer[pid] = req.hero_key
+                        net.lobby_data = {
+                            "heroes": heroes_by_peer,
+                            "map_id": "level0",
+                        }
 
-                    next_scene = DungeonScene(role=role, spawn_requests=spawn_requests)
-                    self.scene_manager.set(next_scene)
+                        next_scene = DungeonScene(role="SOLO", spawn_requests=spawn_requests)
+                        self.scene_manager.set(next_scene)
+        
+            # HOST
+            elif self.mode == "HOST":
+                if self._all_occupied_slots_ready():
+                    self._host_start_networked_game()
+
+            # JOIN
+
 
     def draw(self, surface: Surface) -> None:
         # clear screen
@@ -263,8 +305,6 @@ class HubScene(Scene):
     # --- JOIN browser --------------------------------------
 
     def _handle_join_browser_key(self, lobby_state: LobbyState, key: int) -> None:
-        # NOTE: This is a pure stub – replace host list handling with real net code.
-        # For now we just have a fake single host entry called "Local Host".
         hosts_comp: Optional[AvailableHosts] = None
         for _, comps in self.world.query(AvailableHosts):
             hosts_comp = comps[AvailableHosts]
@@ -274,7 +314,7 @@ class HubScene(Scene):
             return
 
         if not hosts_comp.hosts:
-            hosts_comp.hosts.append("Local Host (debug)")
+            hosts_comp.hosts.append("127.0.0.1:5000")
 
         if key in (pygame.K_UP, pygame.K_w):
             hosts_comp.selected_index = max(0, hosts_comp.selected_index - 1)
@@ -283,10 +323,20 @@ class HubScene(Scene):
                 len(hosts_comp.hosts) - 1, hosts_comp.selected_index + 1
             )
         elif key in (pygame.K_RETURN, pygame.K_SPACE):
-            # Pretend we successfully joined the selected host's lobby.
-            # Networking TODO: handshake, receive authoritative lobby snapshot, etc.
+            # Parse "ip:port"
+            entry = hosts_comp.hosts[hosts_comp.selected_index]
+            ip = "127.0.0.1"
+            port = 5000
+            if ":" in entry:
+                ip_str, port_str = entry.split(":", 1)
+                ip = ip_str.strip() or ip
+                try:
+                    port = int(port_str)
+                except ValueError:
+                    port = 5000
+
+            self._init_client_network(ip, port)
             lobby_state.substate = "SELECT"
-            self._configure_joined_slots_for_debug()
 
     def _configure_joined_slots_for_debug(self) -> None:
         """
@@ -332,7 +382,255 @@ class HubScene(Scene):
             if is_local:
                 self._refresh_slot_preview(e_slot, slot)
 
-    # --- SELECT state input -----------------
+    # networking HOST ##########################################
+
+    def _init_host_network(self) -> None:
+        # Create server socket only once; reuse across scenes
+        if net.server is None:
+            net.server = NetServer(port=5000)
+        net.my_peer_id = "host"
+
+    def _host_net_pump(self) -> None:
+        server = net.server
+        if server is None:
+            return
+
+        for addr, msg in server.recv_all():
+            mtype = msg.get("type")
+
+            if mtype == MSG_HELLO:
+                self._host_handle_hello(server, addr, msg)
+            elif mtype == MSG_LOBBY_UPDATE:
+                self._host_handle_lobby_update(msg)
+            elif mtype == MSG_START_GAME:
+                # Clients should not send this; ignore.
+                pass
+            elif mtype == MSG_JOIN_DENY:
+                # Not expected on host
+                pass
+
+    def _host_handle_hello(self, server: NetServer, addr: Tuple[str, int], msg: Dict[str, Any]) -> None:
+        # Basic protocol check
+        if int(msg.get("protocol", -1)) != PROTOCOL_VERSION:
+            server.send_raw(addr, {
+                "type": MSG_JOIN_DENY,
+                "reason": "protocol_mismatch",
+            })
+            return
+
+        # Collect currently used peer_ids
+        used_peer_ids = [slot.peer_id for _, slot in self._iter_slots() if slot.peer_id is not None]
+
+        # Deny if full
+        if len(used_peer_ids) >= 5:
+            server.send_raw(addr, {
+                "type": MSG_JOIN_DENY,
+                "reason": "full",
+            })
+            return
+
+        # Assign a new peer id
+        base = "peer"
+        index = 1
+        while f"{base}:{index}" in used_peer_ids:
+            index += 1
+        peer_id = f"{base}:{index}"
+
+        # Find a free slot (not necessarily index 0)
+        free_slot_eid = None
+        free_slot_comp: Optional[LobbySlot] = None
+        for eid, slot in self._iter_slots():
+            if slot.peer_id is None and not slot.is_local:
+                free_slot_eid = eid
+                free_slot_comp = slot
+                break
+
+        if free_slot_comp is None:
+            server.send_raw(addr, {
+                "type": MSG_JOIN_DENY,
+                "reason": "full",
+            })
+            return
+
+        free_slot_comp.peer_id = peer_id
+        free_slot_comp.name = msg.get("name", f"Player {free_slot_comp.index + 1}")
+        free_slot_comp.selected_char_index = 0
+        free_slot_comp.ready = False
+        self._refresh_slot_preview(free_slot_eid, free_slot_comp)
+
+        # Register mapping in global context (host)
+        net.peers[peer_id] = addr
+        server.register_peer(peer_id, addr)
+
+        # Send welcome + lobby snapshot
+        server.send_raw(addr, {
+            "type": MSG_WELCOME,
+            "protocol": PROTOCOL_VERSION,
+            "peer_id": peer_id,
+        })
+        server.send_raw(addr, {
+            "type": MSG_LOBBY_STATE,
+            "slots": self._build_lobby_slots_payload(),
+        })
+
+        # Broadcast updated lobby to everyone else
+        server.broadcast({
+            "type": MSG_LOBBY_STATE,
+            "slots": self._build_lobby_slots_payload(),
+        })
+
+    def _host_handle_lobby_update(self, msg: Dict[str, Any]) -> None:
+        peer_id = msg.get("peer_id")
+        if not isinstance(peer_id, str):
+            return
+
+        hero_index = msg.get("hero_index")
+        ready = msg.get("ready")
+
+        for eid, slot in self._iter_slots():
+            if slot.peer_id == peer_id:
+                if hero_index is not None:
+                    try:
+                        hero_index = int(hero_index)
+                    except (TypeError, ValueError):
+                        hero_index = 0
+                    slot.selected_char_index = hero_index % len(self.HERO_CATALOG)
+                    self._refresh_slot_preview(eid, slot)
+                if ready is not None:
+                    slot.ready = bool(ready)
+                break
+
+        if net.server:
+            net.server.broadcast({
+                "type": MSG_LOBBY_STATE,
+                "slots": self._build_lobby_slots_payload(),
+            })
+
+    def _build_lobby_slots_payload(self) -> List[Dict[str, Any]]:
+        payload: List[Dict[str, Any]] = []
+        for _, slot in self._iter_slots():
+            payload.append({
+                "index": slot.index,
+                "peer_id": slot.peer_id,
+                "hero_index": slot.selected_char_index,
+                "ready": slot.ready,
+                "name": slot.name,
+            })
+        return payload
+
+    def _all_occupied_slots_ready(self) -> bool:
+        any_occupied = False
+        for _, slot in self._iter_slots():
+            if slot.peer_id is not None or slot.is_local:
+                any_occupied = True
+                if not slot.ready:
+                    return False
+        return any_occupied
+
+    def _host_start_networked_game(self) -> None:
+        """
+        Host decides to start the game:
+          - Build heroes_by_peer from LobbySlots.
+          - Fill net.lobby_data.
+          - Broadcast START_GAME.
+          - Switch to DungeonScene(HOST).
+        """
+        heroes_by_peer: Dict[str, str] = {}
+        for _, slot in self._iter_slots():
+            if slot.peer_id is None and not slot.is_local:
+                continue
+            hero_name = self.HERO_CATALOG[slot.selected_char_index % len(self.HERO_CATALOG)]
+            hero_key = f"hero.{hero_name}"
+            pid = slot.peer_id or "host"
+            heroes_by_peer[pid] = hero_key
+
+        net.lobby_data = {
+            "heroes": heroes_by_peer,
+            "map_id": "level0",  # you can pick something else later
+        }
+
+        if net.server:
+            net.server.broadcast({
+                "type": MSG_START_GAME,
+                "lobby": net.lobby_data,
+            })
+
+        # Host transitions to DungeonScene(HOST)
+        self.scene_manager.set(DungeonScene(role="HOST"))
+
+    # networking JOIN ##############################################################
+
+    def _init_client_network(self, host_ip: str, host_port: int) -> None:
+        if net.client is None:
+            net.client = NetClient(host=host_ip, port=host_port)
+            net.my_peer_id = "client_pending"
+
+            net.client.send({
+                "type": MSG_HELLO,
+                "protocol": PROTOCOL_VERSION,
+                "name": "Player",
+            })
+
+    def _client_net_pump(self) -> None:
+        client = net.client
+        if client is None:
+            return
+
+        for msg in client.recv_all():
+            mtype = msg.get("type")
+
+            if mtype == MSG_WELCOME:
+                peer_id = msg.get("peer_id")
+                if isinstance(peer_id, str):
+                    net.my_peer_id = peer_id
+            elif mtype == MSG_LOBBY_STATE:
+                slots_payload = msg.get("slots", [])
+                self._apply_lobby_slots_payload(slots_payload)
+            elif mtype == MSG_START_GAME:
+                lobby_payload = msg.get("lobby", {})
+                net.lobby_data = lobby_payload
+                self.scene_manager.set(DungeonScene(role="CLIENT"))
+            elif mtype == MSG_JOIN_DENY:
+                # TODO: show error to player
+                pass
+
+    def _apply_lobby_slots_payload(self, slots_payload: List[Dict[str, Any]]) -> None:
+        # Apply server-authoritative slot mapping.
+        # We assume slots_payload has entries for indices 0..4.
+        for eid, slot in self._iter_slots():
+            data = next((s for s in slots_payload if s.get("index") == slot.index), None)
+            if data is None:
+                # If host has no info for this slot, treat as empty
+                slot.peer_id = None
+                slot.ready = False
+                slot.selected_char_index = 0
+                slot.name = f"Player {slot.index + 1}"
+                slot.is_local = False
+                # Clear preview
+                if slot.preview_eid is not None:
+                    self.world.delete_entity(slot.preview_eid)
+                    slot.preview_eid = None
+                continue
+
+            slot.peer_id = data.get("peer_id")
+            slot.ready = bool(data.get("ready", False))
+            slot.selected_char_index = int(data.get("hero_index", 0))
+            slot.name = data.get("name", f"Player {slot.index + 1}")
+            slot.is_local = (slot.peer_id == net.my_peer_id)
+
+            self._refresh_slot_preview(eid, slot)
+
+    def _send_lobby_update_from_client(self, slot: LobbySlot) -> None:
+        if net.client is None:
+            return
+        net.client.send({
+            "type": MSG_LOBBY_UPDATE,
+            "peer_id": net.my_peer_id,
+            "hero_index": slot.selected_char_index,
+            "ready": slot.ready,
+        })
+
+    # SELECT state input ############################################################### 
 
     def _handle_lobby_select_key(self, lobby_state: LobbyState, key: int) -> None:
         local = self._find_local_slot()
@@ -346,20 +644,50 @@ class HubScene(Scene):
             slot.selected_char_index = (slot.selected_char_index - 1) % catalog_len
             slot.ready = False
             self._refresh_slot_preview(slot_eid, slot)
+            if self.mode == "JOIN":
+                self._send_lobby_update_from_client(slot)
+            elif self.mode == "HOST":
+                # host updates everyone
+                if net.server:
+                    net.server.broadcast({
+                        "type": MSG_LOBBY_STATE,
+                        "slots": self._build_lobby_slots_payload(),
+                    })
         elif key in (pygame.K_DOWN, pygame.K_s):
             slot.selected_char_index = (slot.selected_char_index + 1) % catalog_len
             slot.ready = False
             self._refresh_slot_preview(slot_eid, slot)
+            if self.mode == "JOIN":
+                self._send_lobby_update_from_client(slot)
+            elif self.mode == "HOST":
+                if net.server:
+                    net.server.broadcast({
+                    "type": MSG_LOBBY_STATE,
+                    "slots": self._build_lobby_slots_payload(),
+                })
         elif key in (pygame.K_RETURN, pygame.K_SPACE):
             slot.ready = not slot.ready
+            if self.mode == "JOIN":
+                self._send_lobby_update_from_client(slot)
+            elif self.mode == "HOST":
+                if net.server:
+                    net.server.broadcast({
+                        "type": MSG_LOBBY_STATE,
+                        "slots": self._build_lobby_slots_payload(),
+                    })
 
-        # Host-only shortcut: R key toggles all non-empty slots to ready (debug)
+        # Host-only shortcut: R key toggles all non-empty slots to ready 
         elif key == pygame.K_r and self.mode == "HOST":
             for _, s in self._iter_slots():
                 if s.peer_id is not None:
                     s.ready = True
+            if net.server:
+                net.server.broadcast({
+                    "type": MSG_LOBBY_STATE,
+                    "slots": self._build_lobby_slots_payload(),
+                })
 
-    # --- preview hero entities ----------------------------------------------
+    # preview hero entities #################################################################
 
     def _slot_preview_position(self, index: int) -> Tuple[float, float]:
         # center of the Nth 128 x 360 column
@@ -409,22 +737,12 @@ class HubScene(Scene):
         # Currently a no-op. Left here incase we want to set/check some kind of flags later
         return
 
-    # --- ready check / spawn requests ---------------------------------------
+    # ready check / spawn requests for SINGLE #############################################################
 
-    def _should_transition_to_dungeon(self, lobby_state: LobbyState) -> bool:
-        if self.mode == "SINGLE":
-            # Only the local slot matters
-            local = self._find_local_slot()
-            return bool(local and local[1].ready)
-
-        # HOST / JOIN: all occupied slots must be ready, and at least one occupied
-        any_occupied = False
-        for _, slot in self._iter_slots():
-            if slot.peer_id is not None:
-                any_occupied = True
-                if not slot.ready:
-                    return False
-        return any_occupied
+    def _should_transition_to_dungeon_single(self) -> bool:
+        # Only the local slot matters
+        local = self._find_local_slot()
+        return bool(local and local[1].ready)
 
     def _build_spawn_requests(self) -> List[SpawnRequest]:
         spawn_requests: List[SpawnRequest] = []
@@ -441,10 +759,8 @@ class HubScene(Scene):
                 spawn_requests.append(req)
         return spawn_requests
 
-    # -------------------------------------------------------------------------
-    # Draw JOIN browser
-    # -------------------------------------------------------------------------
-
+    # Draw JOIN browser ##########################################################################
+    
     def _draw_join_browser(self, surface: Surface, lobby_state: LobbyState) -> None:
         hosts_comp: Optional[AvailableHosts] = None
         for _, comps in self.world.query(AvailableHosts):
@@ -453,7 +769,7 @@ class HubScene(Scene):
 
         surface.fill((10, 10, 18))
 
-        title = self.font.render("Searching for hosts...", True, (255, 255, 255))
+        title = self.font.render("Select a host to join:", True, (255, 255, 255))
         surface.blit(title, (20, 20))
 
         if hosts_comp is None or not hosts_comp.hosts:
