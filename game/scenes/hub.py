@@ -646,7 +646,7 @@ class HubScene(Scene):
     def _apply_lobby_slots_payload(self, slots_payload: List[Dict[str, Any]]) -> None:
         # Apply server-authoritative slot mapping.
         # We assume slots_payload has entries for indices 0..4.
-        for eid, slot in self._iter_slots():
+        for eid, slot in list(self._iter_slots()):
             data = next((s for s in slots_payload if s.get("index") == slot.index), None)
             if data is None:
                 # If host has no info for this slot, treat as empty
