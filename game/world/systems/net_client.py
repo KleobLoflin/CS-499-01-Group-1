@@ -129,16 +129,5 @@ class NetClientSystem:
             client_state.client.send({"type": MSG_PONG, "time": msg.get("time", 0)})
 
         elif mtype == MSG_START_GAME:
-            # This is where you'd trigger HubScene -> DungeonScene on the client.
-            # You already have scene flow logic; this system just needs a hook.
-            # Example (pseudo-code):
-            #
-            #   app = world.app   # depending on how you expose the App
-            #   app.net.lobby_data = {
-            #       "map": msg.get("map"),
-            #       "heroes": msg.get("heroes", {}),
-            #   }
-            #   app.scene_manager.set(DungeonScene(app, role="CLIENT"))
-            #
-            # Implementation of that hook depends on how your Scene/World store `app`.
-            pass
+            # START_GAME now handled in HubScene._client_net_pump
+            return

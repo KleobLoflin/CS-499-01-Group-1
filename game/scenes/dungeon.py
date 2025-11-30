@@ -316,20 +316,16 @@ class DungeonScene(Scene):
         self.world.systems.append(NetHostSystem())
 
     def _attach_client_net_singleton(self) -> None:
-        """Create or reuse the client UDP endpoint and attach NetClientState."""
-        # Create client only once per run:
+        """Attach NetClientState to the existing NetClient that was created in HubScene"""
+        # HubScene(JOIN) already created net.client and did the HELLO/WELCOME handshake.
+        # If that didn't happen, we can't safely connect here
         if net.client is None:
-            # host IP
-            net.client = NetClient(host="127.0.0.1", port=5000)
-
-            # Send HELLO only once (handshake)
-            net.client.send({
-                "type": MSG_HELLO,
-                "protocol": PROTOCOL_VERSION,
-                "name": "Player",
-            })
-
-        if not net.my_peer_id or net.my_peer_id == "solo":
+            print("[DungeonScene] Warning: net.client is None; "
+                  "Client must join via HubScene first.")
+            return
+        
+        # If there is still not a peer id, mark as pending
+        if not net.my_peer_id:
             net.my_peer_id = "client_pending"
 
         e = self.world.new_entity()

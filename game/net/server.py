@@ -25,7 +25,7 @@ class NetServer:
         self.peer_to_addr: Dict[str, Address] = {}
         self.addr_to_peer: Dict[Address, str] = {}
 
-    # I/O
+    # I/O ##################################################################
 
     # non-blocking recieve loop. Returns a list of (addr, message_dict).
     def recv_all(self) -> List[Tuple[Address, dict]]:
@@ -64,7 +64,7 @@ class NetServer:
         for addr in list(self.peer_to_addr.values()):
             self.send_raw(addr, message)
 
-    # bookkeeping 
+    # bookkeeping ##########################################################
 
     def register_peer(self, peer_id: str, addr: Address) -> None:
         self.peer_to_addr[peer_id] = addr

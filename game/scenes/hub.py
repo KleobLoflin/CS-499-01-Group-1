@@ -36,6 +36,7 @@ from game.world.systems.animation import AnimationSystem
 from game.world.systems.render import RenderSystem
 
 from game.net.context import net
+from game.net.discovery import HostDiscovery, ClientDiscovery
 from game.net.server import NetServer
 from game.net.client import NetClient
 from game.net.protocol import (
@@ -108,6 +109,10 @@ class HubScene(Scene):
         net.role = self.role
         net.my_peer_id = self.peer_id
 
+        # discovery
+        self.host_discovery: HostDiscovery | None = None
+        self.client_discovery: ClientDiscovery | None = None
+
     # -------------------------------------------------------------------------
     # Scene life cycle
     # -------------------------------------------------------------------------
@@ -138,14 +143,9 @@ class HubScene(Scene):
         #   HOST:   slot 0 is local host; others wait for remote peers.
         #   JOIN:   no local slot yet; becomes available when we "join" a host lobby.
         for i in range(5):
-            if self.mode in ("SINGLE", "HOST") and i == 0:
-                is_local = True
-                peer_id = self.peer_id 
-                name = "You"
-            else:
-                is_local = False if self.mode != "SINGLE" else False
-                peer_id = self.peer_id if (self.mod == "SINGLE" and i == 0) else None
-                name = f"Player {i + 1}"
+            is_local = (self.mode in ("SINGLE", "HOST") and i == 0)
+            peer_id = self.peer_id if is_local else None
+            name = "You" if is_local else f"Player {i + 1}"
 
             e_slot = self.world.new_entity()
             slot = LobbySlot(
@@ -169,8 +169,22 @@ class HubScene(Scene):
         elif self.mode == "JOIN":
             pass
 
+        # discovery
+        if self.mode == "HOST":
+            # start discovery responder
+            self.host_discovery = HostDiscovery(game_port=5000, name="GateCrashers Host")
+        elif self.mode == "JOIN":
+            # start discovery broadcaster
+            self.client_discovery = ClientDiscovery()
+
     def exit(self) -> None:
-        # nothing yet
+        # stop discovery sockets
+        if self.host_discovery is not None:
+            self.host_discovery.close()
+            self.host_discovery = None
+        if self.client_discovery is not None:
+            self.client_discovery.close()
+            self.client_discovery = None
         pass
 
     # -------------------------------------------------------------------------
@@ -215,14 +229,39 @@ class HubScene(Scene):
         # Update previews if anyone changed selection, etc. (no-op most frames)
         self._sync_previews()
 
-        # networking
+        lobby_state = self._get_lobby_state()
+
+        # networking and discovery ################################################
+    
         if self.mode == "HOST":
+            # host pump game lobby messages and respond to LAN discovery
             self._host_net_pump()
+            if self.host_discovery is not None:
+                self.host_discovery.update(dt)
+
         elif self.mode == "JOIN":
+            # client pump lobby messages if connected
             self._client_net_pump()
 
-        
-        lobby_state = self._get_lobby_state()
+            # while in browser, send discovery broadcasts and update host list
+            if lobby_state is not None and lobby_state.substate == "BROWSER":
+                if self.client_discovery is not None:
+                    self.client_discovery.update(dt)
+
+                    hosts_comp: Optional[AvailableHosts] = None
+                    for _, comps in self.world.query(AvailableHosts):
+                        hosts_comp = comps[AvailableHosts]
+                        break
+
+                    if hosts_comp is not None:
+                        # fill hosts list from discovery ["ip:port", ...]
+                        hosts_comp.hosts = [
+                            f"{ip}:{port}"
+                            for (ip, port), _name in sorted(self.client_discovery.hosts.items())
+                        ]
+
+        # transitions ##############################################################################
+
         if lobby_state and lobby_state.substate == "SELECT":
             # SINGLE
             if self.mode == "SINGLE":
@@ -236,7 +275,7 @@ class HubScene(Scene):
                             heroes_by_peer[pid] = req.hero_key
                         net.lobby_data = {
                             "heroes": heroes_by_peer,
-                            "map_id": "level0",
+                            "map_id": "level1",
                         }
 
                         next_scene = DungeonScene(role="SOLO", spawn_requests=spawn_requests)
@@ -247,7 +286,7 @@ class HubScene(Scene):
                 if self._all_occupied_slots_ready():
                     self._host_start_networked_game()
 
-            # JOIN
+            # JOIN: client waits for MSG_START_GAME from host which is handled in _client_net_pump
 
 
     def draw(self, surface: Surface) -> None:
@@ -279,13 +318,11 @@ class HubScene(Scene):
             if slot.peer_id is None and not slot.is_local:
                 label = "Waiting..."
             else:
-                label = f"Player {slot.index + 1}"
+                label = slot.name # OR: f"Player {slot.index + 1}"
             txt = self.font.render(label, True, (255, 255, 255))
             surface.blit(txt, (x + 25, 12))
 
-    # -------------------------------------------------------------------------
-    # Helpers: Lobby / slots
-    # -------------------------------------------------------------------------
+    # Helpers: Lobby / slots ############################################################
 
     def _get_lobby_state(self) -> Optional[LobbyState]:
         for _, comps in self.world.query(LobbyState):
@@ -302,7 +339,7 @@ class HubScene(Scene):
                 return eid, slot
         return None
 
-    # --- JOIN browser --------------------------------------
+    # JOIN browser ########################################################################
 
     def _handle_join_browser_key(self, lobby_state: LobbyState, key: int) -> None:
         hosts_comp: Optional[AvailableHosts] = None
@@ -313,20 +350,25 @@ class HubScene(Scene):
         if hosts_comp is None:
             return
 
-        if not hosts_comp.hosts:
-            hosts_comp.hosts.append("127.0.0.1:5000")
+        # NOTE: hosts_comp is filled by ClientDiscovery in update()
 
         if key in (pygame.K_UP, pygame.K_w):
-            hosts_comp.selected_index = max(0, hosts_comp.selected_index - 1)
+            if hosts_comp.hosts:
+                hosts_comp.selected_index = max(0, hosts_comp.selected_index - 1)
         elif key in (pygame.K_DOWN, pygame.K_s):
-            hosts_comp.selected_index = min(
-                len(hosts_comp.hosts) - 1, hosts_comp.selected_index + 1
-            )
+            if hosts_comp.hosts:
+                hosts_comp.selected_index = min(
+                    len(hosts_comp.hosts) - 1, hosts_comp.selected_index + 1
+                )
         elif key in (pygame.K_RETURN, pygame.K_SPACE):
-            # Parse "ip:port"
+            # only attempt join if there is a host
+            if not hosts_comp.hosts:
+                return
+            
+            # parse "ip:port"
             entry = hosts_comp.hosts[hosts_comp.selected_index]
-            ip = "127.0.0.1"
-            port = 5000
+            ip = "127.0.0.1"    # placeholders
+            port = 5000         #
             if ":" in entry:
                 ip_str, port_str = entry.split(":", 1)
                 ip = ip_str.strip() or ip
@@ -335,6 +377,13 @@ class HubScene(Scene):
                 except ValueError:
                     port = 5000
 
+            # stop discovery when a host is chosen
+            if self.client_discovery is not None:
+                self.client_discovery.close()
+                self.client_discovery = None
+            
+            # Create NetClient and send HELLO
+            # host will reply with WELCOME + LOBBY_STATE
             self._init_client_network(ip, port)
             lobby_state.substate = "SELECT"
 
@@ -382,7 +431,7 @@ class HubScene(Scene):
             if is_local:
                 self._refresh_slot_preview(e_slot, slot)
 
-    # networking HOST ##########################################
+    # networking HOST ############################################################
 
     def _init_host_network(self) -> None:
         # Create server socket only once; reuse across scenes
@@ -679,7 +728,7 @@ class HubScene(Scene):
         # Host-only shortcut: R key toggles all non-empty slots to ready 
         elif key == pygame.K_r and self.mode == "HOST":
             for _, s in self._iter_slots():
-                if s.peer_id is not None:
+                if s.peer_id is not None or s.is_local:
                     s.ready = True
             if net.server:
                 net.server.broadcast({
