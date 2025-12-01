@@ -33,6 +33,9 @@
       { "type": "goblin", "tile_pos": [6, 32] },
       { "type": "goblin", "tile_pos": [7, 36] },
       { "type": "skelet", "tile_pos": [8, 34] }
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
     ],
     "exits": [
