@@ -9,19 +9,16 @@
 
 import random
 import time
-from game.world.components import Transform, Intent, AI, PlayerTag, OnMap, ActiveMapId
-
+from game.world.actors.enemy_factory import create as create_enemy
+from game.world.components import Transform, Intent, AI, PlayerTag, OnMap, ActiveMapId, Attack
+from game.world.actors.blueprint import apply_blueprint
+from game.world.actors.blueprint_index import enemy as enemy_bp
 # Moved AI dataclasses to components and now there is a "kind" label for the different kinds of AI.
 # I filtered each code block for ai.kind so that it only runs if the kind of AI matches.
 # you can add code blocks for as many AI kinds as you want and just filter for the ai.kind string of choice.
 # I also removed the target.id check for wonder ai because it doesnt target a player
 # -Scott
 
-
-#find away to make that an ai switches between the 3 states as needed. 
-#need an agro range.
-#need a place for them to stop if to close or to far agro range again i guess.
-#need another way to make a porjectile attack.
 
 class EnemyAISystem:#System):
     
@@ -153,19 +150,31 @@ class EnemyAISystem:#System):
                     intent.move_x = ai.fixed_dir[0]
                     intent.move_y = ai.fixed_dir[1]
 
+                elif ai.kind == "Ranged":
+                    atk = comps.get(Attack)
+                    if not atk or not target_pos:
+                        return
+
+                    if atk.remaining_cooldown > 0:
+                        atk.remaining_cooldown -= dt
+
+                    intent.move_x = 0.0
+                    intent.move_y = 0.0
+
+                    if dist < ai.agro_range and dist > 10:
+                        if atk.remaining_cooldown <= 0:
+                            atk.remaining_cooldown = atk.max_cooldown
+
+                            self.spawn_projectile(
+                                world=world,
+                                pos=pos,
+                                target_pos=target_pos,
+                                owner_id=entity_id,
+                                active_id=active_id,
+                                target_id=getattr(ai, "target_id", None)
+                            )
 
 
-                #BELOW THIS needs to be worked on
-            #elif ai.kind == "ranged" and target_pos:
-            #    ai.max_cooldown -= dt
-            #    if 10 < dist < ai.agro_range and ai.max_cooldown <= 0:
-            #        ai.max_cooldown = ai.max_cooldown  # reset attack cooldown
-
-        # spawn projectile
-            #proj_id = world.new_entity()
-            #bp = enemy_bp("projectile.arrow")  # blueprint for arrow
-            #ctx = {"pos": (pos.x, pos.y), "owner": entity_id, "target_id": ai.target_id}
-            #apply_blueprint(world, proj_id, bp, ctx)
 
         # optional: face target
             #intent.facing = "left" if dx < 0 else "right
@@ -177,12 +186,27 @@ class EnemyAISystem:#System):
                     intent.facing = "right"
 
 
+    def spawn_projectile(self, world, pos, target_pos, owner_id, active_id, target_id):
+        proj_id = create_enemy(
+            world,
+            kind="projectile.homingarrow",
+            pos=(pos.x, pos.y),
+            params={
+                "owner": owner_id,
+                "target_id": target_id
+            }
+        )
 
-           #ADD A PROJECTILE
-           # CODE TO FIND DISTANCE AND GO IN STRAIGHT ORDER.
-           # if range
-           #delete after timer
+        world.add(proj_id, OnMap(id=active_id))
 
+        # give initial direction
+        dx = target_pos.x - pos.x
+        dy = target_pos.y - pos.y
+        dist = max((dx*dx + dy*dy)**0.5, 0.001)
 
-           # ADD A TRAP 
-            
+        proj_intent = world.get(proj_id, Intent)
+        if proj_intent:
+            proj_intent.move_x = dx / dist
+            proj_intent.move_y = dy / dist
+
+        print("Projectile spawned:", proj_id)
