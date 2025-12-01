@@ -40,6 +40,7 @@ from game.world.systems.death import death
 # net
 from game.world.systems.net_host import NetHostSystem
 from game.world.systems.net_client import NetClientSystem
+from game.world.systems.net_smoothing import NetSmoothingSystem
 from game.net.context import net
 from game.net.server import NetServer
 from game.net.client import NetClient
@@ -104,7 +105,8 @@ class DungeonScene(Scene):
                 self._attach_host_net_singleton()
         elif self.role == "CLIENT":
             self.world.systems = [
-                InputSystem(),                # local keyboard -> Intent
+                InputSystem(),
+                NetSmoothingSystem(),
                 AnimationSystem(),
                 EnsureCameraSystem(),
                 CameraBootstrapSystem(),

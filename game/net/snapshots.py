@@ -219,14 +219,19 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
                 facing: Facing = comps[Facing]
                 anim: AnimationState = comps[AnimationState]
 
-                tr.x = float(pdata.get("x", tr.x))
-                tr.y = float(pdata.get("y", tr.y))
+                tr.net_x = float(pdata.get("x", tr.x))
+                tr.net_y = float(pdata.get("y", tr.y))
                 facing.direction = pdata.get("facing", facing.direction)
-                anim.clip = pdata.get("clip", anim.clip)
-                anim.frame = int(pdata.get("frame", anim.frame))
-                anim.changed = True
-                found = True
-                break
+
+                new_clip = pdata.get("clip", anim.clip)
+
+                # if clip changes
+                if new_clip != anim.clip:
+                    anim.clip = new_clip
+                    anim.time = 0.0
+                    anim.frame = 0
+                    anim.changed = True
+                    break
 
         if not found:
             pass
@@ -250,9 +255,10 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
         anim: AnimationState = comps[AnimationState]
         life: Life = comps[Life]
 
-        tr.x = float(edata.get("x", tr.x))
-        tr.y = float(edata.get("y", tr.y))
+        tr.net_x = float(edata.get("x", tr.x))
+        tr.net_y = float(edata.get("y", tr.y))
         facing.direction = edata.get("facing", facing.direction)
+
         anim.clip = edata.get("clip", anim.clip)
         anim.frame = int(edata.get("frame", anim.frame))
         anim.changed = True

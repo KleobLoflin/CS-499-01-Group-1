@@ -28,6 +28,11 @@ class Transform:
     x: float
     y: float
 
+    # latest position from a host snapshot
+    # for client interpolation
+    net_x: Optional[float] = None
+    net_y: Optional[float] = None
+
 # any data constants that are involved in entity movement calculations
 @dataclass
 class Movement:
