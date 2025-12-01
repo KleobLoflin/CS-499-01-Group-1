@@ -414,6 +414,7 @@
                     "assets/animations/enemys/angel_run_anim/2.png",
                     "assets/animations/enemys/angel_run_anim/3.png"]
                 }
+            }
         },
 
         "enemy.goblin":{
@@ -460,5 +461,6 @@
 
     }
 }
+
 
 
