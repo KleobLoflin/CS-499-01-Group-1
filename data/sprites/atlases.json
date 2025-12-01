@@ -414,9 +414,6 @@
                     "assets/animations/enemys/angel_run_anim/2.png",
                     "assets/animations/enemys/angel_run_anim/3.png"]
                 }
-            }
-<<<<<<< Updated upstream
-=======
         },
 
         "enemy.goblin":{
@@ -459,13 +456,7 @@
                     ]
                 }   
             }
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
         }
-
-
 
     }
 }
