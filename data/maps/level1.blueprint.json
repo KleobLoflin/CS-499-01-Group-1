@@ -20,8 +20,20 @@
       { "type": "potion_health", "pos": [224, 176] }
     ],
     "static_enemies": [
+<<<<<<< Updated upstream
       { "type": "chort", "pos": [260, 120] },
       { "type": "big_zombie", "pos": [240, 180]}
+=======
+      { "type": "chort", "tile_pos": [13, 11] },
+      { "type": "chort", "tile_pos": [19, 11] },
+      { "type": "chort", "tile_pos": [31, 24] },
+      { "type": "big_zombie", "tile_pos": [14, 7] },
+      { "type": "goblin", "tile_pos": [5, 30] },
+      { "type": "goblin", "tile_pos": [4, 33] },
+      { "type": "goblin", "tile_pos": [6, 32] },
+      { "type": "goblin", "tile_pos": [7, 36] },
+      { "type": "skelet", "tile_pos": [8, 34] }
+>>>>>>> Stashed changes
     ],
     "exits": [
       { "to": "level1", "region": "east" }
