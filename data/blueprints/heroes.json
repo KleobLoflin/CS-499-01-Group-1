@@ -10,7 +10,8 @@
             {"type":"AnimationState", "clip": "idle"},
             {"type":"Facing"},
             {"type":"Attack", "max_cooldown": 0.25},
-            {"type":"HitboxSize"}
+            {"type":"HitboxSize"},
+            {"type":"Owner"}
         ]
     },
 
@@ -25,7 +26,8 @@
             {"type":"AnimationState", "clip": "idle"},
             {"type":"Facing"},
             {"type":"Attack", "max_cooldown": 0.25},
-            {"type":"HitboxSize"}
+            {"type":"HitboxSize"},
+            {"type":"Owner"}
         ]
     },
 
@@ -40,7 +42,8 @@
             {"type":"AnimationState", "clip": "idle"},
             {"type":"Facing"},
             {"type":"Attack", "max_cooldown": 0.25},
-            {"type":"HitboxSize"}
+            {"type":"HitboxSize"},
+            {"type":"Owner"}
         ]
     },
 
@@ -55,7 +58,8 @@
             {"type":"AnimationState", "clip": "idle"},
             {"type":"Facing"},
             {"type":"Attack", "max_cooldown": 0.25},
-            {"type":"HitboxSize"}
+            {"type":"HitboxSize"},
+            {"type":"Owner"}
         ]
     },
 
@@ -70,7 +74,8 @@
             {"type":"AnimationState", "clip": "idle"},
             {"type":"Facing"},
             {"type":"Attack", "max_cooldown": 0.25},
-            {"type":"HitboxSize"}
+            {"type":"HitboxSize"},
+            {"type":"Owner"}
         ]
     }
 }

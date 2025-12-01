@@ -9,8 +9,8 @@
 from game.scenes.base import Scene
 import pygame
 from pygame import Surface
+from game.core.config import Config
 
-from game.scenes.dungeon import DungeonScene
 from game.scenes.hub import HubScene
 from game.world.world import World
 from game.world.components import TitleMenu, SpawnPolicy, TitleIntro
@@ -21,6 +21,7 @@ from game.world.systems.presentation_mapper import PresentationMapperSystem
 from game.world.systems.movement import MovementSystem
 from game.world.systems.collision import CollisionSystem
 from game.world.systems.spawn import SpawnSystem
+from game.world.systems.ai import EnemyAISystem
 
 from game.world.maps.map_index import load_registry, pick
 from game.world.maps.map_factory import create_or_activate
@@ -82,6 +83,7 @@ class TitleScene(Scene):
 
         # logic systems
         self.world.systems = [
+            EnemyAISystem(),
             PresentationMapperSystem(),
             AnimationSystem(),
             MovementSystem(),
@@ -156,7 +158,7 @@ class TitleScene(Scene):
                 elif menu.selected_role == "settings":
                     return
                 else:
-                    self.sm.set(DungeonScene(role=menu.selected_role))
+                    self.sm.set(HubScene(self.sm, role=menu.selected_role))
                     return
 
     def _ensure_buffers(self, surface: Surface) -> None:
@@ -166,6 +168,7 @@ class TitleScene(Scene):
             self._ui_buf = pygame.Surface((w, h), flags=pygame.SRCALPHA).convert_alpha()
 
     def draw(self, surface: Surface) -> None:
+        surface.fill(Config.BG_COLOR)
         self._ensure_buffers(surface)
 
         # Clear buffers

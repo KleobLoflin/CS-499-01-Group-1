@@ -28,15 +28,20 @@ class Transform:
     x: float
     y: float
 
+    # latest position from a host snapshot
+    # for client interpolation
+    net_x: Optional[float] = None
+    net_y: Optional[float] = None
+
 # any data constants that are involved in entity movement calculations
 @dataclass
 class Movement:
     speed: int
-    dash_speed: int = 250
+    dash_speed: int = 300
     dash_duration: float = 0.0
     dash_cooldown: float = 0.0
     dash_max_cooldown: float = 1.0
-    dash_max_duration: float = 0.125
+    dash_max_duration: float = 0.175
  
 # intent: data representing what the player/enemy is trying to do
 # this describes a per-tick input intent that is either written by 
@@ -49,11 +54,19 @@ class Intent:
     basic_atk_held: bool = False
     dash: bool = False
     special_atk: bool = False
-    facing: str = Literal["up", "down", "left", "right"]
+    facing: Literal["up", "down", "left", "right"] = "down"
 
 @dataclass
 class InputState:
     key_order: List[str] = field(default_factory=list)
+    up: bool = False
+    down: bool = False
+    left: bool = False
+    right: bool = False
+    accept: bool = False
+    back: bool = False
+    prev_attack_pressed: bool = False
+    prev_dash_pressed: bool = False
 
 @dataclass
 class Attack:
@@ -114,7 +127,7 @@ class AnimationState:
 
 @dataclass
 class Facing:
-    direction: str = Literal["up", "down", "left", "right"]
+    direction: Literal["up", "down", "left", "right"] = "right"
 
 @dataclass
 class DebugRect:
@@ -173,7 +186,7 @@ class Pickup:
 class WorldObject:
     kind: str = "chest"         # chests, fountains, columns, barriers, spikes, doors, etc...
 
-# Menus ############################################
+# Title Menu ############################################
 
 @dataclass
 class TitleMenu:
@@ -211,3 +224,76 @@ class Camera:
 @dataclass
 class CameraFollowLocalPlayer:
     pass
+
+# Networking id and ownership ##################################
+
+@dataclass
+class NetIdentity:
+    my_peer_id: str     # "host", "solo", "peer:abcd"
+    role: str           # "HOST" | "CLIENT" | "SOLO"
+
+@dataclass
+class Owner:
+    peer_id: str        # who owns/controls this entity
+
+# Hub / Lobby ##################################################
+
+@dataclass
+class LobbySlot:
+    # one slot per player. up to five.
+    index: int
+    player_eid: Optional[int] = None    # eid of PlayerTag when occupied
+    is_local: bool = False              
+    selected_char_index: int = 0        # which hero in the catalog
+    ready: bool = False
+    name: str = "Player"
+    preview_eid: Optional[int] = None   # entity that displays idle animation
+    peer_id: Optional[str] = None       # owner id for this slot
+
+@dataclass
+class LobbyState:
+    mode: str = "SINGLE"        # "SINGLE" | "HOST" | "JOIN"
+    substate: str = "SELECT"    # "BROWSER" for Join server list, else "SELECT"
+    character_catalog: List[str] = field(default_factory=list)
+
+@dataclass
+class AvailableHosts:
+    hosts: List[str] = field(default_factory=list)
+    selected_index: int = 0
+
+@dataclass
+class SpawnRequest:     # use to pass player spawn info to DungeonScene
+    hero_key: str       # example: "hero.knight_blue"
+    is_local: bool      # if true, attach LocalControlled at gameplay
+    player_name: str = "Player"
+    net_id: Optional[str] = None    # use for networking
+
+# Networking host/client state #####################################################
+
+@dataclass
+class NetHostState:
+    server: Any = None                      # game.net.server.NetServer instance
+    tick: int = 0                           # simulation/network tick
+    accumulator: float = 0.0                # time accumulator for snapshot sends
+    send_interval: float = 1.0 / 60.0       # send snapshots at ~60Hz by default
+    max_clients: int = 4                    # up to 4 clients (5 total players w/ host)
+    # peer_id -> (ip, port)
+    peers: Dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass
+class NetClientState:
+    client: Any = None                      # game.net.client.NetClient instance
+    tick: int = 0                           # local input tick
+    accumulator: float = 0.0                # time accumulator for input sends
+    send_interval: float = 1.0 / 60.0       # send inputs at ~60Hz
+    last_snapshot_tick: int = 0             # last snapshot we applied
+    prediction: bool = True                 # hook for client-side prediction
+    interpolation: bool = True              # hook for snapshot interpolation
+
+# marks an entity as a client-side proxy for something that actually lives on the host
+@dataclass
+class RemoteEntity:
+    remote_id: int
+    category: str = "generic"
+

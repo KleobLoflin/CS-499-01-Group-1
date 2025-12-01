@@ -11,7 +11,7 @@ class TriggerSystem:
         # Get the player Transform
         player_transform = world.get(self.scene.player_id, Transform)
         if not player_transform:
-            print("[TriggerSystem] No player transform found")
+            #print("[TriggerSystem] No player transform found")
             return
 
         # only process triggers if the player is on the active map 
@@ -48,7 +48,7 @@ class TriggerSystem:
 
         if not trigger_layer:
             # some maps may not have triggers
-            print("[TriggerSystem] No layer named 'triggers'")
+            #print("[TriggerSystem] No layer named 'triggers'")
             return
 
         # Check each object in the triggers layer
