@@ -49,6 +49,8 @@ def build_lifeSpan(spec, ctx):
 def build_Life(spec,ctx):
     return Life(hp=spec.get("hp",10))
 
+def build_Owner(spec, ctx): return Owner(peer_id=ctx.get("owner", None))
+
 
 # gather all builder functions
 BUILDERS = {
@@ -65,7 +67,8 @@ BUILDERS = {
     "DebugRect": build_DebugRect,
     "HitboxSize": build_HitboxSize,
     "lifeSpan": build_lifeSpan,
-    "Life": build_Life
+    "Life": build_Life,
+    "Owner": build_Owner
 }
 
 # uses builder functions to add components to an entity
