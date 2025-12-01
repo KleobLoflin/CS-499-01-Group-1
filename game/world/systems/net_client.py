@@ -85,7 +85,7 @@ class NetClientSystem:
                 continue
 
             intent: Intent = comps[Intent]
-            return {
+            payload: Dict[str, Any] = {
                 "move_x": intent.move_x,
                 "move_y": intent.move_y,
                 "facing": intent.facing,
@@ -95,6 +95,10 @@ class NetClientSystem:
                 "special_atk": intent.special_atk,
             }
 
+            intent.basic_atk = False
+
+            return payload
+        
         return None
 
     def _handle_message(

@@ -105,7 +105,6 @@ class DungeonScene(Scene):
         elif self.role == "CLIENT":
             self.world.systems = [
                 InputSystem(),                # local keyboard -> Intent
-                PresentationMapperSystem(),   # map abstract to renderable
                 AnimationSystem(),
                 EnsureCameraSystem(),
                 CameraBootstrapSystem(),
@@ -334,4 +333,6 @@ class DungeonScene(Scene):
         self.world.add(e, NetClientState(client=net.client))
 
         # NetClientSystem runs before animation/render
-        self.world.systems.insert(0, NetClientSystem())
+        for idx, sys in enumerate(self.world.systems):
+            if isinstance(sys, InputSystem):
+                self.world.systems.insert(idx + 1, NetClientSystem())

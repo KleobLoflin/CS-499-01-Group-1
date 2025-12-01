@@ -66,7 +66,8 @@ class AttackSystem:
             tr: Transform = comps[Transform]
 
             # start swing
-            if it.basic_atk and atk.remaining_cooldown <= 0.0:
+            wants_attack = it.basic_atk or it.basic_atk_held
+            if wants_attack and atk.remaining_cooldown <= 0.0:
                 atk.active = True
                 it.basic_atk = False
                 atk.remaining_cooldown = atk.max_cooldown

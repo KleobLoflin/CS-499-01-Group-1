@@ -270,7 +270,7 @@ class NetHostState:
     server: Any = None                      # game.net.server.NetServer instance
     tick: int = 0                           # simulation/network tick
     accumulator: float = 0.0                # time accumulator for snapshot sends
-    send_interval: float = 1.0 / 20.0       # send snapshots at ~20Hz by default
+    send_interval: float = 1.0 / 60.0       # send snapshots at ~60Hz by default
     max_clients: int = 4                    # up to 4 clients (5 total players w/ host)
     # peer_id -> (ip, port)
     peers: Dict[str, Any] = field(default_factory=dict)

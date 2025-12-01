@@ -46,6 +46,7 @@ class InputSystem:
         attack_pressed = any(keys[k] for k in ATTACK_KEYS)
         if attack_pressed and not input.prev_attack_pressed:
             intent.basic_atk = True
+        intent.basic_atk_held = attack_pressed
         input.prev_attack_pressed = attack_pressed
 
         # Dash (edge detection)
