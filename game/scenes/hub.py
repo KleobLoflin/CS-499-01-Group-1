@@ -145,7 +145,7 @@ class HubScene(Scene):
         for i in range(5):
             is_local = (self.mode in ("SINGLE", "HOST") and i == 0)
             peer_id = self.peer_id if is_local else None
-            name = "You" if is_local else f"Player {i + 1}"
+            name = f"Player {i + 1}"
 
             e_slot = self.world.new_entity()
             slot = LobbySlot(
@@ -389,10 +389,7 @@ class HubScene(Scene):
 
     def _configure_joined_slots_for_debug(self) -> None:
         """
-        Debug-only helper: after "joining" a host, we fabricate a lobby with:
-            slot 0: host (not local)
-            slot 1: this client (local)
-        Other slots empty.
+        Debug-only helper
         """
         # Clear existing slots
         for eid, slot in list(self._iter_slots()):
@@ -502,7 +499,7 @@ class HubScene(Scene):
             return
 
         free_slot_comp.peer_id = peer_id
-        free_slot_comp.name = msg.get("name", f"Player {free_slot_comp.index + 1}")
+        free_slot_comp.name = f"Player {free_slot_comp.index + 1}"
         free_slot_comp.selected_char_index = 0
         free_slot_comp.ready = False
         self._refresh_slot_preview(free_slot_eid, free_slot_comp)
@@ -664,7 +661,7 @@ class HubScene(Scene):
             slot.peer_id = data.get("peer_id")
             slot.ready = bool(data.get("ready", False))
             slot.selected_char_index = int(data.get("hero_index", 0))
-            slot.name = data.get("name", f"Player {slot.index + 1}")
+            slot.name = f"Player {slot.index + 1}"
             slot.is_local = (slot.peer_id == net.my_peer_id)
 
             self._refresh_slot_preview(eid, slot)
@@ -834,5 +831,5 @@ class HubScene(Scene):
                 surface.blit(line, (40, y))
                 y += 24
 
-        hint = self.font.render("↑/↓: select host   Enter: join   Esc: back", True, (255, 255, 255))
+        hint = self.font.render("Enter: join   Esc: back", True, (255, 255, 255))
         surface.blit(hint, (20, Config.WINDOW_H - 32))

@@ -4,7 +4,7 @@
 from game.world.components import Transform
 
 class NetSmoothingSystem:
-    SMOOTH_SPEED = 12.0  # higher = snappier, lower = more floaty
+    SMOOTH_SPEED = 15.0  # higher = snappier, lower = more floaty
 
     def update(self, world, dt: float) -> None:
         alpha = self.SMOOTH_SPEED * dt

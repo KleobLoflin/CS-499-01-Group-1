@@ -30,21 +30,14 @@ class EnemyAISystem:#System):
              active_id = comps[ActiveMapId].id
              break
         
-        # pick a player on this map
-        # just picks the first player in the entity list for now
-        # later, get a list of players that are on the map and then use the list
-        # to find the right target_id for each of the enemy ai types depending on distance
-        player_tr = None
+        # get all players on the map
+        player_tr: list[Transform] = []
         for _, comps in world.query(Transform, PlayerTag):
             if active_id is not None:
                 om = comps.get(OnMap)
                 if om is None or om.id != active_id:
                     continue
-            player_tr = comps[Transform]
-            break
-        # if player_tr is None:
-        #     return
-
+            player_tr.append(comps[Transform])
 
         # drive AI for entities with AI + Transform + Intent
         for entity_id, comps in world.query(Transform, Intent, AI): 
@@ -60,19 +53,28 @@ class EnemyAISystem:#System):
 
             # choose target position
             target_pos: Transform | None = None
-            #if ai.kind in ("chase", "flee"):
-                # prefer AI.target_id if provided, else use first player on this map
+            
+            # prefer AI.target_id if provided
             if getattr(ai, "target_id", None) is not None:
                 target_pos = world.get(ai.target_id, Transform)
-            if target_pos is None:
-                target_pos = player_tr
-            # if target_pos is None:
-            #     # no valid target
-            #     intent.move_x = 0.0
-            #     intent.move_y = 0.0
-            #     continue
+
+            # otherwise, pick nearest player on this map
+            if target_pos is None and player_tr:
+                best_tr: Transform | None = None
+                best_dist2 = float("inf")
+                for p_tr in player_tr:
+                    dx = p_tr.x - pos.x
+                    dy = p_tr.y - pos.y
+                    d2 = dx * dx + dy * dy
+                    if d2 < best_dist2:
+                        best_dist2 = d2
+                        best_tr = p_tr
+                target_pos = best_tr
             
-            dist = float('inf')
+            # compute distance to target
+            dx = 0.0
+            dy = 0.0
+            dist = float("inf")
             if target_pos != None:
                 dx = target_pos.x - pos.x
                 dy = target_pos.y - pos.y
@@ -87,7 +89,6 @@ class EnemyAISystem:#System):
                 if not hasattr(ai, "wander_waiting"):
                     ai.wander_waiting = False
 
-
                 ai.wander_timer -= dt
                 if ai.wander_waiting:
                     if ai.wander_timer <= 0:
@@ -99,7 +100,7 @@ class EnemyAISystem:#System):
                         ai.wander_dir = (dx / mag, dy / mag)
                         ai.wander_timer = 1.0  # pick new direction every 1 second
 
-                    # keep moving in that direction
+                    # waiting
                     intent.move_x = 0.0
                     intent.move_y = 0.0
                 else:
@@ -113,10 +114,6 @@ class EnemyAISystem:#System):
                         intent.move_x = ai.wander_dir[0]
                         intent.move_y = ai.wander_dir[1]
 
-
-
-
-
             else:
                 # only handle chase entities
                 if ai.kind == "chase" or "projectileHoming":
@@ -127,8 +124,6 @@ class EnemyAISystem:#System):
                         intent.move_x = 0.0
                         intent.move_y = 0.0
                     #if ai.kind == "projectileHoming":
-
-                    
 
                 elif ai.kind == "flee":
                 
@@ -141,12 +136,12 @@ class EnemyAISystem:#System):
 
                 #believed to work not sure tho
                 elif ai.kind == "StraightLine":
-                    if not hasattr(ai, "fixed_dir"):
+                    if not hasattr(ai, "fixed_dir") and target_pos is not None:
                         # Calculate player direction at creation
-                        dx = player_tr.x - pos.x
-                        dy = player_tr.y - pos.y
-                        dist = max((dx * dx + dy * dy) ** 0.5, 1.0)
-                        ai.fixed_dir = (dx / dist, dy / dist)
+                        dx0 = target_pos.x - pos.x
+                        dy0 = target_pos.y - pos.y
+                        d0 = max((dx0 * dx0 + dy0 * dy0) ** 0.5, 1.0)
+                        ai.fixed_dir = (dx0 / d0, dy0 / d0)
                     
                     # Move along the fixed direction each frame
                     intent.move_x = ai.fixed_dir[0]
