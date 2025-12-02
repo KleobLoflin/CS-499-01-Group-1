@@ -1,7 +1,7 @@
 {
   "version": 1,
   "meta": {
-    "name": "Level 2",
+    "name": "Level 3",
     "music": "n/a",
     "ambience": "room.small"
   },
@@ -9,20 +9,20 @@
 
   ],
   "game_spawns": {
-    "player_start": { "tile_pos": [8, 24] },
+    "player_start": { "tile_pos": [11, 356] },
     "objects": [],
     "pickups": [
       
     ],
     "static_enemies": [
-      { "type": "chort", "tile_pos": [26, 34] },
-      { "type": "chort", "tile_pos": [22, 30] },
-      { "type": "chort", "tile_pos": [32, 31] },
-      { "type": "big_zombie", "tile_pos": [48, 25] },
-      { "type": "goblin", "tile_pos": [21, 14] },
-      { "type": "goblin", "tile_pos": [30, 17] },
-      { "type": "goblin", "tile_pos": [24, 16] },
-      { "type": "goblin", "tile_pos": [26, 18] }
+      { "type": "chort", "tile_pos": [13, 11] },
+      { "type": "chort", "tile_pos": [22, 25] },
+      { "type": "chort", "tile_pos": [20, 45] },
+      { "type": "big_zombie", "tile_pos": [42, 35] },
+      { "type": "goblin", "tile_pos": [30, 56] },
+      { "type": "goblin", "tile_pos": [30, 68] },
+      { "type": "goblin", "tile_pos": [24, 61] },
+      { "type": "goblin", "tile_pos": [35, 63] }
     ],
     "exits": [
       { "to": "level1", "region": "east" }

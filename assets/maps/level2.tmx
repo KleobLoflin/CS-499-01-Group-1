@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="70" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="48">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="70" height="50" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="49">
  <tileset firstgid="1" name="0x72_16x16DungeonTileset.v5" tilewidth="16" tileheight="16" tilecount="512" columns="32">
   <image source="../tile_sets/0x72_16x16DungeonTileset.v5/0x72_16x16DungeonTileset.v5/0x72_16x16DungeonTileset.v5.png" width="512" height="256"/>
   <tile id="296">
@@ -304,9 +304,9 @@
  <objectgroup id="5" name="triggers">
   <object id="47" x="976" y="400" width="16" height="16">
    <properties>
-    <property name="target_map" value="level1"/>
-    <property name="target_x" value="200"/>
-    <property name="target_y" value="200"/>
+    <property name="target_map" value="level3"/>
+    <property name="target_x" value="193"/>
+    <property name="target_y" value="577"/>
     <property name="trigger_type" value="exit"/>
    </properties>
   </object>
