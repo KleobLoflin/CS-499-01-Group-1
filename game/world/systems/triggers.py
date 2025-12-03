@@ -1,5 +1,6 @@
+#WORKED ON BY: Colin Adams
 # game/world/systems/triggers.py
-
+#Performs actions based on invisble rectangles in the map
 import pygame
 from game.world.components import Transform, Map, OnMap
 

@@ -1,3 +1,4 @@
+#AUTHORED BY: Colin Adams
 import pygame
 from pygame import Surface
 from typing import Optional
@@ -8,7 +9,7 @@ from game.world.maps.room import Room
 from game.core.config import Config
 from game.core import resources
 
-
+#renders the correct map 
 class RenderSystem:
     def draw(self, world, surface: Surface) -> None:
         # find active map id and get tmx data
