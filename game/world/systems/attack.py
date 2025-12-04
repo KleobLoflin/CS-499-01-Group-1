@@ -1,4 +1,4 @@
-from game.world.components import Intent, Attack, Transform, HitboxSize, PlayerTag, AI, Life
+from game.world.components import Intent, Attack, Transform, HitboxSize, PlayerTag, AI, Life, LastHitBy
 import math
 
 class AttackSystem:
@@ -151,7 +151,13 @@ class AttackSystem:
                         enemy_life = world.get(enemy_id, Life)
                         if enemy_life:
                             enemy_life.hp -= atk.damage
-                            print(f"Enemy {enemy_id} HP: {enemy_life.hp}")
+                            #print(f"Enemy {enemy_id} HP: {enemy_life.hp}")
+
+                            existing = world.get(enemy_id, LastHitBy)
+                            if existing:
+                                existing.attacker_eid = eid
+                            else:
+                                world.add(enemy_id, LastHitBy(attacker_eid=eid))
 
                         enemy_tr = world.get(enemy_id, Transform)
                         dx = enemy_tr.x - tr.x
