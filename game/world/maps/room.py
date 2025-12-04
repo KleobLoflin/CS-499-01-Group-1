@@ -1,4 +1,5 @@
 #AUTHORED BY: Colin Adams
+#EDITED BY: Scott Petty
 import pytmx
 import pygame
 

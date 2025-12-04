@@ -1,7 +1,8 @@
 # game/world/systems/spawn.py
 from game.world.components import (
     Map, OnMap, MapSpawnState, ActiveMapId, SpawnPolicy,
-    WorldObject, Pickup, Transform, Intent, Movement, Facing, LocalControlled
+    WorldObject, Pickup, Transform, Intent, Movement, Facing, LocalControlled,
+    PlayerTag,
 )
 from game.world.actors.enemy_factory import create as create_enemy
 from game.world.actors.hero_factory import create as create_hero
@@ -14,25 +15,38 @@ class SpawnSystem:
     
     def update(self, world, dt: float):
         policy = _get_policy(world)
-        active_id = _active_map_id(world)
-        if not active_id:
-            return
-        map_eid, mp = _map_by_id(world, active_id)
-        if not mp or not mp.blueprint:
-            return
+        
+        # collect map ids that currently have at least one player
+        map_ids_with_players: set[str] = set()
+        for _eid, comps in world.query(PlayerTag, OnMap):
+            om: OnMap = comps[OnMap]
+            if om.id:
+                map_ids_with_players.add(om.id)
 
-        state = _ensure_map_state(world, map_eid)
+        # if there are no players yet, use single ActiveMapId
+        if not map_ids_with_players:
+            active_id = _active_map_id(world)
+            if not active_id:
+                return
+            map_ids_with_players.add(active_id)
+        
+        # for each map id that needs spwns, run them once per map
+        for map_id in map_ids_with_players:
+            map_eid, mp = _map_by_id(world, map_id)
+            if not mp or not mp.blueprint:
+                continue
 
-        # Title spawns
-        if policy.run_title_spawns and not getattr(state, "did_title_spawns", False):
-            _run_title_spawns(world, mp, active_id)
-            state.did_title_spawns = True  
+            state = _ensure_map_state(world, map_eid)
 
-        # Gameplay spawns
-        if policy.run_game_spawns and not state.did_initial_spawns:
-            _run_game_spawns(world, mp, active_id, policy)
-            state.did_initial_spawns = True
+            # title spawns
+            if policy.run_title_spawns and not getattr(state, "did_title_spawns", False):
+                _run_title_spawns(world, mp, map_id)
+                state.did_title_spawns = True
 
+            # gameplay spawns
+            if policy.run_game_spawns and not state.did_initial_spawns:
+                _run_game_spawns(world, mp, map_id, policy)
+                state.did_initial_spawns = True
 
 def _run_title_spawns(world, mp: Map, active_id: str):
     entries = mp.blueprint.get("title_spawns") or []
@@ -52,7 +66,6 @@ def _run_title_spawns(world, mp: Map, active_id: str):
             eid = create_enemy(world, kind=et, pos=pos)
             _ensure_basics(world, eid)
             world.add(eid, OnMap(id=active_id))
-
 
 def _run_game_spawns(world, mp: Map, active_id: str, policy: SpawnPolicy):
     gs = mp.blueprint.get("game_spawns") or {}
