@@ -1,3 +1,6 @@
+# AUTHORED BY: Matthew Payne
+# EDITED BY: Scott Petty
+
 from game.world.components import Intent, Attack, Transform, HitboxSize, PlayerTag, AI, Life, OnMap
 import math
 

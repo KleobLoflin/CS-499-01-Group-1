@@ -1,3 +1,5 @@
+# AUTHORED BY: Scott Petty
+# EDITED BY: Matthew Payne
 # class: MovementSystem
 
 from game.world.components import Transform, Intent, Movement, Facing, Attack, OnMap, ActiveMapId, PlayerTag

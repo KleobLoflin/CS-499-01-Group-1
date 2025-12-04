@@ -1,3 +1,5 @@
+# AUTHORED BY: Scott Petty
+
 from game.world.components import Camera, CameraFollowLocalPlayer, Transform
 from game.world.components import PlayerTag, LocalControlled
 

@@ -1,3 +1,4 @@
+# AUTHORED BY: Nicholas Loflin
 # EDITED BY: Scott Petty
 
 from game.world.components import Transform, Life, lifeSpan, OnMap, ActiveMapId, PlayerTag

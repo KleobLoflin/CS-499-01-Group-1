@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty
 # Hero Factory script used to generate hero entities (player characters)
 
 from game.world.actors.blueprint import apply_blueprint

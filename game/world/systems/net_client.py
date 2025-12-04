@@ -1,3 +1,5 @@
+# AUTHORED BY: Scott Petty, Cole Herzog
+
 # game/world/systems/net_client.py
 #
 # NetClientSystem:

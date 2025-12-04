@@ -1,4 +1,4 @@
-#WORKED ON BY: Colin Adams
+#WORKED ON BY: Colin Adams, Scott Petty
 # game/world/systems/triggers.py
 #Performs actions based on invisble rectangles in the map
 import pygame
@@ -22,8 +22,9 @@ class TriggerSystem:
             # Find the triggers layer once per map
             trigger_layer = None
             for layer in tmx.objectgroups:
-                name = getattr(layer, "name", "") or ""
-                if name.lower() == "triggers":
+                if not getattr(layer, "name", None):
+                    continue
+                if layer.name.lower() == "triggers":
                     trigger_layer = layer
                     break
 
@@ -33,8 +34,15 @@ class TriggerSystem:
         if not triggers_by_map_id:
             return
 
+        # gather all transitions
+        pending_transitions: list[tuple[int, str, float, float]] = []
+
+        # get all players
+        players = list(world.query(PlayerTag, Transform, OnMap))
+
+
         # For each player, only check triggers on the same map
-        for pid, comps in world.query(PlayerTag, Transform, OnMap):
+        for pid, comps in players:
             tr: Transform = comps[Transform]
             onmap: OnMap = comps[OnMap]
             map_id = getattr(onmap, "id", None)
@@ -46,10 +54,10 @@ class TriggerSystem:
                 continue
 
             # player rect for collision checking
-            player_rect = pygame.Rect(tr.x, tr.y, 32, 32)  # TODO: tie to hitbox/sprite size
+            player_rect = pygame.Rect(tr.x, tr.y, 16, 16)  # TODO: tie to hitbox/sprite size
 
             for obj in trigger_layer:
-                trigger_type = getattr(obj, "type", None) or obj.properties.get("type")
+                trigger_type = obj.properties.get("trigger_type")
                 if isinstance(trigger_type, str):
                     trigger_type = trigger_type.lower()
 
@@ -59,7 +67,7 @@ class TriggerSystem:
                 exit_rect = pygame.Rect(obj.x, obj.y, obj.width, obj.height)
                 if not player_rect.colliderect(exit_rect):
                     continue
-
+                
                 target_map = obj.properties.get("target_map")
                 if not target_map:
                     continue
@@ -77,13 +85,16 @@ class TriggerSystem:
                 else:
                     ty = float(ty)
 
-                # Delegate actual transition to the scene, per-entity.
-                if hasattr(self.scene, "change_map_for_entity"):
-                    self.scene.change_map_for_entity(pid, target_map, tx, ty)
-                else:
-                    # Backwards compatibility for old system
-                    if getattr(self.scene, "player_id", None) == pid and hasattr(self.scene, "change_map"):
-                        self.scene.change_map(target_map, tx, ty)
+                # record the transition
+                pending_transitions.append((pid, target_map, tx, ty))
 
                 # Don't process multiple exits for the same player in a single frame
                 break
+
+        # Delegate actual transition to the scene, per-entity.
+        for pid, target_map, tx, ty in pending_transitions:
+            if hasattr(self.scene, "change_map_for_entity"):
+                self.scene.change_map_for_entity(pid, target_map, tx, ty)
+            else:
+                if getattr(self.scene, "player_id", None) == pid and hasattr(self.scene, "change_map"):
+                    self.scene.change_map(target_map, tx, ty)

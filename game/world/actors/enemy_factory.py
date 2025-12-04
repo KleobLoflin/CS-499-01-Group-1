@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty
 # Enemy Factory script used to generate enemy entities
 
 from game.world.actors.blueprint import apply_blueprint

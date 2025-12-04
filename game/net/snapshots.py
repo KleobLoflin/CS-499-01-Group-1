@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty, Cole Herzog
 # game/net/snapshots.py
 #
 # Building and applying world snapshots.
@@ -47,8 +48,8 @@ class EnemySnapshot:
     clip: str
     frame: int
     hp: float
-    map_id: Optional[str] = None
     atlas_id: str        # which sprite atlas to use
+    map_id: Optional[str] = None
 
 
 @dataclass
@@ -57,8 +58,8 @@ class PickupSnapshot:
     x: float
     y: float
     kind: str
-    map_id: Optional[str] = None
     atlas_id: str
+    map_id: Optional[str] = None
 
 
 @dataclass

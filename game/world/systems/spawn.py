@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty
 # game/world/systems/spawn.py
 from game.world.components import (
     Map, OnMap, MapSpawnState, ActiveMapId, SpawnPolicy,

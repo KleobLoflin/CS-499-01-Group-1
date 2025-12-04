@@ -1,3 +1,6 @@
+# AUTHORED BY: Nicholas Loflin
+# EDITED BY: Scott Petty
+
 # ai for the entities
 # game/world/systems/ai.py
 
@@ -48,7 +51,7 @@ class EnemyAISystem:#System):
 
             # otherwise, pick nearest player on the same map as this AI
             if target_pos is None:
-                ai_onmap = world.get(_, OnMap)
+                ai_onmap = world.get(entity_id, OnMap)
                 if ai_onmap is not None:
                     same_map_players = players_by_map.get(ai_onmap.id, [])
                     if same_map_players:

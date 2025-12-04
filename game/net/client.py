@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty, Cole Herzog
 # Non-blocking UDP client wrapper used by remote peers.
 
 from __future__ import annotations

@@ -1,3 +1,5 @@
+# AUTHORED BY: Scott Petty
+
 from game.world.maps.map_index import info, REGISTRY
 from game.world.maps.map_blueprint import build_Map_component
 from game.world.components import Map, ActiveMapId, MapSpawnState

@@ -1,3 +1,5 @@
+# AUTHORED BY: Scott Petty
+
 # system responsible for updating sprite animation components related to timing
 # controls timing between looping animated frames
 

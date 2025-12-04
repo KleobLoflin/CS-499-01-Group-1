@@ -1,3 +1,5 @@
+# AUTHORED BY: Scott Petty
+# EDITED BY: ALL
 # Components are data-only
 # they become attached to entities when entities are created
 # systems operate on the components data to make stuff happen

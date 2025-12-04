@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty
 # game/scenes/hub.py
 #
 # HubScene(Scene)

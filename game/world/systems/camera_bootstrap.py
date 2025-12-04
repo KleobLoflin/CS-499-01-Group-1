@@ -1,3 +1,5 @@
+# AUTHORED BY: Scott Petty
+
 # game/world/systems/camera_bootstrap.py
 from game.world.components import Camera, ActiveMapId, Map
 from game.world.maps.utils import map_world_bounds

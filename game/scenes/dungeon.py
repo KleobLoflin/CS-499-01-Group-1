@@ -1,4 +1,4 @@
-#AUTHORED BY: Colin Adams, Scott Petty, Nicholas Loflin
+# AUTHORED BY: Colin Adams, Scott Petty, Nicholas Loflin
 # Class DungeonScene(Scene)
 
 # actual gameplay scene
@@ -39,7 +39,6 @@ from game.world.systems.lifespan import LifeSpanSystem
 from game.world.systems.death import death
 
 # net
-from game.net import globals as net
 from game.world.systems.net_host import NetHostSystem
 from game.world.systems.net_client import NetClientSystem
 from game.world.systems.net_smoothing import NetSmoothingSystem
@@ -179,7 +178,7 @@ class DungeonScene(Scene):
         self.world.add(map_eid, MapSpawnState())
 
     # called by TriggerSystem() when a player hits an exit trigger
-    def chang_map_for_entity(
+    def change_map_for_entity(
             self,
             entity_id: int,
             new_map_name: str,
@@ -270,7 +269,7 @@ class DungeonScene(Scene):
             return
 
         # Spread players horizontally around the base position
-        spacing = 32.0
+        spacing = 16.0
         start_offset = -spacing * (count - 1) / 2.0
 
         for i, req in enumerate(self.spawn_requests):

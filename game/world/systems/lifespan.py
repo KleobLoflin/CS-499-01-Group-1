@@ -1,8 +1,6 @@
+# AUTHORED BY: Nicholas Loflin
 
 from game.world.components import lifeSpan
-
-
-
     
 class LifeSpanSystem:
     def update(self, world, dt: float) -> None:

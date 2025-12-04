@@ -1,3 +1,5 @@
+# AUTHORED BY: Scott Petty
+
 import json
 import random
 from dataclasses import dataclass

@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty, Cole Herzog
 # description of the wire protocol and message types.
 
 from __future__ import annotations

@@ -1,3 +1,5 @@
+# AUTHORED BY: Scott Petty
+
 import os, json, pytmx
 from typing import Any, Dict
 from game.world.components import Map
