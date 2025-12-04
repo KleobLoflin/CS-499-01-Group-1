@@ -300,3 +300,26 @@ class RemoteEntity:
     remote_id: int
     category: str = "generic"
 
+# scoring components
+
+@dataclass
+class Score:
+    #Attach to a player entity. Holds the player's current score.
+    points: int = 0
+
+@dataclass
+class Scored:
+    #Marker added to a dead/consumed entity so we don't award score multiple times.
+    reason: str = ""   # e.g. "death", "chest", etc.
+
+@dataclass
+class ChestOpened:
+    """Attach to a chest (WorldObject) when it has been opened by `opener_eid`.
+       Other systems (interaction system / chest system) should add this component
+       when a chest is opened, passing the opener's entity id if available.
+    """
+    opener_eid: Optional[int] = None
+
+@dataclass
+class LastHitBy:
+    attacker_eid: int = -1
