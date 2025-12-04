@@ -1,24 +1,30 @@
 # class: MovementSystem
 
-from game.world.components import Transform, Intent, Movement, Facing, Attack, OnMap, ActiveMapId
+from game.world.components import Transform, Intent, Movement, Facing, Attack, OnMap, ActiveMapId, PlayerTag
 from game.core.config import Config
 
 class MovementSystem:
     def update(self, world, dt: float) -> None:
-        # get active map id
-        active_id = None
-        for _, comps in world.query(ActiveMapId):
-            active_id = comps[ActiveMapId].id
-            break
+        # determine which map ids currently have players on them
+        logic_map_ids: set[str] = set()
+        for _, comps in world.query(Transform, PlayerTag, OnMap):
+            om = comps[OnMap]
+            logic_map_ids.add(om.id)
+
+        # If there are no PlayerTag entities yet
+        if not logic_map_ids:
+            for _, comps in world.query(ActiveMapId):
+                logic_map_ids.add(comps[ActiveMapId].id)
+                break
         
         # loops through all entities that have transform and Intent components
         # and adjusts the transform values according to intent and movespeed
         for _, components in world.query(Transform, Intent, Movement, Facing, Attack):
 
-            # guard for active map entities
-            if active_id is not None:
+            # Only simulate entities that are on a map that has at least one player
+            if logic_map_ids:
                 om = components.get(OnMap)
-                if om is None or om.id != active_id:
+                if om is not None and om.id not in logic_map_ids:
                     continue
 
             tr: Transform = components[Transform]

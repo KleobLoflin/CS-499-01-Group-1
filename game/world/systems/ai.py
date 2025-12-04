@@ -9,7 +9,7 @@
 
 import random
 import time
-from game.world.components import Transform, Intent, AI, PlayerTag, OnMap, ActiveMapId
+from game.world.components import Transform, Intent, AI, PlayerTag, OnMap
 
 # Moved AI dataclasses to components and now there is a "kind" label for the different kinds of AI.
 # I filtered each code block for ai.kind so that it only runs if the kind of AI matches.
@@ -26,30 +26,15 @@ from game.world.components import Transform, Intent, AI, PlayerTag, OnMap, Activ
 class EnemyAISystem:#System):
     
     def update(self, world, dt: float) -> None:
-        
-        # get active map ID
-        active_id = None
-        for _, comps in world.query(ActiveMapId):
-             active_id = comps[ActiveMapId].id
-             break
-        
-        # get all players on the map
-        player_tr: list[Transform] = []
-        for _, comps in world.query(Transform, PlayerTag):
-            if active_id is not None:
-                om = comps.get(OnMap)
-                if om is None or om.id != active_id:
-                    continue
-            player_tr.append(comps[Transform])
+        # build a mapping of map_id -> list of player Transforms on that map
+        players_by_map: dict[str, list[Transform]] = {}
+        for _, comps in world.query(Transform, PlayerTag, OnMap):
+            tr: Transform = comps[Transform]
+            om: OnMap = comps[OnMap]
+            players_by_map.setdefault(om.id, []).append(tr)
 
         # drive AI for entities with AI + Transform + Intent
         for entity_id, comps in world.query(Transform, Intent, AI): 
-            # only move entities that are on the map
-            if active_id is not None:
-                om = comps.get(OnMap)
-                if om is None or om.id != active_id:
-                    continue
-
             ai: AI = comps[AI]
             pos: Transform = comps[Transform]
             intent: Intent = comps[Intent]
@@ -61,19 +46,23 @@ class EnemyAISystem:#System):
             if getattr(ai, "target_id", None) is not None:
                 target_pos = world.get(ai.target_id, Transform)
 
-            # otherwise, pick nearest player on this map
-            if target_pos is None and player_tr:
-                best_tr: Transform | None = None
-                best_dist2 = float("inf")
-                for p_tr in player_tr:
-                    dx = p_tr.x - pos.x
-                    dy = p_tr.y - pos.y
-                    d2 = dx * dx + dy * dy
-                    if d2 < best_dist2:
-                        best_dist2 = d2
-                        best_tr = p_tr
-                target_pos = best_tr
-            
+            # otherwise, pick nearest player on the same map as this AI
+            if target_pos is None:
+                ai_onmap = world.get(_, OnMap)
+                if ai_onmap is not None:
+                    same_map_players = players_by_map.get(ai_onmap.id, [])
+                    if same_map_players:
+                        best_tr: Transform | None = None
+                        best_dist2 = float("inf")
+                        for p_tr in same_map_players:
+                            dx = p_tr.x - pos.x
+                            dy = p_tr.y - pos.y
+                            d2 = dx * dx + dy * dy
+                            if d2 < best_dist2:
+                                best_dist2 = d2
+                                best_tr = p_tr
+                        target_pos = best_tr
+
             # compute distance to target
             dx = 0.0
             dy = 0.0
@@ -84,7 +73,7 @@ class EnemyAISystem:#System):
                 dist = (dx * dx + dy * dy) ** 0.5
 
             if dist > ai.agro_range or target_pos == None:
-        # Give each AI its own cooldown + direction if not already present
+                # Give each AI its own cooldown + direction if not already present
                 if not hasattr(ai, "wander_timer"):
                     ai.wander_timer = 0.0
                 if not hasattr(ai, "wander_dir"):

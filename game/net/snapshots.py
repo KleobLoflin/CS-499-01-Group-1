@@ -21,8 +21,10 @@ from game.world.components import (
     Pickup,
     RemoteEntity,
     ActiveMapId,
+    OnMap,
 )
 
+from game.world.maps.map_factory import create_or_activate, resolve_map_hint_to_id
 
 @dataclass
 class PlayerSnapshot:
@@ -32,6 +34,8 @@ class PlayerSnapshot:
     facing: str
     clip: str
     frame: int
+    hp: float
+    map_id: Optional[str] = None
 
 
 @dataclass
@@ -43,6 +47,7 @@ class EnemySnapshot:
     clip: str
     frame: int
     hp: float
+    map_id: Optional[str] = None
     atlas_id: str        # which sprite atlas to use
 
 
@@ -52,6 +57,7 @@ class PickupSnapshot:
     x: float
     y: float
     kind: str
+    map_id: Optional[str] = None
     atlas_id: str
 
 
@@ -70,10 +76,10 @@ class WorldSnapshot:
 # called on the Host
 # map geometry not serialized because both host and clients load the same TMX map blueprint
 def build_world_snapshot(world, tick: int) -> Dict[str, Any]:
-    # Active map id 
+    # Host's currently active map id 
     map_id: Optional[str] = None
     for _eid, comps in world.query(ActiveMapId):
-        map_id = comps[ActiveMapId].id
+        host_map_id = comps[ActiveMapId].id
         break
 
     # Players
@@ -83,6 +89,7 @@ def build_world_snapshot(world, tick: int) -> Dict[str, Any]:
         tr: Transform = comps[Transform]
         facing: Facing = comps[Facing]
         anim: AnimationState = comps[AnimationState]
+        om: OnMap | None = world.get(_eid, OnMap)
 
         players.append(PlayerSnapshot(
             peer_id=owner.peer_id,
@@ -91,6 +98,7 @@ def build_world_snapshot(world, tick: int) -> Dict[str, Any]:
             facing=facing.direction,
             clip=anim.clip,
             frame=anim.frame,
+            map_id=getattr(om, "id", None),
         ))
 
     # Enemies: any AI+Life entity that is not tagged as a Player
