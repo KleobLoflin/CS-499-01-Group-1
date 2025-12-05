@@ -116,7 +116,7 @@ class EnemyAISystem:#System):
 
             else:
                 # only handle chase entities
-                if ai.kind == "chase" or "projectileHoming":
+                if ai.kind == "chase":
                     if dist > 10 and dist < ai.agro_range:  
                         intent.move_x = dx / dist
                         intent.move_y = dy / dist
@@ -150,7 +150,7 @@ class EnemyAISystem:#System):
                 elif ai.kind == "Ranged":
                     atk = comps.get(Attack)
                     if not atk or not target_pos:
-                        return
+                        continue
 
                     if atk.remaining_cooldown > 0:
                         atk.remaining_cooldown -= dt
