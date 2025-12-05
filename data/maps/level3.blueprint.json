@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "meta": {
+    "name": "Level 3",
+    "music": "n/a",
+    "ambience": "room.small"
+  },
+  "title_spawns": [
+
+  ],
+  "game_spawns": {
+    "player_start": { "tile_pos": [11, 356] },
+    "objects": [],
+    "pickups": [
+      
+    ],
+    "static_enemies": [
+      { "type": "chort", "tile_pos": [13, 11] },
+      { "type": "chort", "tile_pos": [22, 25] },
+      { "type": "chort", "tile_pos": [20, 45] },
+      { "type": "big_zombie", "tile_pos": [42, 35] },
+      { "type": "goblin", "tile_pos": [30, 56] },
+      { "type": "goblin", "tile_pos": [30, 68] },
+      { "type": "goblin", "tile_pos": [24, 61] },
+      { "type": "goblin", "tile_pos": [35, 63] }
+    ],
+    "exits": [
+      { "to": "level1", "region": "east" }
+    ]
+  },
+  "regions": {
+    "center": { "type": "ring", "center": [176, 128], "r_min": 20, "r_max": 80 },
+    "north": { "type": "rect", "x": 80, "y": 72, "w": 240, "h": 144 },
+    "east": { "type": "poly", "points": [[64, 48], [352, 48], [352, 64], [64, 64]] },
+    "west": { "type": "rect", "x": 336, "y": 112, "w": 24, "h": 48 },
+    "south": {}
+  }
+}

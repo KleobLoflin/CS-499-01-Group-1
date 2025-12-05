@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="48" height="48" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="222">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="48" height="48" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="224">
  <tileset firstgid="1" name="dungeontileset-extended" tilewidth="16" tileheight="16" tilecount="4096" columns="64">
   <image source="../tile_sets/dungeontiles-extended v1.1/dungeontileset-extended.png" width="1024" height="1024"/>
  </tileset>
@@ -27,9 +27,6 @@
     <frame tileid="159" duration="160"/>
    </animation>
   </tile>
- </tileset>
- <tileset firstgid="4801" name="atlas_walls_low-16x16" tilewidth="16" tileheight="16" tilecount="48" columns="12">
-  <image source="../tile_sets/atlas_walls_low-16x16.png" width="192" height="64"/>
  </tileset>
  <layer id="1" name="abyss" width="48" height="48">
   <data encoding="csv">
@@ -261,7 +258,7 @@
   <object id="151" x="384" y="192" width="16" height="32"/>
   <object id="153" x="368" y="272" width="64" height="96"/>
   <object id="154" x="368" y="320" width="144" height="48"/>
-  <object id="156" x="496" y="320" width="144" height="32"/>
+  <object id="156" x="560" y="320" width="80" height="32"/>
   <object id="157" x="592" y="336" width="48" height="112"/>
   <object id="158" x="560" y="432" width="80" height="64"/>
   <object id="161" x="368" y="416" width="144" height="48"/>
@@ -299,7 +296,6 @@
   <object id="209" x="576" y="240" width="48" height="96"/>
   <object id="210" x="241.333" y="430" width="14" height="10"/>
   <object id="211" x="289.333" y="431.333" width="14.6667" height="10"/>
-  <object id="212" x="-41.6667" y="304.167"/>
   <object id="213" x="128" y="640.667" width="16" height="16"/>
   <object id="214" x="544" y="290" width="16.6667" height="14.6667"/>
   <object id="215" x="416" y="224" width="32" height="32"/>
@@ -307,8 +303,16 @@
   <object id="217" x="416" y="464" width="32" height="32"/>
   <object id="220" x="353.333" y="472" width="14.6667" height="10.6667"/>
   <object id="221" x="176" y="472.667" width="16.6667" height="10"/>
+  <object id="222" x="480" y="320" width="64" height="32"/>
  </objectgroup>
  <objectgroup id="5" name="triggers">
-  <object id="122" x="544" y="384" width="16" height="16"/>
+  <object id="223" x="544" y="384" width="16" height="16">
+   <properties>
+    <property name="target_map" value="level2"/>
+    <property name="target_x" value="140"/>
+    <property name="target_y" value="400"/>
+    <property name="trigger_type" value="exit"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>

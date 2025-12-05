@@ -1,3 +1,4 @@
+#WORKED ON BY: Colin Adams, Scott Petty, Nicholas Loflin
 #Class collision
 from game.world.components import Transform, HitboxSize, PlayerTag, Map, ActiveMapId, OnMap
 import pygame

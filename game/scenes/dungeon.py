@@ -1,3 +1,4 @@
+#AUTHORED BY: Colin Adams, Scott Petty, Nicholas Loflin
 # Class DungeonScene(Scene)
 
 # actual gameplay scene
