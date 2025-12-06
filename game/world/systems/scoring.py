@@ -1,5 +1,5 @@
+#AUTHOR: Colin Adams
 # game/world/systems/scoring.py
-# Stateless scoring system.
 # Awards score when enemies die, using ScoreValue.amount.
 # Score is stored only on heroes (who must have a Score component).
 
@@ -14,14 +14,11 @@ from game.world.components import (
 
 
 class ScoringSystem:
-    # No __init__; system is stateless.
     
     def update(self, world, dt: float) -> None:
         self._process_deaths(world)
 
-    # ------------------------------------------------------------------
-    # Death → Score logic
-    # ------------------------------------------------------------------
+
     def _process_deaths(self, world) -> None:
         for eid, comps in world.query(Transform, Life):
             life: Life = comps[Life]
@@ -55,9 +52,7 @@ class ScoringSystem:
             if not world.get(eid, Scored):
                 world.add(eid, Scored(reason="death"))
 
-    # ------------------------------------------------------------------
     # Scorer resolution chaining
-    # ------------------------------------------------------------------
     def _resolve_scorer(self, world, dead_eid: int, comps: dict) -> Optional[int]:
         """
         Order of heuristics:
@@ -68,7 +63,7 @@ class ScoringSystem:
         5. Fallback: nearest local-controlled player
         """
 
-        # --- 1) LastHitBy
+        #LastHitBy
         lhb = comps.get(LastHitBy)
         if lhb and getattr(lhb, "attacker_eid", None) is not None:
             att = lhb.attacker_eid
@@ -76,14 +71,14 @@ class ScoringSystem:
             if resolved is not None:
                 return resolved
 
-        # --- 2) Damage.owner_id
+        # Damage.owner_id
         dmg = comps.get(Damage)
         if dmg and dmg.owner_id is not None:
             resolved = self._resolve_attacker_entity(world, dmg.owner_id)
             if resolved is not None:
                 return resolved
 
-        # --- 3) Owner.peer_id (on the dead entity)
+        # Owner.peer_id (on the dead entity)
         owner = comps.get(Owner)
         if owner and getattr(owner, "peer_id", None) is not None:
             peer_id = owner.peer_id
@@ -91,19 +86,17 @@ class ScoringSystem:
                 if pcomps[Owner].peer_id == peer_id:
                     return peid
 
-        # --- 4) AI.target_id
+        #AI.target_id
         ai = comps.get(AI)
         if ai and ai.target_id is not None:
             tid = ai.target_id
             if isinstance(tid, int) and world.get(tid, PlayerTag):
                 return tid
 
-        # --- 5) nearest local player fallback
+        # nearest local player fallback
         return self._nearest_local_player(world, comps)
 
-    # ------------------------------------------------------------------
     # Helpers
-    # ------------------------------------------------------------------
     def _resolve_attacker_entity(self, world, attacker_id) -> Optional[int]:
         """
         Converts attacker entity → player entity.

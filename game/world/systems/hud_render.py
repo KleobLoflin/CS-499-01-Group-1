@@ -1,3 +1,4 @@
+#AUTHORS: Colin Adams
 import pygame
 from pygame import Surface
 from game.world.components import Score, PlayerTag, Owner
@@ -7,14 +8,13 @@ from game.net.context import net
 class HudRenderSystem:
     """
     HUD renderer.
-    Current functionality:
-    - Draws score for all players.
+    Draws score for all players.
 
     """
     FONT = None
 
     def draw(self, world, surface: Surface) -> None:
-        # Lazy init font (allowed, since no ECS/world state is stored)
+        # init font
         if HudRenderSystem.FONT is None:
             HudRenderSystem.FONT = pygame.font.SysFont("Retro Gaming", 20)
 
