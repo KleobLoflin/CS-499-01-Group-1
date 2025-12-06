@@ -310,15 +310,11 @@ class Score:
 @dataclass
 class Scored:
     #Marker added to a dead/consumed entity so we don't award score multiple times.
-    reason: str = ""   # e.g. "death", "chest", etc.
-
+    reason: str = "" 
+    
 @dataclass
-class ChestOpened:
-    """Attach to a chest (WorldObject) when it has been opened by `opener_eid`.
-       Other systems (interaction system / chest system) should add this component
-       when a chest is opened, passing the opener's entity id if available.
-    """
-    opener_eid: Optional[int] = None
+class ScoreValue:
+    amount: int = 0
 
 @dataclass
 class LastHitBy:
