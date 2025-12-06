@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty
 # Class: App
 
 # Entry point for the client, owns the Pygame window and the main loop

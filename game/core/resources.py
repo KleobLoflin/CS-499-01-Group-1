@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty
 # contains functions for loading sprite images and animation clip data
 # will possibly contain functions for loading fonts and audio in the future
 

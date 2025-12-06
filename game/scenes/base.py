@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty
 # Class: Scene
 
 # This is an abstract base class (ABC) for scenes.

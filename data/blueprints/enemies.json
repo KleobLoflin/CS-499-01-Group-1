@@ -29,7 +29,6 @@
         ]
     },
 
-
     "enemy.goblin": {
         "components": [
             {"type": "Transform"},
@@ -44,11 +43,7 @@
             {"type": "Life", "hp": 2}
         ]
     },
-
-
-
-
-
+    
     "enemy.homingarrow": {
         "components": [
             {"type": "Transform"},

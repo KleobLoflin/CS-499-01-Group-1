@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty
 # Class: SceneManager
 
 # controls which scene is active and forwards events/update/draw to it

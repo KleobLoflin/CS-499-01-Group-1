@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty, Cole Herzog
 # Non-blocking UDP server wrapper used by the host.
 
 from __future__ import annotations

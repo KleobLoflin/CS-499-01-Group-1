@@ -1,3 +1,5 @@
+# AUTHORED BY: Scott Petty
+# EDITED BY: ALL
 # Components are data-only
 # they become attached to entities when entities are created
 # systems operate on the components data to make stuff happen
@@ -163,7 +165,8 @@ class OnMap:
 # lives on the Map entity, ensures spawns happen once per map
 @dataclass
 class MapSpawnState:
-    did_initial_spawns: bool = False    
+    did_initial_spawns: bool = False
+    did_title_spawns: bool = False
 
 # run/scene-level policy used by SpawnSystem
 @dataclass

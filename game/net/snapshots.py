@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty, Cole Herzog
 # game/net/snapshots.py
 #
 # Building and applying world snapshots.
@@ -21,8 +22,10 @@ from game.world.components import (
     Pickup,
     RemoteEntity,
     ActiveMapId,
+    OnMap,
 )
 
+from game.world.maps.map_factory import create_or_activate, resolve_map_hint_to_id
 
 @dataclass
 class PlayerSnapshot:
@@ -32,6 +35,8 @@ class PlayerSnapshot:
     facing: str
     clip: str
     frame: int
+    hp: float
+    map_id: Optional[str] = None
 
 
 @dataclass
@@ -44,6 +49,7 @@ class EnemySnapshot:
     frame: int
     hp: float
     atlas_id: str        # which sprite atlas to use
+    map_id: Optional[str] = None
 
 
 @dataclass
@@ -53,6 +59,7 @@ class PickupSnapshot:
     y: float
     kind: str
     atlas_id: str
+    map_id: Optional[str] = None
 
 
 @dataclass
@@ -70,19 +77,21 @@ class WorldSnapshot:
 # called on the Host
 # map geometry not serialized because both host and clients load the same TMX map blueprint
 def build_world_snapshot(world, tick: int) -> Dict[str, Any]:
-    # Active map id 
-    map_id: Optional[str] = None
+    # Host's currently active map id 
+    host_map_id: Optional[str] = None
     for _eid, comps in world.query(ActiveMapId):
-        map_id = comps[ActiveMapId].id
+        host_map_id = comps[ActiveMapId].id
         break
 
     # Players
     players: List[PlayerSnapshot] = []
-    for _eid, comps in world.query(PlayerTag, Owner, Transform, Facing, AnimationState):
+    for _eid, comps in world.query(PlayerTag, Owner, Transform, Facing, AnimationState, Life):
         owner: Owner = comps[Owner]
         tr: Transform = comps[Transform]
         facing: Facing = comps[Facing]
         anim: AnimationState = comps[AnimationState]
+        life: Life = comps[Life]
+        om: OnMap | None = world.get(_eid, OnMap)
 
         players.append(PlayerSnapshot(
             peer_id=owner.peer_id,
@@ -91,6 +100,8 @@ def build_world_snapshot(world, tick: int) -> Dict[str, Any]:
             facing=facing.direction,
             clip=anim.clip,
             frame=anim.frame,
+            hp=life.hp,
+            map_id=getattr(om, "id", None),
         ))
 
     # Enemies: any AI+Life entity that is not tagged as a Player
@@ -104,6 +115,7 @@ def build_world_snapshot(world, tick: int) -> Dict[str, Any]:
         anim: AnimationState = comps[AnimationState]
         life: Life = comps[Life]
         spr: Sprite = comps[Sprite]
+        om: OnMap | None = world.get(eid, OnMap)
 
         enemies.append(EnemySnapshot(
             id=eid,
@@ -114,6 +126,7 @@ def build_world_snapshot(world, tick: int) -> Dict[str, Any]:
             frame=anim.frame,
             hp=life.hp,
             atlas_id=spr.atlas_id,
+            map_id=getattr(om, "id", None),
         ))
 
     # Pickups
@@ -122,6 +135,7 @@ def build_world_snapshot(world, tick: int) -> Dict[str, Any]:
         tr: Transform = comps[Transform]
         p: Pickup = comps[Pickup]
         spr: Sprite = comps[Sprite]
+        om: OnMap | None = world.get(eid, OnMap)
 
         pickups.append(PickupSnapshot(
             id=eid,
@@ -129,11 +143,12 @@ def build_world_snapshot(world, tick: int) -> Dict[str, Any]:
             y=tr.y,
             kind=p.kind,
             atlas_id=spr.atlas_id,
+            map_id=getattr(om, "id", None),
         ))
 
     snapshot = WorldSnapshot(
         tick=tick,
-        map_id=map_id,
+        map_id=host_map_id,
         players=players,
         enemies=enemies,
         pickups=pickups,
@@ -203,40 +218,76 @@ def _cleanup_remote_category(world, category: str, ids_in_snapshot: set[int]) ->
 def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
     # Map id is informational. actual map geometry should be loaded by the scene.
 
-    # Players
+    # Players #############################
     players_data = msg.get("players", [])
 
     for pdata in players_data:
         peer_id = pdata.get("peer_id")
         if peer_id is None:
             continue
+        
+        snapshot_map_id = pdata.get("map_id")
 
-        found = False
-        for _eid, comps in world.query(PlayerTag, Owner, Transform, Facing, AnimationState):
+        for eid, comps in world.query(PlayerTag, Owner, Transform, Facing, AnimationState, Life):
             owner: Owner = comps[Owner]
-            if owner.peer_id == peer_id:
-                tr: Transform = comps[Transform]
-                facing: Facing = comps[Facing]
-                anim: AnimationState = comps[AnimationState]
+            if owner.peer_id != peer_id:
+                continue
+            
+            tr: Transform = comps[Transform]
+            facing: Facing = comps[Facing]
+            anim: AnimationState = comps[AnimationState]
+            life: Life = comps[Life]
 
-                tr.net_x = float(pdata.get("x", tr.x))
-                tr.net_y = float(pdata.get("y", tr.y))
-                facing.direction = pdata.get("facing", facing.direction)
+            # previous map id for this entity
+            prev_map_id: Optional[str] = None
+            om_existing: OnMap | None = world.get(eid, OnMap)
+            if om_existing is not None:
+                prev_map_id = om_existing.id
 
-                new_clip = pdata.get("clip", anim.clip)
+            # update OnMap from snapshot
+            if isinstance(snapshot_map_id, str):
+                if om_existing is not None:
+                    om_existing.id = snapshot_map_id
+                else:
+                    world.add(eid, OnMap(id=snapshot_map_id))
 
-                # if clip changes
-                if new_clip != anim.clip:
-                    anim.clip = new_clip
-                    anim.time = 0.0
-                    anim.frame = 0
-                    anim.changed = True
-                    break
+                # if this is the local player and their map changed, activate that map
+                if peer_id == my_peer_id and snapshot_map_id != prev_map_id:
+                    target_id = resolve_map_hint_to_id(snapshot_map_id) or snapshot_map_id
+                    create_or_activate(world, target_id)
 
-        if not found:
-            pass
+            # position from snapshot
+            new_x = float(pdata.get("x", tr.x))
+            new_y = float(pdata.get("y", tr.y))
 
-    # Enemies 
+            if peer_id == my_peer_id and isinstance(snapshot_map_id, str) and snapshot_map_id != prev_map_id:
+                # On a map transition, snap to the new room
+                tr.x = new_x
+                tr.y = new_y
+                tr.net_x = new_x
+                tr.net_y = new_y
+            else:
+                # Normal smoothing 
+                tr.net_x = new_x
+                tr.net_y = new_y
+
+            # life and facing
+            life.hp = float(pdata.get("hp", life.hp))
+            facing.direction = pdata.get("facing", facing.direction)
+
+            new_clip = pdata.get("clip", anim.clip)
+
+            # if clip changes
+            if new_clip != anim.clip:
+                anim.clip = new_clip
+                anim.time = 0.0
+                anim.frame = 0
+                anim.changed = True
+
+            # found matching entity so stop scanning
+            break
+
+    # Enemies ###############################
     enemies_data = msg.get("enemies", [])
     enemy_ids_in_snapshot: set[int] = set()
 
@@ -264,6 +315,15 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
         anim.changed = True
         life.hp = float(edata.get("hp", life.hp))
 
+        # sync OnMap from snapshot
+        snapshot_map_id = edata.get("map_id")
+        if isinstance(snapshot_map_id, str):
+            om = comps.get(OnMap)
+            if om is not None:
+                om.id = snapshot_map_id
+            else:
+                comps[OnMap] = OnMap(id=snapshot_map_id)
+
     _cleanup_remote_category(world, "enemy", enemy_ids_in_snapshot)
 
     # Pickups
@@ -284,5 +344,14 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
         tr: Transform = comps[Transform]
         tr.x = float(pdata.get("x", tr.x))
         tr.y = float(pdata.get("y", tr.y))
+
+        # sync OnMap from snapshot
+        snapshot_map_id = pdata.get("map_id")
+        if isinstance(snapshot_map_id, str):
+            om = comps.get(OnMap)
+            if om is not None:
+                om.id = snapshot_map_id
+            else:
+                comps[OnMap] = OnMap(id=snapshot_map_id)
 
     _cleanup_remote_category(world, "pickup", pickup_ids_in_snapshot)

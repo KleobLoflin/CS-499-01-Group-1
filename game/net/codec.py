@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty, Cole Herzog
 # Converts Python dict messages <-> bytes using JSON over UDP.
 
 from __future__ import annotations

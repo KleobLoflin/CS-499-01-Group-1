@@ -1,4 +1,4 @@
-#AUTHORED BY: Colin Adams
+#AUTHORED BY: Colin Adams, Scott Petty
 import pygame
 from pygame import Surface
 from typing import Optional
@@ -54,8 +54,7 @@ class RenderSystem:
             if flip:
                 img = pygame.transform.flip(img, True, False)
 
-            # make attack up and down mirror every other attack
-            # ...
+            # TODO: make attack up and down mirror every other attack
             
             # get (x, y) position of sprite to draw
             # calculate position to draw the sprite

@@ -1,3 +1,5 @@
+# AUTHORED BY: Scott Petty
+
 # used by client only
 # moves Transform.x/.y towards Transform.net_x/.net_y each frame
 

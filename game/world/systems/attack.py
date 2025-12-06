@@ -1,4 +1,7 @@
-from game.world.components import Intent, Attack, Transform, HitboxSize, PlayerTag, AI, Life
+# AUTHORED BY: Matthew Payne
+# EDITED BY: Scott Petty
+
+from game.world.components import Intent, Attack, Transform, HitboxSize, PlayerTag, AI, Life, OnMap
 import math
 
 class AttackSystem:
@@ -131,9 +134,17 @@ class AttackSystem:
                 if prev is None:
                     prev = (sx, sy)
                 self.prev_tip[eid] = (sx, sy)
+                
+                # restrict hits to enemies on the same map as the attacker
+                attacker_on = world.get(eid, OnMap)
+                attacker_map_id = attacker_on.id if attacker_on is not None else None
 
                 hit_this_frame = set()
                 for enemy_id, enemy_comps in world.query(Transform, AI, HitboxSize):
+                    if attacker_map_id is not None:
+                        enemy_on = world.get(enemy_id, OnMap)
+                        if enemy_on is None or enemy_on.id != attacker_map_id:
+                            continue
                     enemy_tr: Transform = enemy_comps[Transform]
                     enemy_hitbox: HitboxSize = enemy_comps[HitboxSize]
 
