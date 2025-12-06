@@ -1,3 +1,4 @@
+# AUTHORED BY: Colin Adams
 #calculates and transforms the screen to fit native resolution
 
 import pygame

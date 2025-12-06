@@ -1,3 +1,4 @@
+# AUTHORED BY: SCOTT PETTY
 # contains load function used to read heroes.json and enemies.json
 # stores the information in global variables
 

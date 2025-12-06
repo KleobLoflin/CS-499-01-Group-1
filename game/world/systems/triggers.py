@@ -1,71 +1,100 @@
+#WORKED ON BY: Colin Adams, Scott Petty
 # game/world/systems/triggers.py
-
+#Performs actions based on invisble rectangles in the map
 import pygame
-from game.world.components import Transform, Map, OnMap
+from game.world.components import Transform, Map, OnMap, PlayerTag
 
 class TriggerSystem:
     def __init__(self, scene):
         self.scene = scene  # to call change_map()
 
     def update(self, world, dt):
-        # Get the player Transform
-        player_transform = world.get(self.scene.player_id, Transform)
-        if not player_transform:
-            #print("[TriggerSystem] No player transform found")
-            return
-
-        # only process triggers if the player is on the active map 
-        player_onmap = world.get(self.scene.player_id, OnMap)
-
-        # Represent player as a rect for collision checking
-        player_rect = pygame.Rect(player_transform.x, player_transform.y, 32, 32)  # adjust size
-
-        # Find the active map
-        active_map = None
-        active_map_id = None
-        for _, comps in world.query(Map):
-            mp = comps[Map]
-            if mp.active:
-                active_map = mp.tmx_data
-                active_map_id = getattr(mp, "id", None)
-                break
-
-        if not active_map:
-            return
-
-        # If player has an OnMap tag and it doesn't match the active map id, skip
-        if player_onmap and active_map_id and player_onmap.id != active_map_id:
-            return
-        
-        # Find the triggers layer
-        trigger_layer = None
-        for layer in active_map.objectgroups:
-            if not getattr(layer, "name", None):
-                continue  # skip layers without a name
-            if layer.name.lower() == "triggers":
-                trigger_layer = layer
-                break
-
-        if not trigger_layer:
-            # some maps may not have triggers
-            #print("[TriggerSystem] No layer named 'triggers'")
-            return
-
-        # Check each object in the triggers layer
-        for obj in trigger_layer:
-            trigger_type = obj.properties.get("trigger_type")
-            if trigger_type != "exit":
+        # check exit triggers for all players, per map
+        # build index of map_id -> TMX object triggers layer
+        triggers_by_map_id: dict[str, object] = {}
+        for _eid, comps in world.query(Map):
+            mp: Map = comps[Map]
+            map_id = getattr(mp, "id", None)
+            tmx = getattr(mp, "tmx_data", None)
+            if not map_id or not tmx:
                 continue
 
-            exit_rect = pygame.Rect(obj.x, obj.y, obj.width, obj.height)
-            if player_rect.colliderect(exit_rect):
-
-                # Map transition info
-                target_map = obj.properties.get("target_map")
-
-                if target_map:
-                    # Use provided coordinates, or keep current player position
-                    tx = int(float(obj.properties.get("target_x", 0)))
-                    ty = int(float(obj.properties.get("target_y", 0)))
-                    self.scene.change_map(target_map, tx, ty)
+            # Find the triggers layer once per map
+            trigger_layer = None
+            for layer in tmx.objectgroups:
+                if not getattr(layer, "name", None):
+                    continue
+                if layer.name.lower() == "triggers":
+                    trigger_layer = layer
                     break
+
+            if trigger_layer is not None:
+                triggers_by_map_id[map_id] = trigger_layer
+
+        if not triggers_by_map_id:
+            return
+
+        # gather all transitions
+        pending_transitions: list[tuple[int, str, float, float]] = []
+
+        # get all players
+        players = list(world.query(PlayerTag, Transform, OnMap))
+
+
+        # For each player, only check triggers on the same map
+        for pid, comps in players:
+            tr: Transform = comps[Transform]
+            onmap: OnMap = comps[OnMap]
+            map_id = getattr(onmap, "id", None)
+            if not map_id:
+                continue
+
+            trigger_layer = triggers_by_map_id.get(map_id)
+            if trigger_layer is None:
+                continue
+
+            # player rect for collision checking
+            player_rect = pygame.Rect(tr.x, tr.y, 16, 16)  # TODO: tie to hitbox/sprite size
+
+            for obj in trigger_layer:
+                trigger_type = obj.properties.get("trigger_type")
+                if isinstance(trigger_type, str):
+                    trigger_type = trigger_type.lower()
+
+                if trigger_type != "exit":
+                    continue
+
+                exit_rect = pygame.Rect(obj.x, obj.y, obj.width, obj.height)
+                if not player_rect.colliderect(exit_rect):
+                    continue
+                
+                target_map = obj.properties.get("target_map")
+                if not target_map:
+                    continue
+
+                # If target_x/target_y are omitted, keep current position
+                tx = obj.properties.get("target_x")
+                ty = obj.properties.get("target_y")
+                if tx is None:
+                    tx = tr.x
+                else:
+                    tx = float(tx)
+
+                if ty is None:
+                    ty = tr.y
+                else:
+                    ty = float(ty)
+
+                # record the transition
+                pending_transitions.append((pid, target_map, tx, ty))
+
+                # Don't process multiple exits for the same player in a single frame
+                break
+
+        # Delegate actual transition to the scene, per-entity.
+        for pid, target_map, tx, ty in pending_transitions:
+            if hasattr(self.scene, "change_map_for_entity"):
+                self.scene.change_map_for_entity(pid, target_map, tx, ty)
+            else:
+                if getattr(self.scene, "player_id", None) == pid and hasattr(self.scene, "change_map"):
+                    self.scene.change_map(target_map, tx, ty)

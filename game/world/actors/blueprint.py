@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty
 # contains builder functions that instantiate components based on
 # data from .json files
 

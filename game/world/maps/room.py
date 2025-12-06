@@ -1,7 +1,9 @@
-
+#AUTHORED BY: Colin Adams
+#EDITED BY: Scott Petty
 import pytmx
 import pygame
 
+#specifies draw order, handles map persepctive between entities and map
 class Room:
     @staticmethod
     def visible_tile_bounds(tmx_data, view_left, view_top, view_w, view_h):

@@ -1,3 +1,4 @@
+# AUTHORED BY: Colin Adams, Scott Petty, Nicholas Loflin
 # Class DungeonScene(Scene)
 
 # actual gameplay scene
@@ -17,7 +18,7 @@ from game.world.world import World
 from game.world.components import (
     Transform, Map, ActiveMapId, OnMap, SpawnPolicy, LocalControlled,
     SpawnRequest, Owner, PlayerTag, NetIdentity, NetHostState,
-    NetClientState,
+    NetClientState, MapSpawnState
     )
 from game.world.actors.hero_factory import create as create_hero
 from game.world.systems.input import InputSystem
@@ -46,10 +47,11 @@ from game.world.systems.net_smoothing import NetSmoothingSystem
 from game.net.context import net
 from game.net.server import NetServer
 from game.net.client import NetClient
-from game.net.protocol import PROTOCOL_VERSION, MSG_HELLO
+from game.net.protocol import MSG_START_GAME
 
 
-from game.world.maps.map_index import load_registry, pick
+from game.world.maps.map_index import load_registry, pick, info
+from game.world.maps.map_blueprint import build_Map_component
 from game.world.maps.map_factory import create_or_activate, resolve_map_hint_to_id
 
 class DungeonScene(Scene):
@@ -165,26 +167,67 @@ class DungeonScene(Scene):
         self.render.draw(self.world, surface)
         self.hud.draw(self.world, surface) 
 
-    # called by TriggerSystem() when player hits an exit trigger
-    def change_map(self, new_map_name: str, spawn_x: float = None, spawn_y: float = None):
-         # Accept registry id or legacy ".tmx" names
+    # Map transitions ############################################################################
+    def _ensure_map_loaded(self, map_id: str) -> None:
+        # ensure that a Map entity for map_id exists in this world
+        # if map is already present return
+        for _eid, comps in self.world.query(Map):
+            mp: Map = comps[Map]
+            if getattr(mp, "id", None) == map_id:
+                return
+        
+        # build a new Map + MapSpawnState, but leave ActiveMapId alone
+        mi = info(map_id)
+        map_eid = self.world.new_entity()
+        self.world.add(map_eid, build_Map_component(mi))
+        self.world.add(map_eid, MapSpawnState())
+
+    # called by TriggerSystem() when a player hits an exit trigger
+    def change_map_for_entity(
+            self,
+            entity_id: int,
+            new_map_name: str,
+            spawn_x: float | None = None,
+            spawn_y: float | None = None,
+    ) -> None:
+        # move a specific player entity to a new map
+        # update ActiveMapId and Map.active for the local player on this machine
+        # ensure the target map is loaded and update that entities OnMap for remote players
+
+        # Accept registry id or legacy ".tmx" names
         target_id = resolve_map_hint_to_id(new_map_name) or new_map_name
-        create_or_activate(self.world, target_id)
 
-        # Move player and retag OnMap
-        if self.player_id is not None:
-            tr = self.world.get(self.player_id, Transform)
-            if tr and spawn_x is not None and spawn_y is not None:
-                tr.x = float(spawn_x)
-                tr.y = float(spawn_y)
+        # check if this entity is local-controlled
+        is_local = self.world.get(entity_id, LocalControlled) is not None
+        if is_local:
+            # for local player, this machine's active map becomes target_id
+            create_or_activate(self.world, target_id)
+            # remember which entity is the local player in case player_id is still needed somewhere
+            self.player_id = entity_id
+        else:
+            # for remote player, make sure map exists without changing
+            # ActiveMapId or Map.active flags
+            self._ensure_map_loaded(target_id)
 
-            # flip the player's OnMap to the new id
-            om = self.world.get(self.player_id, OnMap)
-            if om:
-                om.id = target_id
-            else:
-                self.world.add(self.player_id, OnMap(id=target_id))
+        # reposition the entity
+        tr = self.world.get(entity_id, Transform)
+        if tr is not None and spawn_x is not None and spawn_y is not None:
+            tr.x = float(spawn_x)
+            tr.y = float(spawn_y)
 
+        # update/attach OnMap
+        om = self.world.get(entity_id, OnMap)
+        if om:
+            om.id = target_id
+        else:
+            self.world.add(entity_id, OnMap(id=target_id))
+    
+    # for backwards compatibility with old system
+    def change_map(self, new_map_name: str, spawn_x: float = None, spawn_y: float = None):
+        if self.player_id is None:
+            return
+        self.change_map_for_entity(self.player_id, new_map_name, spawn_x, spawn_y)
+         
     # Spawning helpers ##########################################################################
 
     def _find_active_map_and_spawn_pos(self) -> tuple[str | None, float, float]:
@@ -231,7 +274,7 @@ class DungeonScene(Scene):
             return
 
         # Spread players horizontally around the base position
-        spacing = 32.0
+        spacing = 16.0
         start_offset = -spacing * (count - 1) / 2.0
 
         for i, req in enumerate(self.spawn_requests):

@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty
 # Class: Menu(Scene)
 
 # Title screen menu, start/pause menu, etc...

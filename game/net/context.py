@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty, Cole Herzog
 # game/net/context.py
 #
 # Global networking context shared across scenes.

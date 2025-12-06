@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty, Cole Herzog
 # HostDiscovery:
 #   - Runs on the host machine.
 #   - Listens on DISCOVERY_PORT for "discover" messages.

@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty
 # System that adjusts sprite and animation components based on intent
 # adjusts the animation clip type and whether frames need to be mirrored
 

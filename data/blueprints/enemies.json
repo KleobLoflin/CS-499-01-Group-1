@@ -31,7 +31,6 @@
         ]
     },
 
-
     "enemy.goblin": {
         "components": [
             {"type": "Transform"},
@@ -47,11 +46,7 @@
             {"type": "ScoreValue", "amount": 50}
         ]
     },
-
-
-
-
-
+    
     "enemy.homingarrow": {
         "components": [
             {"type": "Transform"},

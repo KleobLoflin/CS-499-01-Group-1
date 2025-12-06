@@ -1,3 +1,4 @@
+#AUTHORED BY: Colin Adams, Scott Petty
 # class: World
 
 # minimal ECS-lite container:

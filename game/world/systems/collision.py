@@ -1,3 +1,4 @@
+#WORKED ON BY: Colin Adams, Scott Petty, Nicholas Loflin, Matthew Payne
 #Class collision
 from game.world.components import Transform, HitboxSize, PlayerTag, Map, ActiveMapId, OnMap
 import pygame
@@ -28,50 +29,61 @@ class CollisionSystem:
         for eid in expired:
             del self.knockbacks[eid]
         
-        # get list of player entities
-        # Determine the active map id (if present)
-        active_map_id = None
-        for _, comps in world.query(ActiveMapId):
-            active_map_id = comps[ActiveMapId].id
-            break
+        # build player -> map info
+        players: list[int] = []
+        player_map: dict[int, str] = {}
+        player_maps: set[str] = set()
+
+        for pid, comps in world.query(PlayerTag, OnMap):
+            om: OnMap = comps[OnMap]
+            players.append(pid)
+            player_map[pid] = om.id
+            player_maps.add(om.id)
         
-        # Grab collision rects from the active Map component (fallback to self.collision_rects)
-        collisions = self.collision_rects
-        for _, comps in world.query(Map):
-            m = comps[Map]
-            if m.active and (active_map_id is None or m.id == active_map_id):
-                if m.collisions:
-                    collisions = m.collisions
-                break
-        if not collisions:
+        # if no players
+        if not players:
             return
         
-        # get list of player entities, filter to active map
-        players = []
-        for player_entity, comps in world.query(PlayerTag):
-            on = None
-            if active_map_id is not None:
-                on = world.get(player_entity, OnMap)
-                if on and on.id != active_map_id:
-                    continue
-            players.append(player_entity)
+        # get collision rects per map
+        collisions_by_map: dict[str, list[pygame.Rect]] = {}
+        for _, comps in world.query(Map):
+            m: Map = comps[Map]
+            if not m.collisions:
+                continue
+            
+            # only keep maps that currently have players on them
+            if player_maps and m.id not in player_maps:
+                continue
+            collisions_by_map[m.id] = m.collisions
 
-        # Check collisions for all entities
+        # incase still need self.collision_rects
+        global_collisions = self.collision_rects or []
+
+        # if no per-map collisions or global collisions
+        if not collisions_by_map and not global_collisions:
+            return
+        
+        # check collisions for all entities
         for eid, comps in world.query(Transform):
             tr = comps[Transform]
 
-            # If entity is tagged with OnMap and we have an active map id, skip if not on it
-            if active_map_id is not None:
-                on = comps.get(OnMap)
-                if on and on.id != active_map_id:
-                    continue
-            
-            # Get this entity's hitbox radius (default 10 if not defined)
+            # determine which map entity is on
+            ent_on = comps.get(OnMap)
+            ent_map_id = ent_on.id if ent_on is not None else None
+
+            # if entity has OnMap and that map has no players then skip
+            if ent_map_id is not None and ent_map_id not in player_maps:
+                continue
+
+            # get entity's hitbox radius
             hitbox = world.get(eid, HitboxSize)
             entity_radius = hitbox.radius if hitbox else 10
 
-            # for each player
+            # for each player on the same map
             for player_entity in players:
+                if ent_map_id is not None:
+                    if player_map.get(player_entity) != ent_map_id:
+                        continue
 
                 # Players vs enemies knockback
                 if eid not in players:
@@ -89,9 +101,22 @@ class CollisionSystem:
                             self.knockbacks[player_entity] = {"timer": 0.2, "dir": (dx, dy)}
                             self.knockbacks[eid] = {"timer": 0.2, "dir": (-dx, -dy)}
 
-            entity_radius= (hitbox.radius/2) if hitbox else 5
-            # Wall collisions
-            entity_rect = pygame.Rect(tr.x - entity_radius, tr.y - entity_radius, entity_radius*2, entity_radius/2)  # adjust to entity size
+            
+            entity_radius = (hitbox.radius / 2) if hitbox else 5
+
+            # pick per-map collision rects for this entity
+            if ent_map_id is not None:
+                collisions = collisions_by_map.get(ent_map_id, [])
+            else:
+                collisions = global_collisions
+
+            # wall collisions
+            entity_rect = pygame.Rect(
+                tr.x - entity_radius,
+                tr.y - entity_radius,
+                entity_radius * 2,
+                entity_radius -2
+            )
             for rect in collisions:
                 if entity_rect.colliderect(rect):
                     # Calculate minimum push distance

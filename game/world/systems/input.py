@@ -1,3 +1,4 @@
+# AUTHORED BY: Scott Petty
 # Class input
 
 import pygame

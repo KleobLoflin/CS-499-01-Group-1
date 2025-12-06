@@ -1,4 +1,4 @@
-
+# AUTHORED BY: Scott Petty
 import pygame
 from pygame import Surface
 from typing import List, Dict
