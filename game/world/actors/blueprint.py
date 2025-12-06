@@ -52,6 +52,9 @@ def build_Life(spec,ctx):
 
 def build_Owner(spec, ctx): return Owner(peer_id=ctx.get("owner", None))
 
+def build_ProjectileRequest(spec, ctx):
+    return ProjectileRequest(target_pos=tuple(spec["target_pos"]))
+
 
 # gather all builder functions
 BUILDERS = {
@@ -69,7 +72,9 @@ BUILDERS = {
     "HitboxSize": build_HitboxSize,
     "lifeSpan": build_lifeSpan,
     "Life": build_Life,
-    "Owner": build_Owner
+    "Owner": build_Owner,
+    "ProjectileRequest": build_ProjectileRequest,
+
 }
 
 # uses builder functions to add components to an entity

@@ -66,4 +66,9 @@ class World:
         for eid in self._to_delete:
             self.entities.pop(eid, None)
         self._to_delete.clear()
+        
+    def remove(self, eid: int, comp_type: type) -> None:
+        comps = self.entities.get(eid)
+        if comps and comp_type in comps:
+            del comps[comp_type]
 

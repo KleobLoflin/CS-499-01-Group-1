@@ -108,7 +108,12 @@ class Damage:
     amount: float = 1.0   # damage to apply
     owner_id: Optional[int] = None  # entity that caused the damage
     # friendly fire option here later?
-    
+
+
+@dataclass
+class ProjectileRequest:
+    target_pos: Tuple[float, float]  # where to aim    \
+    fired: bool = False   
 
 
 # presentation #####################################################

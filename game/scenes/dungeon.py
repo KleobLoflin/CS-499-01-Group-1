@@ -37,6 +37,7 @@ from game.world.systems.camera_follow import CameraFollowSystem
 from game.world.systems.camera_clamp import CameraClampSystem
 from game.world.systems.lifespan import LifeSpanSystem
 from game.world.systems.death import death
+from game.world.systems.projectile import ProjectileSpawnSystem
 
 # net
 from game.world.systems.net_host import NetHostSystem
@@ -101,7 +102,8 @@ class DungeonScene(Scene):
                 CameraFollowSystem(),
                 CameraClampSystem(),
                 LifeSpanSystem(),
-                death(),           
+                death(),
+                ProjectileSpawnSystem(),           
             ]
             if self.role == "HOST":
                 self._attach_host_net_singleton()
@@ -116,6 +118,7 @@ class DungeonScene(Scene):
                 CameraClampSystem(),
                 LifeSpanSystem(),
                 death(),
+                ProjectileSpawnSystem(),
             ]
             self._attach_client_net_singleton()
         else : # fallback to SOLO
