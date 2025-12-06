@@ -37,6 +37,7 @@ from game.world.systems.camera_clamp import CameraClampSystem
 from game.world.systems.lifespan import LifeSpanSystem
 from game.world.systems.death import death
 from game.world.systems.scoring import ScoringSystem
+from game.world.systems.hud_render import HudRenderSystem
 
 # net
 from game.world.systems.net_host import NetHostSystem
@@ -56,6 +57,7 @@ class DungeonScene(Scene):
         self.world = World()
         self.role = role.upper()
         self.render = RenderSystem()
+        self.hud = HudRenderSystem()
         self.spawn_requests: list[SpawnRequest] = spawn_requests or []
         self.player_id: int | None = None
         net.role = self.role
@@ -161,6 +163,7 @@ class DungeonScene(Scene):
     # renders all graphics
     def draw(self, surface: Surface) -> None:
         self.render.draw(self.world, surface)
+        self.hud.draw(self.world, surface) 
 
     # called by TriggerSystem() when player hits an exit trigger
     def change_map(self, new_map_name: str, spawn_x: float = None, spawn_y: float = None):
