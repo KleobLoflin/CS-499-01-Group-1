@@ -38,7 +38,7 @@ class PlayerSnapshot:
     frame: int
     hp: float
     map_id: Optional[str] = None
-    score: int
+    score: int = 0
 
 
 @dataclass
@@ -221,7 +221,7 @@ def _cleanup_remote_category(world, category: str, ids_in_snapshot: set[int]) ->
 # Apply a snapshot message on the client
 def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
     # Map id is informational. actual map geometry should be loaded by the scene.
-
+    pending_map_switch = None
     # Players #############################
     players_data = msg.get("players", [])
 
@@ -248,6 +248,12 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
             if om_existing is not None:
                 prev_map_id = om_existing.id
 
+            score_val = pdata.get("score")
+            if score_val is not None:
+                score_comp = world.get(eid, Score)
+                if score_comp:
+                    score_comp.points = int(score_val)     
+
             # update OnMap from snapshot
             if isinstance(snapshot_map_id, str):
                 if om_existing is not None:
@@ -257,8 +263,8 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
 
                 # if this is the local player and their map changed, activate that map
                 if peer_id == my_peer_id and snapshot_map_id != prev_map_id:
-                    target_id = resolve_map_hint_to_id(snapshot_map_id) or snapshot_map_id
-                    create_or_activate(world, target_id)
+                    pending_map_switch = snapshot_map_id
+
 
             # position from snapshot
             new_x = float(pdata.get("x", tr.x))
@@ -288,11 +294,10 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
                     anim.frame = 0
                     anim.changed = True
                     break
-                score_val = pdata.get("score")
-                if score_val is not None:
-                    score_comp = world.get(_eid, Score)
-                    if score_comp:
-                        score_comp.points = int(score_val)     
+        if pending_map_switch is not None:
+            target_id = resolve_map_hint_to_id(pending_map_switch) or pending_map_switch
+            create_or_activate(world, target_id)
+
 
     # Enemies ###############################
     enemies_data = msg.get("enemies", [])
