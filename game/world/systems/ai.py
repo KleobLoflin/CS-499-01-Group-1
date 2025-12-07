@@ -13,7 +13,7 @@
 import random
 import time
 from game.world.actors.enemy_factory import create as create_enemy
-from game.world.components import Transform, Intent, AI, PlayerTag, OnMap, ActiveMapId, Attack, ProjectileRequest, ProjectileSpawner
+from game.world.components import Transform, Intent, AI, PlayerTag, OnMap, SoundRequest, ActiveMapId, Attack, ProjectileRequest, ProjectileSpawner
 from game.world.actors.blueprint import apply_blueprint
 from game.world.actors.blueprint_index import enemy as enemy_bp
 # Moved AI dataclasses to components and now there is a "kind" label for the different kinds of AI.
@@ -38,7 +38,6 @@ class EnemyAISystem:#System):
             ai: AI = comps[AI]
             pos: Transform = comps[Transform]
             intent: Intent = comps[Intent]
-
 
             # choose target position
             target_pos: Transform | None = None
@@ -110,13 +109,24 @@ class EnemyAISystem:#System):
             else:
                 # only handle chase entities
                 if ai.kind == "chase":
-                    if dist > 10 and dist < ai.agro_range:  
+                    if dist > 10 and dist < ai.agro_range:
                         intent.move_x = dx / dist
                         intent.move_y = dy / dist
+
+                        # chase sound request
+                        comps[SoundRequest] = SoundRequest(
+                            event="enemy_aggro",
+                            subtype=size,
+                            global_event=False,
+                        )
+                        
                     else:
                         intent.move_x = 0.0
                         intent.move_y = 0.0
-                    #if ai.kind == "projectileHoming":
+                
+                if ai.kind == "projectileHoming":
+                    # separated projectilehoming from chase because sounds should be different
+                    pass
 
                 elif ai.kind == "flee":
                 
