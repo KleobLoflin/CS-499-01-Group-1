@@ -50,7 +50,7 @@
             {"type": "Transform"},
             {"type": "Intent"},
             {"type": "Movement", "speed": 0},
-            {"type": "AI", "kind": "Range", "agro_range": 150},
+            {"type": "AI", "kind": "Range", "agro_range": 150,  "spawn_kind": "skelet"},
             {"type": "Sprite", "atlas": "enemy.necro", "z": 10},
             {"type": "AnimationState", "clip": "idle"},
             {"type": "Facing"},
@@ -81,7 +81,7 @@
         ]
     },
 
-    "enemy.big_demon": {
+    "enemy.boss": {
         "components": [
             {"type": "Transform"},
             {"type": "Intent"},

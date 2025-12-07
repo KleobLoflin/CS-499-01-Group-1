@@ -163,10 +163,13 @@ class EnemyAISystem:#System):
 
                         if dist < ai.agro_range and dist > 10:
                             if world.get(entity_id, ProjectileRequest) is None:
+
+                                spawn_kind = getattr(ai, "spawn_kind", "skelet")
                                 print("ProjectileRequest added for", entity_id)
                                 world.add(
                                     entity_id,
-                                    ProjectileRequest(target_pos=(target_pos.x, target_pos.y))
+                                    ProjectileRequest(target_pos=(target_pos.x, target_pos.y,
+                                                                  spawn_kind))
                                     
                                         )
 

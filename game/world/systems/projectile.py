@@ -16,10 +16,11 @@ class ProjectileSpawnSystem:
             shoot = comps[ProjectileRequest]
             tr = comps[Transform]
             onmap = comps[OnMap]
-
+            req: ProjectileRequest = comps[ProjectileRequest]
+            
             proj_id = create_enemy(
                 world,
-                kind="skelet",
+                kind= req.spawn_kind,
                 pos=(tr.x, tr.y),
                 params={"owner": eid}
             )

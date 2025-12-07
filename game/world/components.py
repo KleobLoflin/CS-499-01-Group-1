@@ -112,7 +112,8 @@ class Damage:
 
 @dataclass
 class ProjectileRequest:
-    target_pos: Tuple[float, float]  # where to aim    \
+    target_pos: Tuple[float, float]  # where to aim    
+    spawn_kind: str
     fired: bool = False   
 
 @dataclass
