@@ -250,7 +250,7 @@ def bootstrap_sounds() -> None:
             "assets/sounds/player/dash/Woosh_1.ogg",
             "assets/sounds/player/dash/Woosh_2.ogg",
         ],
-        min_interval_ms=60,
+        min_interval_ms=400,
         volume=0.7
     )
 
@@ -364,7 +364,7 @@ def bootstrap_sounds() -> None:
             "assets/sounds/misc/chest_open/SpecialFX_Magic_2.wav",
         ],
         min_interval_ms=300,
-        volume=1.0,
+        volume=0.9,
     )
 
     # menu sounds ##################################################################
@@ -374,7 +374,7 @@ def bootstrap_sounds() -> None:
             "assets/sounds/ui/menu_item_change/UI - Button Select 1.wav",
         ],
         min_interval_ms=60,
-        volume=0.7,
+        volume=0.4,
     )
 
     register_group(
@@ -393,5 +393,5 @@ def bootstrap_sounds() -> None:
             "assets/sounds/misc/transition/Transportation - Move 01.wav"
         ],
         min_interval_ms=60,
-        volume=0.6,
+        volume=0.5,
     )

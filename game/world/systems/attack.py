@@ -170,18 +170,10 @@ class AttackSystem:
                         enemy_life = world.get(enemy_id, Life)
                         enemy_ai: AI | None = world.get(enemy_id, AI)
 
-                        enemy_ai: AI | None = world.get(enemy_id, AI)
-
                         if enemy_life:
-                            old_hp = enemy_life.hp
                             old_hp = enemy_life.hp
                             enemy_life.hp -= atk.damage
                             new_hp = enemy_life.hp
-
-                            # decide enemy size
-                            size = "small"
-                            if enemy_ai is not None:
-                                size = infer_enemy_size(enemy_ai)
                             
                             # attach sound request
                             enemy_comps = world.components_of(enemy_id)
@@ -190,15 +182,15 @@ class AttackSystem:
                                 # enemy death
                                 enemy_comps[SoundRequest] = SoundRequest(
                                     event="enemy_death",
-                                    subtype=size,
+                                    subtype=enemy_ai.size,
                                     global_event=False,
                                 )
-                                
+
                             elif new_hp < old_hp:
                                 # enemy hit but still alive
                                 enemy_comps[SoundRequest] = SoundRequest(
                                     event="enemy_hit",
-                                    subtype=size,
+                                    subtype=enemy_ai.size,
                                     global_event=False,
                                 )
 
