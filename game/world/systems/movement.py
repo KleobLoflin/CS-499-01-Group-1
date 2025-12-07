@@ -2,7 +2,7 @@
 # EDITED BY: Matthew Payne
 # class: MovementSystem
 
-from game.world.components import Transform, Intent, Movement, Facing, Attack, OnMap, ActiveMapId, PlayerTag
+from game.world.components import Transform, Intent, Movement, Facing, Attack, OnMap, ActiveMapId, PlayerTag, SoundRequest
 from game.core.config import Config
 
 class MovementSystem:
@@ -63,6 +63,12 @@ class MovementSystem:
                     # Dash applies high speed while active
                     tr.x += it.move_x * mv.dash_speed * dt
                     tr.y += it.move_y * mv.dash_speed * dt
+
+                    components[SoundRequest] = SoundRequest(
+                        event="player_dash",
+                        global_event=False,
+                    )
+
                 else:
                     tr.x += it.move_x * mv.speed * dt 
                     tr.y += it.move_y * mv.speed * dt

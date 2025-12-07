@@ -37,6 +37,7 @@ from game.world.systems.camera_follow import CameraFollowSystem
 from game.world.systems.camera_clamp import CameraClampSystem
 from game.world.systems.lifespan import LifeSpanSystem
 from game.world.systems.death import death
+from game.world.systems.sound import SoundSystem
 from game.world.systems.scoring import ScoringSystem
 from game.world.systems.hud_render import HudRenderSystem
 from game.world.systems.projectile import ProjectileSpawnSystem
@@ -104,10 +105,11 @@ class DungeonScene(Scene):
                 CameraBootstrapSystem(),
                 CameraFollowSystem(),
                 CameraClampSystem(),
+                SoundSystem(),  
                 LifeSpanSystem(),
                 ScoringSystem(),
                 death(),
-                ProjectileSpawnSystem(),           
+                ProjectileSpawnSystem(),
             ]
             if self.role == "HOST":
                 self._attach_host_net_singleton()
@@ -120,6 +122,7 @@ class DungeonScene(Scene):
                 CameraBootstrapSystem(),
                 CameraFollowSystem(),
                 CameraClampSystem(),
+                SoundSystem(),
                 LifeSpanSystem(),
                 death(),
                 ProjectileSpawnSystem(),
@@ -140,8 +143,10 @@ class DungeonScene(Scene):
                 CameraBootstrapSystem(),
                 CameraFollowSystem(),
                 CameraClampSystem(),
+                SoundSystem(),
                 LifeSpanSystem(),
                 death(),
+                
             ]
 
         # Spawn players
@@ -366,7 +371,10 @@ class DungeonScene(Scene):
             peers=net.peers,
         ))
 
-        self.world.systems.append(NetHostSystem())
+        # NetHostSystem needs to run after all sound request producing systems but before SoundSystem
+        for idx, sys in enumerate(self.world.systems):
+            if isinstance(sys, CollisionSystem):
+                self.world.systems.insert(idx + 1, NetHostSystem())
 
     def _attach_client_net_singleton(self) -> None:
         """Attach NetClientState to the existing NetClient that was created in HubScene"""

@@ -13,9 +13,11 @@
 import random
 import time
 from game.world.actors.enemy_factory import create as create_enemy
-from game.world.components import Transform, Intent, AI, PlayerTag, OnMap, ActiveMapId, Attack, ProjectileRequest, ProjectileSpawner
+from game.world.components import Transform, Intent, AI, PlayerTag, OnMap, SoundRequest, ActiveMapId, Attack, ProjectileRequest, ProjectileSpawner
 from game.world.actors.blueprint import apply_blueprint
 from game.world.actors.blueprint_index import enemy as enemy_bp
+from game.sound.enemy_sound_utils import infer_enemy_size
+
 # Moved AI dataclasses to components and now there is a "kind" label for the different kinds of AI.
 # I filtered each code block for ai.kind so that it only runs if the kind of AI matches.
 # you can add code blocks for as many AI kinds as you want and just filter for the ai.kind string of choice.
@@ -27,11 +29,11 @@ class EnemyAISystem:#System):
     
     def update(self, world, dt: float) -> None:
         # build a mapping of map_id -> list of player Transforms on that map
-        players_by_map: dict[str, list[Transform]] = {}
-        for _, comps in world.query(Transform, PlayerTag, OnMap):
+        players_by_map: dict[str, list[tuple[int, Transform]]] = {}
+        for player_eid, comps in world.query(Transform, PlayerTag, OnMap):
             tr: Transform = comps[Transform]
             om: OnMap = comps[OnMap]
-            players_by_map.setdefault(om.id, []).append(tr)
+            players_by_map.setdefault(om.id, []).append((player_eid, tr))
 
         # drive AI for entities with AI + Transform + Intent
         for entity_id, comps in world.query(Transform, Intent, AI): 
@@ -39,15 +41,11 @@ class EnemyAISystem:#System):
             pos: Transform = comps[Transform]
             intent: Intent = comps[Intent]
 
-
-            # choose target position
+            # pick nearest player on the same map as this AI
+            # pick nearest player on the same map as this AI
             target_pos: Transform | None = None
-            
-            # prefer AI.target_id if provided
-            if getattr(ai, "target_id", None) is not None:
-                target_pos = world.get(ai.target_id, Transform)
 
-            # otherwise, pick nearest player on the same map as this AI
+
             if target_pos is None:
                 ai_onmap = world.get(entity_id, OnMap)
                 if ai_onmap is not None:
@@ -55,14 +53,21 @@ class EnemyAISystem:#System):
                     if same_map_players:
                         best_tr: Transform | None = None
                         best_dist2 = float("inf")
-                        for p_tr in same_map_players:
+                        best_target_id: int | None = None
+                        for p_eid, p_tr in same_map_players:
                             dx = p_tr.x - pos.x
                             dy = p_tr.y - pos.y
                             d2 = dx * dx + dy * dy
                             if d2 < best_dist2:
                                 best_dist2 = d2
                                 best_tr = p_tr
+                                best_target_id = p_eid
+
                         target_pos = best_tr
+
+                        # track which player this enemy is targeting
+                        if best_target_id is not None:
+                            ai.target_id = best_target_id
 
             # compute distance to target
             dx = 0.0
@@ -74,6 +79,9 @@ class EnemyAISystem:#System):
                 dist = (dx * dx + dy * dy) ** 0.5
 
             if dist > ai.agro_range or target_pos == None:
+                # out of aggro range or no valid target so clear target_id
+                ai.target_id = None
+
                 # Give each AI its own cooldown + direction if not already present
                 if not hasattr(ai, "wander_timer"):
                     ai.wander_timer = 0.0
@@ -110,13 +118,63 @@ class EnemyAISystem:#System):
             else:
                 # only handle chase entities
                 if ai.kind == "chase":
-                    if dist > 10 and dist < ai.agro_range:  
+                    # check if in range
+                    chasing_now = (dist > 10 and dist < ai.agro_range and target_pos is not None)
+
+                    # previous chasing state
+                    was_chasing = getattr(ai, "was_chasing", False)
+                    ai.was_chasing = chasing_now
+
+                    current_target_id = getattr(ai, "target_id", None)
+                    last_sound_target_id = getattr(ai, "last_aggro_target_id", None)
+
+                    if chasing_now:
                         intent.move_x = dx / dist
                         intent.move_y = dy / dist
+
+                        # decide if aggro sound should play
+                        # 1. just started chasing, or
+                        # 2. switched to a different player target
+                        should_play_sound = False
+                        if not was_chasing and chasing_now:
+                            should_play_sound = True
+                        elif was_chasing and current_target_id is not None and current_target_id != last_sound_target_id:
+                            should_play_sound = True
+                        
+                        
+                        if should_play_sound:
+                            comps[SoundRequest] = SoundRequest(
+                                event="enemy_aggro",
+                                subtype=ai.size,
+                                global_event=False,
+                            )
+                            ai.last_aggro_target_id = current_target_id
+                        
+
+                        # decide if aggro sound should play
+                        # 1. just started chasing, or
+                        # 2. switched to a different player target
+                        should_play_sound = False
+                        if not was_chasing and chasing_now:
+                            should_play_sound = True
+                        elif was_chasing and current_target_id is not None and current_target_id != last_sound_target_id:
+                            should_play_sound = True
+                        
+                        if should_play_sound:
+                            comps[SoundRequest] = SoundRequest(
+                                event="enemy_aggro",
+                                subtype=ai.size,
+                                global_event=False,
+                            )
+                            ai.last_aggro_target_id = current_target_id
+                        
                     else:
                         intent.move_x = 0.0
                         intent.move_y = 0.0
-                    #if ai.kind == "projectileHoming":
+                
+                if ai.kind == "projectileHoming":
+                    # separated projectilehoming from chase because sounds should be different
+                    pass
 
                 elif ai.kind == "flee":
                 
@@ -154,7 +212,6 @@ class EnemyAISystem:#System):
                         intent.move_x = 0.0
                         intent.move_y = 0.0
 
-
                     atk = comps.get(Attack)
                     if not atk or not target_pos:
                         continue
@@ -178,9 +235,6 @@ class EnemyAISystem:#System):
                                                                  
                                     
                                         )
-
-
-
         # optional: face target
             #intent.facing = "left" if dx < 0 else "right
 
