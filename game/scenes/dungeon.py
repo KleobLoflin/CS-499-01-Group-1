@@ -38,6 +38,7 @@ from game.world.systems.camera_clamp import CameraClampSystem
 from game.world.systems.lifespan import LifeSpanSystem
 from game.world.systems.death import death
 from game.world.systems.sound import SoundSystem
+from game.world.systems.sound import SoundSystem
 from game.world.systems.scoring import ScoringSystem
 from game.world.systems.hud_render import HudRenderSystem
 from game.world.systems.projectile import ProjectileSpawnSystem
@@ -123,6 +124,7 @@ class DungeonScene(Scene):
                 CameraFollowSystem(),
                 CameraClampSystem(),
                 SoundSystem(),
+                SoundSystem(),
                 LifeSpanSystem(),
                 death(),
                 
@@ -144,6 +146,7 @@ class DungeonScene(Scene):
                 CameraBootstrapSystem(),
                 CameraFollowSystem(),
                 CameraClampSystem(),
+                SoundSystem(),
                 SoundSystem(),
                 LifeSpanSystem(),
                 death(),
@@ -372,6 +375,10 @@ class DungeonScene(Scene):
             peers=net.peers,
         ))
 
+        # NetHostSystem needs to run after all sound request producing systems but before SoundSystem
+        for idx, sys in enumerate(self.world.systems):
+            if isinstance(sys, CollisionSystem):
+                self.world.systems.insert(idx + 1, NetHostSystem())
         # NetHostSystem needs to run after all sound request producing systems but before SoundSystem
         for idx, sys in enumerate(self.world.systems):
             if isinstance(sys, CollisionSystem):

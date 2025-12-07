@@ -25,6 +25,8 @@ from game.world.components import (
     OnMap,
     Score,
     SoundRequest,
+    Score,
+    SoundRequest,
 )
 
 from game.world.maps.map_factory import create_or_activate, resolve_map_hint_to_id
@@ -348,9 +350,22 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
             # life and facing
             life.hp = float(pdata.get("hp", life.hp))
             facing.direction = pdata.get("facing", facing.direction)
+            life.hp = float(pdata.get("hp", life.hp))
+            facing.direction = pdata.get("facing", facing.direction)
 
             new_clip = pdata.get("clip", anim.clip)
+            new_clip = pdata.get("clip", anim.clip)
 
+            # if clip changes
+            if new_clip != anim.clip:
+                anim.clip = new_clip
+                anim.time = 0.0
+                anim.frame = 0
+                anim.changed = True
+            
+            # found matching entity so stop scanning
+            break
+        
             # if clip changes
             if new_clip != anim.clip:
                 anim.clip = new_clip

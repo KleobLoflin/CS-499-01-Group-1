@@ -88,9 +88,12 @@ class HitboxSize:
 class AI:
     name: str   # "chort", "big_zombie", etc...
     size: str   # "big", "medium", "small", "tiny"
+    name: str   # "chort", "big_zombie", etc...
+    size: str   # "big", "medium", "small", "tiny"
     kind: str   # current kinds: "chase", "flee", "wander", ...
     target_id: int|None = None  # explicit target; None = auto-pick nearest player
     agro_range: int = 0   # distance to start chasing
+    aggro_sfx_played: bool = False
     aggro_sfx_played: bool = False
 
 
@@ -334,6 +337,13 @@ class ScoreValue:
 class LastHitBy:
     attacker_eid: int = -1
 
+# Sound ##############################################################################################
+
+@dataclass
+class SoundRequest:
+    event: str                          # "player_swing", "enemy_aggro", "enemy_hit", etc...
+    subtype: Optional[str] = None       # enemy size/type
+    global_event: bool = False          # for UI/map transitions
 # Sound ##############################################################################################
 
 @dataclass
