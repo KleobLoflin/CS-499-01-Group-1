@@ -252,6 +252,14 @@ def _find_or_create_remote_enemy(world, remote_id: int, atlas_id: str):
     comps[Sprite] = Sprite(atlas_id=atlas_id)
     comps[Life] = Life()
 
+    # enemy aggro sfx
+    size = _infer_enemy_size_from_atlas_id(atlas_id)
+    comps[SoundRequest] = SoundRequest(
+        event="enemy_aggro",
+        subtype=size,
+        global_event=False,
+    )
+
     return comps
 
 # Look up or create a client-side proxy entity representing a pickup owned by the host.
@@ -306,6 +314,9 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
             facing: Facing = comps[Facing]
             anim: AnimationState = comps[AnimationState]
             life: Life = comps[Life]
+            
+            # record previous HP
+            old_hp = life.hp
 
             # previous map id for this entity
             prev_map_id: Optional[str] = None
@@ -330,6 +341,11 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
                 if peer_id == my_peer_id and snapshot_map_id != prev_map_id:
                     pending_map_switch = snapshot_map_id
 
+                    # map transition SFX for local player
+                    comps[SoundRequest] = SoundRequest(
+                        event="map_transition",
+                        global_event=True,
+                    )
 
             # position from snapshot
             new_x = float(pdata.get("x", tr.x))
@@ -349,6 +365,13 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
             # life and facing
             life.hp = float(pdata.get("hp", life.hp))
             facing.direction = pdata.get("facing", facing.direction)
+
+            # player hit / death SFX for the Local player
+            if peer_id == my_peer_id:
+                if old_hp > 0 and life.hp <= 0:
+                    comps[SoundRequest] = SoundRequest(event="player_death")
+                elif life.hp < old_hp:
+                    comps[SoundRequest] = SoundRequest(event="player_hit")
 
             new_clip = pdata.get("clip", anim.clip)
 
@@ -386,6 +409,9 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
         anim: AnimationState = comps[AnimationState]
         life: Life = comps[Life]
 
+        # record previous HP
+        old_hp = life.hp
+
         tr.net_x = float(edata.get("x", tr.x))
         tr.net_y = float(edata.get("y", tr.y))
         facing.direction = edata.get("facing", facing.direction)
@@ -403,6 +429,19 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
                 om.id = snapshot_map_id
             else:
                 comps[OnMap] = OnMap(id=snapshot_map_id)
+
+        # enemy hit / death SFX on client
+        size = _infer_enemy_size_from_atlas_id(atlas_id)
+        if old_hp > 0 and life.hp <= 0:
+            comps[SoundRequest] = SoundRequest(
+                event="enemy_death",
+                subtype=size,
+            )
+        elif life.hp < old_hp:
+            comps[SoundRequest] = SoundRequest(
+                event="enemy_hit",
+                subtype=size,
+            )
 
     _cleanup_remote_category(world, "enemy", enemy_ids_in_snapshot)
 

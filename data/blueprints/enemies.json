@@ -136,7 +136,6 @@
             {"type": "lifeSpan", "duration": 5},
             {"type": "Projectile"},
             {"type": "HitboxSize", "radius": 3}
-            
         ]
     }
 

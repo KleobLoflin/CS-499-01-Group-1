@@ -39,6 +39,20 @@ class EnemyAISystem:#System):
             pos: Transform = comps[Transform]
             intent: Intent = comps[Intent]
 
+            # get enemy type for sound purposes
+            # add other types when they are integrated depending on what size sound you want
+            enemy_type = getattr(ai, "enemy_type", "")
+            if enemy_type in ("boss",):
+                size = "big"
+            elif enemy_type in ("big_zombie", ):
+                size = "medium"
+            elif enemy_type in ("chort",):
+                size = "small"
+            elif enemy_type in ("goblin",):
+                size = "tiny"
+            else:
+                size = "small"
+
             # pick nearest player on the same map as this AI
             target_pos: Transform | None = None
 
