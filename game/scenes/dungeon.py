@@ -101,9 +101,9 @@ class DungeonScene(Scene):
                 CameraBootstrapSystem(),
                 CameraFollowSystem(),
                 CameraClampSystem(),
+                SoundSystem(),  
                 LifeSpanSystem(),
                 death(),
-                SoundSystem(),           
             ]
             if self.role == "HOST":
                 self._attach_host_net_singleton()
@@ -116,9 +116,10 @@ class DungeonScene(Scene):
                 CameraBootstrapSystem(),
                 CameraFollowSystem(),
                 CameraClampSystem(),
+                SoundSystem(),
                 LifeSpanSystem(),
                 death(),
-                SoundSystem(),
+                
             ]
             self._attach_client_net_singleton()
         else : # fallback to SOLO
@@ -136,9 +137,10 @@ class DungeonScene(Scene):
                 CameraBootstrapSystem(),
                 CameraFollowSystem(),
                 CameraClampSystem(),
+                SoundSystem(),
                 LifeSpanSystem(),
                 death(),
-                SoundSystem(),
+                
             ]
 
         # Spawn players
