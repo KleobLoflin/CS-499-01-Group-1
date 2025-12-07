@@ -315,3 +315,22 @@ class RemoteEntity:
     remote_id: int
     category: str = "generic"
 
+# scoring components
+
+@dataclass
+class Score:
+    #Attach to a player entity. Holds the player's current score.
+    points: int = 0
+
+@dataclass
+class Scored:
+    #Marker added to a dead/consumed entity so we don't award score multiple times.
+    reason: str = "" 
+    
+@dataclass
+class ScoreValue:
+    amount: int = 0
+
+@dataclass
+class LastHitBy:
+    attacker_eid: int = -1

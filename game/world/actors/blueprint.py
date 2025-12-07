@@ -61,6 +61,11 @@ def build_Projectile(spec, ctx):
 def build_ProjectileSpawner(spec, ctx):
     return ProjectileSpawner(spawn_kind=spec["spawn_kind"])
 
+def build_Score(spec, ctx):
+    return Score(points=spec.get("points", 0))
+
+def build_ScoreValue(spec, ctx):
+    return ScoreValue(amount=spec.get("amount", 0))
 
 # gather all builder functions
 BUILDERS = {
@@ -79,6 +84,8 @@ BUILDERS = {
     "lifeSpan": build_lifeSpan,
     "Life": build_Life,
     "Owner": build_Owner,
+    "Score": build_Score,            
+    "ScoreValue": build_ScoreValue   ,
     "ProjectileRequest": build_ProjectileRequest,
     "Projectile": build_Projectile,
     "ProjectileSpawner": build_ProjectileSpawner,

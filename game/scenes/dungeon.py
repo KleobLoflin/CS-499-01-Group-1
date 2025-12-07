@@ -37,6 +37,8 @@ from game.world.systems.camera_follow import CameraFollowSystem
 from game.world.systems.camera_clamp import CameraClampSystem
 from game.world.systems.lifespan import LifeSpanSystem
 from game.world.systems.death import death
+from game.world.systems.scoring import ScoringSystem
+from game.world.systems.hud_render import HudRenderSystem
 from game.world.systems.projectile import ProjectileSpawnSystem
 
 # net
@@ -58,6 +60,7 @@ class DungeonScene(Scene):
         self.world = World()
         self.role = role.upper()
         self.render = RenderSystem()
+        self.hud = HudRenderSystem()
         self.spawn_requests: list[SpawnRequest] = spawn_requests or []
         self.player_id: int | None = None
         net.role = self.role
@@ -102,6 +105,7 @@ class DungeonScene(Scene):
                 CameraFollowSystem(),
                 CameraClampSystem(),
                 LifeSpanSystem(),
+                ScoringSystem(),
                 death(),
                 ProjectileSpawnSystem(),           
             ]
@@ -164,6 +168,7 @@ class DungeonScene(Scene):
     # renders all graphics
     def draw(self, surface: Surface) -> None:
         self.render.draw(self.world, surface)
+        self.hud.draw(self.world, surface) 
 
     # Map transitions ############################################################################
     def _ensure_map_loaded(self, map_id: str) -> None:
