@@ -185,7 +185,7 @@ class EnemyAISystem:#System):
     def spawn_projectile(self, world, pos, target_pos, owner_id, target_id):
         proj_id = create_enemy(
             world,
-            kind="homingarrow",
+            kind="skelet",
             pos=(pos.x, pos.y),
             params={
                 "owner": owner_id,

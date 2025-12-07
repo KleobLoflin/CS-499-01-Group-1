@@ -19,7 +19,7 @@ class ProjectileSpawnSystem:
 
             proj_id = create_enemy(
                 world,
-                kind="homingarrow",
+                kind="skelet",
                 pos=(tr.x, tr.y),
                 params={"owner": eid}
             )
@@ -38,6 +38,8 @@ class ProjectileSpawnSystem:
 
             intent.move_x = dx / dist
             intent.move_y = dy / dist
+
+            
 
             # CONSUME EVENT
             del world.entities[eid][ProjectileRequest]

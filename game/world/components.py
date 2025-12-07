@@ -115,6 +115,10 @@ class ProjectileRequest:
     target_pos: Tuple[float, float]  # where to aim    \
     fired: bool = False   
 
+@dataclass
+class Projectile:
+    pass
+
 
 # presentation #####################################################
 

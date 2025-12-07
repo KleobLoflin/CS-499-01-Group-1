@@ -55,6 +55,9 @@ def build_Owner(spec, ctx): return Owner(peer_id=ctx.get("owner", None))
 def build_ProjectileRequest(spec, ctx):
     return ProjectileRequest(target_pos=tuple(spec["target_pos"]))
 
+def build_Projectile(spec, ctx):
+    pass
+
 
 # gather all builder functions
 BUILDERS = {
@@ -74,6 +77,8 @@ BUILDERS = {
     "Life": build_Life,
     "Owner": build_Owner,
     "ProjectileRequest": build_ProjectileRequest,
+    "Projectile": build_Projectile,
+
 
 }
 

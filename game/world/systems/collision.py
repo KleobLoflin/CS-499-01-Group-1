@@ -1,6 +1,6 @@
 #WORKED ON BY: Colin Adams, Scott Petty, Nicholas Loflin, Matthew Payne
 #Class collision
-from game.world.components import Transform, HitboxSize, PlayerTag, Map, ActiveMapId, OnMap
+from game.world.components import Transform, HitboxSize, PlayerTag, Map, ActiveMapId, OnMap,  Projectile
 import pygame
 import math
 from game.core.config import Config
@@ -115,10 +115,14 @@ class CollisionSystem:
                 tr.x - entity_radius,
                 tr.y - entity_radius,
                 entity_radius * 2,
-                entity_radius -2
+                entity_radius * 2
             )
             for rect in collisions:
                 if entity_rect.colliderect(rect):
+
+                    if world.get(eid, Projectile):
+                        world.delete_entity(eid)
+                        break
                     # Calculate minimum push distance
                     dx_left = rect.right - entity_rect.left
                     dx_right = rect.left - entity_rect.right

@@ -458,6 +458,27 @@
                 }   
             }
         },
+
+         "enemy.necro":{
+            "mirror_x": true,
+            "origin": [8, 15],
+            "clips":{
+                "idle": { "fps": 6, "loop": true,
+                    "frames": ["assets/animations/enemys/necromancer_anim/0.png",
+                    "assets/animations/enemys/necromancer_anim/1.png",
+                    "assets/animations/enemys/necromancer_anim/2.png",
+                    "assets/animations/enemys/necromancer_anim/3.png"
+                    ]
+                },
+                "run": { "fps": 10, "loop": true,
+                    "frames": ["assets/animations/enemys/necromancer_anim/0.png",
+                    "assets/animations/enemys/necromancer_anim/1.png",
+                    "assets/animations/enemys/necromancer_anim/2.png",
+                    "assets/animations/enemys/necromancer_anim/3.png"
+                    ]
+                }   
+            }
+        },
         "enemy.big_demon":{
             "mirror_x": true,
             "origin": [8, 15],
@@ -474,6 +495,21 @@
                     "assets/animations/enemys/big_demon_run_anim/1.png",
                     "assets/animations/enemys/big_demon_run_anim/2.png",
                     "assets/animations/enemys/big_demon_run_anim/3.png"
+                    ]
+                }   
+            }
+        },
+
+          "enemy.arrow":{
+            "mirror_x": true,
+            "origin": [8, 15],
+            "clips":{
+                "idle": { "fps": 6, "loop": true,
+                    "frames": ["assets/weapons/weapon_arrow.png"
+                    ]
+                },
+                "run": { "fps": 10, "loop": true,
+                    "frames": ["assets/weapons/weapon_arrow.png"
                     ]
                 }   
             }
