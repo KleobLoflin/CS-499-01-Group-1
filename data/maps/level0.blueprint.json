@@ -20,8 +20,8 @@
       { "type": "potion_health", "pos": [224, 176] }
     ],
     "static_enemies": [
-      {"type": "boss", "pos": [37, 10]},
-      {"type": "necro", "pos": [54, 25]},
+      {"type": "boss", "pos": [200, -100]},
+      {"type": "necro", "pos": [300, -200]},
       {"type": "necro", "pos": [54, 10]},
       {"type": "necro", "pos": [0, 0]},
       {"type": "necro", "pos": [80, 10]}
