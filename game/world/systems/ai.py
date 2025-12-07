@@ -150,24 +150,6 @@ class EnemyAISystem:#System):
                             )
                             ai.last_aggro_target_id = current_target_id
                         
-
-                        # decide if aggro sound should play
-                        # 1. just started chasing, or
-                        # 2. switched to a different player target
-                        should_play_sound = False
-                        if not was_chasing and chasing_now:
-                            should_play_sound = True
-                        elif was_chasing and current_target_id is not None and current_target_id != last_sound_target_id:
-                            should_play_sound = True
-                        
-                        if should_play_sound:
-                            comps[SoundRequest] = SoundRequest(
-                                event="enemy_aggro",
-                                subtype=ai.size,
-                                global_event=False,
-                            )
-                            ai.last_aggro_target_id = current_target_id
-                        
                     else:
                         intent.move_x = 0.0
                         intent.move_y = 0.0
@@ -200,14 +182,43 @@ class EnemyAISystem:#System):
 
                 elif ai.kind == "Range":
 
-
                     spawner = comps.get(ProjectileSpawner)
                     if not spawner:
                         continue
 
-                    if dist > 10 and dist < ai.agro_range:  
-                        intent.move_x = dx / dist
-                        intent.move_y = dy / dist
+                    if dist > 10 and dist < ai.agro_range:
+                        # check if in range
+                        chasing_now = (dist > 10 and dist < ai.agro_range and target_pos is not None)
+
+                        # previous chasing state
+                        was_chasing = getattr(ai, "was_chasing", False)
+                        ai.was_chasing = chasing_now
+
+                        current_target_id = getattr(ai, "target_id", None)
+                        last_sound_target_id = getattr(ai, "last_aggro_target_id", None)
+
+                        if chasing_now:
+                            intent.move_x = dx / dist
+                            intent.move_y = dy / dist
+
+                            # decide if aggro sound should play
+                            # 1. just started chasing, or
+                            # 2. switched to a different player target
+                            should_play_sound = False
+                            if not was_chasing and chasing_now:
+                                should_play_sound = True
+                            elif was_chasing and current_target_id is not None and current_target_id != last_sound_target_id:
+                                should_play_sound = True
+                        
+                        
+                            if should_play_sound:
+                                comps[SoundRequest] = SoundRequest(
+                                    event="enemy_aggro",
+                                    subtype=ai.size,
+                                    global_event=False,
+                                )
+                                ai.last_aggro_target_id = current_target_id
+
                     else:
                         intent.move_x = 0.0
                         intent.move_y = 0.0

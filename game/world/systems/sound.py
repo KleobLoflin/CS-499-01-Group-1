@@ -93,7 +93,7 @@ class SoundSystem:
             if not reqs:
                 continue
             # If there were many, keep it to 2 per size
-            reqs = reqs[:2]
+            reqs = reqs[:3]
             group_id = f"enemy.aggro.{size}"
             for _req in reqs:
                 audio.play_sfx_group(group_id)
