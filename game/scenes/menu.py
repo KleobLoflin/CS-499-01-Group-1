@@ -23,6 +23,7 @@ from game.world.systems.movement import MovementSystem
 from game.world.systems.collision import CollisionSystem
 from game.world.systems.spawn import SpawnSystem
 from game.world.systems.ai import EnemyAISystem
+from game.world.systems.sound import SoundSystem
 
 from game.world.maps.map_index import load_registry, pick
 from game.world.maps.map_factory import create_or_activate
@@ -91,6 +92,7 @@ class TitleScene(Scene):
             CollisionSystem(),
             SpawnSystem(),
             self.menu_ui,
+            SoundSystem(),
         ]
 
     def exit(self) -> None:

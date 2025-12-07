@@ -56,7 +56,6 @@
             {"type": "Attack", "max_cooldown": 2},
             {"type": "lifeSpan", "duration": 5},
             {"type": "HitboxSize", "radius": 3}
-            
         ]
     }
 

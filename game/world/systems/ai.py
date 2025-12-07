@@ -12,7 +12,7 @@
 
 import random
 import time
-from game.world.components import Transform, Intent, AI, PlayerTag, OnMap
+from game.world.components import Transform, Intent, AI, PlayerTag, OnMap, SoundRequest
 
 # Moved AI dataclasses to components and now there is a "kind" label for the different kinds of AI.
 # I filtered each code block for ai.kind so that it only runs if the kind of AI matches.
@@ -41,6 +41,20 @@ class EnemyAISystem:#System):
             ai: AI = comps[AI]
             pos: Transform = comps[Transform]
             intent: Intent = comps[Intent]
+
+            # get enemy type for sound purposes
+            # add other types when they are integrated depending on what size sound you want
+            enemy_type = getattr(ai, "enemy_type", "")
+            if enemy_type in ("boss",):
+                size = "big"
+            elif enemy_type in ("big_zombie", ):
+                size = "medium"
+            elif enemy_type in ("chort",):
+                size = "small"
+            elif enemy_type in ("goblin",):
+                size = "tiny"
+            else:
+                size = "small"
 
             # choose target position
             target_pos: Transform | None = None
@@ -111,14 +125,25 @@ class EnemyAISystem:#System):
 
             else:
                 # only handle chase entities
-                if ai.kind == "chase" or "projectileHoming":
-                    if dist > 10 and dist < ai.agro_range:  
+                if ai.kind == "chase":
+                    if dist > 10 and dist < ai.agro_range:
                         intent.move_x = dx / dist
                         intent.move_y = dy / dist
+
+                        # chase sound request
+                        comps[SoundRequest] = SoundRequest(
+                            event="enemy_aggro",
+                            subtype=size,
+                            global_event=False,
+                        )
+                        
                     else:
                         intent.move_x = 0.0
                         intent.move_y = 0.0
-                    #if ai.kind == "projectileHoming":
+                
+                if ai.kind == "projectileHoming":
+                    # separated projectilehoming from chase because sounds should be different
+                    pass
 
                 elif ai.kind == "flee":
                 

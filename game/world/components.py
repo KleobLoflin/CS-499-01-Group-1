@@ -300,3 +300,10 @@ class RemoteEntity:
     remote_id: int
     category: str = "generic"
 
+# Sound ###############################################################################################
+
+@dataclass
+class SoundRequest:
+    event: str                          # "player_swing", "enemy_aggro", "enemy_hit", etc...
+    subtype: Optional[str] = None       # enemy size/type
+    global_event: bool = False          # for UI/map transitions
