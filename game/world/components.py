@@ -92,8 +92,6 @@ class AI:
     aggro_sfx_played: bool = False
 
 
-
-
 @dataclass
 class lifeSpan:
     duration: float = 5.0    # seconds until entity is removed
