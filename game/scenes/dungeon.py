@@ -105,7 +105,7 @@ class DungeonScene(Scene):
                 CameraBootstrapSystem(),
                 CameraFollowSystem(),
                 CameraClampSystem(),
-                SoundSystem(),
+                SoundSystem(),  
                 LifeSpanSystem(),
                 ScoringSystem(),
                 death(),
@@ -122,9 +122,10 @@ class DungeonScene(Scene):
                 CameraBootstrapSystem(),
                 CameraFollowSystem(),
                 CameraClampSystem(),
+                SoundSystem(),
                 LifeSpanSystem(),
                 death(),
-                SoundSystem(),
+                
                 ProjectileSpawnSystem(),
             ]
             self._attach_client_net_singleton()
@@ -143,9 +144,10 @@ class DungeonScene(Scene):
                 CameraBootstrapSystem(),
                 CameraFollowSystem(),
                 CameraClampSystem(),
+                SoundSystem(),
                 LifeSpanSystem(),
                 death(),
-                SoundSystem(),
+                
             ]
 
         # Spawn players
