@@ -81,11 +81,13 @@ class Room:
         wall_dec_coords = Room.get_occupied_coords(tmx_data, ("walls", "dec"))
 
         # 4) Add entities, applying perspective rule against wall/dec tiles.
-        for z, depth_y, eid, img, pos_world in entities_world:
-            wx, wy = pos_world  # world top-left of sprite
-            # feet in world pixels 
-            feet_y = wy + img.get_height()
-            feet_x = wx + img.get_width() // 2
+        # 4) Add entities, applying perspective rule against wall/dec tiles.
+        # entities_world now contains: (z, depth_y, eid, img, (wx, wy), tr_x)
+        for z, depth_y, eid, img, pos_world, tr_x in entities_world:
+            wx, wy = pos_world  # world top-left of sprite (for drawing)
+            # Use transform values for feet: tr_x (world x of "feet/anchor") and depth_y (world y).
+            feet_x = tr_x
+            feet_y = depth_y
 
             tile_x = int(feet_x // tw)
             tile_y = int(feet_y // th)
@@ -101,6 +103,7 @@ class Room:
             sy = int(wy + oy)
 
             drawables.append((depth_y_for_sort, 1, img, (sx, sy)))  # kind_rank 1 for entities
+
 
         # 5) Sort & draw
         drawables.sort(key=lambda d: (d[0], d[1]))

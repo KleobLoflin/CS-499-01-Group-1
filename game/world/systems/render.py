@@ -62,7 +62,9 @@ class RenderSystem:
             
             # get depth
             depth_y = int(tr.y)
-            entities_world.append((spr.z, depth_y, eid, img, pos))
+            # append tr.x so Room can compute feet x using the canonical transform
+            entities_world.append((spr.z, depth_y, eid, img, pos, tr.x))
+
 
         # get tmx data if it exists
         tmx_data = None
@@ -76,7 +78,7 @@ class RenderSystem:
         if tmx_data is None:
             # z and y-depth sort
             entities_world.sort(key=lambda d: (d[0], d[1]))
-            for _, _, _, img, pos in entities_world:
+            for _, _, _, img, pos, _ in entities_world:
                 surface.blit(img, pos)
             return
         

@@ -115,7 +115,7 @@ class CollisionSystem:
                 tr.x - entity_radius,
                 tr.y - entity_radius,
                 entity_radius * 2,
-                entity_radius * 2
+                entity_radius - 2 # -2 is required for bottom wall collision aestetics
             )
             for rect in collisions:
                 if entity_rect.colliderect(rect):
