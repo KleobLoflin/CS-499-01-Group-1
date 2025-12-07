@@ -2,7 +2,7 @@
 import pygame
 from pygame import Surface
 from typing import List, Dict
-from game.world.components import TitleMenu, TitleIntro
+from game.world.components import TitleMenu, TitleIntro, SoundRequest
 
 class TitleMenuSystem:
     def __init__(
@@ -24,13 +24,15 @@ class TitleMenuSystem:
         for _, comps in world.query(TitleMenu):
             menu: TitleMenu = comps[TitleMenu]
             if event.type == pygame.KEYDOWN:
+                old_index = menu.selected_index
+
                 if event.key in (pygame.K_UP, pygame.K_w):
                     menu.selected_index = (menu.selected_index - 1) % len(menu.options)
                 elif event.key in (pygame.K_DOWN, pygame.K_s):
                     menu.selected_index = (menu.selected_index + 1) % len(menu.options)
                 elif event.key in (pygame.K_RETURN, pygame.K_SPACE):
                     sel = menu.options[menu.selected_index].lower()
-                    # map to your roles
+                    # map to roles
                     if "host" in sel:
                         menu.selected_role = "host"
                     elif "join" in sel:
@@ -41,6 +43,13 @@ class TitleMenuSystem:
                         menu.selected_role = "quit"
                     else:
                         menu.selected_role = "single_player"
+
+                # sound request if selection changes
+                if menu.selected_index != old_index:
+                    comps[SoundRequest] = SoundRequest(
+                        event="menu_move",
+                        global_event=True,
+                    )
 
     def update(self, world, dt: float) -> None:
         pass

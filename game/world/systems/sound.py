@@ -132,19 +132,17 @@ class SoundSystem:
         elif event == "char_change":
             audio.play_sfx_group("ui.menu_item_change")
         elif event == "ready_up":
-            audio.play_sfx_group("ui.menu_item_change")
+            audio.play_sfx_group("ui.ready_up")
 
         #  Player actions 
         elif event == "player_swing":
             audio.play_sfx_group("player.sword_swing")
         elif event == "player_dash":
-            # Placeholder – you can give dashes their own SFX group later
-            audio.play_sfx_group("player.sword_swing")
+            audio.play_sfx_group("player.dash")
         elif event == "player_hit":
             audio.play_sfx_group("misc.damage")
         elif event == "player_death":
-            # You can create a dedicated player.death group later; for now medium-ish.
-            audio.play_sfx_group("enemy.death.medium")
+            audio.play_sfx_group("enemy.death.medium")  # change later when player death is implemented
 
         # Enemy actions 
         elif event == "enemy_hit":
@@ -155,4 +153,9 @@ class SoundSystem:
 
         # Map transitions 
         elif event == "map_transition":
-            audio.play_sfx_group("misc.chest_open") # later change this to a different sound
+            audio.play_sfx_group("misc.transition")
+        
+        # object interactions
+
+        elif event == "chest_open":
+            audio.play_sfx_group("misc.chest_open")

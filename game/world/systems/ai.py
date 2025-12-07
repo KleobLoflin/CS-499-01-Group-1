@@ -16,6 +16,8 @@ from game.world.actors.enemy_factory import create as create_enemy
 from game.world.components import Transform, Intent, AI, PlayerTag, OnMap, SoundRequest, ActiveMapId, Attack, ProjectileRequest, ProjectileSpawner
 from game.world.actors.blueprint import apply_blueprint
 from game.world.actors.blueprint_index import enemy as enemy_bp
+from game.sound.enemy_sound_utils import infer_enemy_size
+
 # Moved AI dataclasses to components and now there is a "kind" label for the different kinds of AI.
 # I filtered each code block for ai.kind so that it only runs if the kind of AI matches.
 # you can add code blocks for as many AI kinds as you want and just filter for the ai.kind string of choice.
@@ -39,19 +41,8 @@ class EnemyAISystem:#System):
             pos: Transform = comps[Transform]
             intent: Intent = comps[Intent]
 
-            # get enemy type for sound purposes
-            # add other types when they are integrated depending on what size sound you want
-            enemy_type = getattr(ai, "enemy_type", "")
-            if enemy_type in ("boss",):
-                size = "big"
-            elif enemy_type in ("big_zombie", ):
-                size = "medium"
-            elif enemy_type in ("chort",):
-                size = "small"
-            elif enemy_type in ("goblin",):
-                size = "tiny"
-            else:
-                size = "small"
+            # get enemy size
+            size = infer_enemy_size(ai)
 
             # pick nearest player on the same map as this AI
             target_pos: Transform | None = None

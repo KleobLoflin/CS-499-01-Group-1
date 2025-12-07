@@ -2,23 +2,10 @@
 # EDITED BY: Scott Petty
 
 from game.world.components import Intent, Attack, Transform, HitboxSize, PlayerTag, AI, Life, OnMap, LastHitBy, SoundRequest
+from game.sound.enemy_sound_utils import infer_enemy_size
 import math
 
-# helper to map enemy size from ai data ##############
-def _infer_enemy_size_from_ai(ai: AI) -> str:
-    enemy_type = getattr(ai, "enemy_type", "")
-    if enemy_type in ("boss",):
-        size = "big"
-    elif enemy_type in ("big_zombie", ):
-        size = "medium"
-    elif enemy_type in ("chort",):
-        size = "small"
-    elif enemy_type in ("goblin",):
-        size = "tiny"
-    else:
-        size = "small"
 
-    return size
 
 class AttackSystem:
     """
@@ -92,6 +79,7 @@ class AttackSystem:
                 atk.remaining_cooldown = atk.max_cooldown
                 self.swing_progress[eid] = 0.0
                 self.already_hit[eid] = set()
+                self.prev_tip[eid] = None
                 self.prev_tip[eid] = None
 
                 # attack sound request
@@ -190,7 +178,7 @@ class AttackSystem:
                             # decide enemy size
                             size = "small"
                             if enemy_ai is not None:
-                                size = _infer_enemy_size_from_ai(enemy_ai)
+                                size = infer_enemy_size(enemy_ai)
                             
                             # attach sound request
                             enemy_comps = world.components_of(enemy_id)
@@ -202,6 +190,7 @@ class AttackSystem:
                                     subtype=size,
                                     global_event=False,
                                 )
+                                
                             elif new_hp < old_hp:
                                 # enemy hit but still alive
                                 enemy_comps[SoundRequest] = SoundRequest(
