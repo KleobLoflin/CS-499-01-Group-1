@@ -96,6 +96,15 @@ class WorldSnapshot:
     enemies: List[EnemySnapshot]
     pickups: List[PickupSnapshot]
 
+@dataclass
+class SoundEventSnapshot:
+    event: str
+    subtype: str | None
+    global_event: bool
+    source_kind: str
+    host_id: int | None
+    peer_id: str | None
+
 
 # host-side ###############################################################
 
@@ -173,6 +182,36 @@ def build_world_snapshot(world, tick: int) -> Dict[str, Any]:
             atlas_id=spr.atlas_id,
             map_id=getattr(om, "id", None),
         ))
+    
+    # sound requests
+    sound_events: list[dict[str, Any]] = []
+    for eid, comps in world.query(SoundRequest):
+        req: SoundRequest = comps[SoundRequest]
+
+        # classify source
+        if PlayerTag in comps:
+            owner: Owner | None = comps.get(Owner)
+            peer_id = owner.peer_id if owner is not None else None
+            source_kind = "player"
+            host_id = None
+        elif AI in comps:
+            source_kind = "enemy"
+            host_id = eid
+            peer_id = None
+        else:
+            # map transition or global UI type of thing
+            source_kind = "global"
+            host_id = None
+            peer_id = None
+
+        sound_events.append({
+            "event": req.event,
+            "subtype": req.subtype,
+            "global_event": req.global_event,
+            "source_kind": source_kind,
+            "host_id": host_id,
+            "peer_id": peer_id,
+        })
 
     snapshot = WorldSnapshot(
         tick=tick,
@@ -188,6 +227,7 @@ def build_world_snapshot(world, tick: int) -> Dict[str, Any]:
         "players": [asdict(p) for p in snapshot.players],
         "enemies": [asdict(e) for e in snapshot.enemies],
         "pickups": [asdict(p) for p in snapshot.pickups],
+        "sound_events": sound_events,
     }
 
 
@@ -211,14 +251,6 @@ def _find_or_create_remote_enemy(world, remote_id: int, atlas_id: str):
     comps[AnimationState] = AnimationState()
     comps[Sprite] = Sprite(atlas_id=atlas_id)
     comps[Life] = Life()
-
-    # enemy aggro sfx
-    size = _infer_enemy_size_from_atlas_id(atlas_id)
-    comps[SoundRequest] = SoundRequest(
-        event="enemy_aggro",
-        subtype=size,
-        global_event=False,
-    )
 
     return comps
 
@@ -274,9 +306,6 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
             facing: Facing = comps[Facing]
             anim: AnimationState = comps[AnimationState]
             life: Life = comps[Life]
-            
-            # record previous HP
-            old_hp = life.hp
 
             # previous map id for this entity
             prev_map_id: Optional[str] = None
@@ -318,25 +347,21 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
                 tr.net_y = new_y
 
             # life and facing
-                life.hp = float(pdata.get("hp", life.hp))
-                facing.direction = pdata.get("facing", facing.direction)
+            life.hp = float(pdata.get("hp", life.hp))
+            facing.direction = pdata.get("facing", facing.direction)
 
-            # player hit / death SFX for the Local player
-            if peer_id == my_peer_id:
-                if old_hp > 0 and life.hp <= 0:
-                    comps[SoundRequest] = SoundRequest(event="player_death")
-                elif life.hp < old_hp:
-                    comps[SoundRequest] = SoundRequest(event="player_hit")
+            new_clip = pdata.get("clip", anim.clip)
 
-                new_clip = pdata.get("clip", anim.clip)
-
-                # if clip changes
-                if new_clip != anim.clip:
-                    anim.clip = new_clip
-                    anim.time = 0.0
-                    anim.frame = 0
-                    anim.changed = True
-                    break
+            # if clip changes
+            if new_clip != anim.clip:
+                anim.clip = new_clip
+                anim.time = 0.0
+                anim.frame = 0
+                anim.changed = True
+            
+            # found matching entity so stop scanning
+            break
+        
         if pending_map_switch is not None:
             target_id = resolve_map_hint_to_id(pending_map_switch) or pending_map_switch
             create_or_activate(world, target_id)
@@ -361,9 +386,6 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
         anim: AnimationState = comps[AnimationState]
         life: Life = comps[Life]
 
-        # record previous HP
-        old_hp = life.hp
-
         tr.net_x = float(edata.get("x", tr.x))
         tr.net_y = float(edata.get("y", tr.y))
         facing.direction = edata.get("facing", facing.direction)
@@ -381,19 +403,6 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
                 om.id = snapshot_map_id
             else:
                 comps[OnMap] = OnMap(id=snapshot_map_id)
-
-        # enemy hit / death SFX on client
-        size = _infer_enemy_size_from_atlas_id(atlas_id)
-        if old_hp > 0 and life.hp <= 0:
-            comps[SoundRequest] = SoundRequest(
-                event="enemy_death",
-                subtype=size,
-            )
-        elif life.hp < old_hp:
-            comps[SoundRequest] = SoundRequest(
-                event="enemy_hit",
-                subtype=size,
-            )
 
     _cleanup_remote_category(world, "enemy", enemy_ids_in_snapshot)
 
@@ -426,3 +435,44 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
                 comps[OnMap] = OnMap(id=snapshot_map_id)
 
     _cleanup_remote_category(world, "pickup", pickup_ids_in_snapshot)
+
+    # Sound Requests
+    sound_events = msg.get("sound_events", [])
+    for ev in sound_events:
+        event = ev.get("event")
+        subtype = ev.get("subtype")
+        global_event = bool(ev.get("global_event", False))
+        source_kind = ev.get("source_kind")
+        host_id = ev.get("host_id")
+        peer_id = ev.get("peer_id")
+
+        target_comps = None
+
+        if source_kind == "enemy" and host_id is not None:
+            # map host enemy id to RemoteEntity enemy
+            for _eid, comps in world.query(RemoteEntity, Transform, Sprite, Life):
+                rem: RemoteEntity = comps[RemoteEntity]
+                if rem.category == "enemy" and rem.remote_id == host_id:
+                    target_comps = comps
+                    break
+
+        elif source_kind == "player" and peer_id is not None:
+            # map peer_id to local PlayerTag entity
+            for _eid, comps in world.query(PlayerTag, Owner, Transform, Life):
+                owner: Owner = comps[Owner]
+                if owner.peer_id == peer_id:
+                    target_comps = comps
+                    break
+        
+        else:
+            # global sound event
+            e = world.new_entity()
+            target_comps = world.components_of(e)
+
+        if target_comps is not None:
+            target_comps[SoundRequest] = SoundRequest(
+                event=event,
+                subtype=subtype,
+                global_event=global_event,
+            )
+
