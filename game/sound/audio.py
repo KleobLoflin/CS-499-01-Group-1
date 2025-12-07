@@ -143,7 +143,7 @@ def _set_music_track(
     try:
         pygame.mixer.music.fadeout(max(0, fade_ms))
         pygame.mixer.music.load(music_path)
-        pygame.mixer.music.set_volume(max(0.0, min(0.5, float(volume))))
+        pygame.mixer.music.set_volume(max(0.0, min(0.36, float(volume))))
         pygame.mixer.music.play(loops=loop, fade_ms=max(0, fade_ms))
         _current_music_id = music_path
     except Exception as e:
@@ -227,7 +227,7 @@ def set_scene_music(
 # register sound groups using asset paths
 # this gets called once after pygame.init()
 def bootstrap_sounds() -> None:
-    # player sword swing ######################################
+    # player sounds ######################################
     register_group(
         "player.sword_swing",
         [
@@ -242,6 +242,16 @@ def bootstrap_sounds() -> None:
         ],
         min_interval_ms=30,
         volume=0.9,
+    )
+
+    register_group(
+        "player.dash",
+        [
+            "assets/sounds/player/dash/Woosh_1.ogg",
+            "assets/sounds/player/dash/Woosh_2.ogg",
+        ],
+        min_interval_ms=60,
+        volume=0.7
     )
 
     # enemy aggro sounds ###################################################
@@ -264,7 +274,7 @@ def bootstrap_sounds() -> None:
             "assets/sounds/enemy/medium/grunt/Noise_Medium_Monster_3.wav",
         ],
         min_interval_ms=150,
-        volume=8.0,
+        volume=0.8,
     )
 
     register_group(
@@ -309,7 +319,7 @@ def bootstrap_sounds() -> None:
             "assets/sounds/enemy/medium/death/Noise_Medium_Monster_Down_3.wav",
         ],
         min_interval_ms=50,
-        volume=0.8,
+        volume=0.9,
     )
 
     register_group(
@@ -320,7 +330,7 @@ def bootstrap_sounds() -> None:
             "assets/sounds/enemy/small/death/Noise_Small_Monster_Down_3.wav",
         ],
         min_interval_ms=50,
-        volume=0.7,
+        volume=0.8,
     )
 
     register_group(
@@ -331,7 +341,7 @@ def bootstrap_sounds() -> None:
             "assets/sounds/enemy/tiny/death/Noise_Tiny_Monster_Down_3.wav",
         ],
         min_interval_ms=50,
-        volume=0.7,
+        volume=0.8,
     )
 
     # shared damage sounds #######################################################
@@ -361,8 +371,27 @@ def bootstrap_sounds() -> None:
     register_group(
         "ui.menu_item_change",
         [
-            "assets/sounds/ui/menu_item_change/1.wav",
+            "assets/sounds/ui/menu_item_change/UI - Button Select 1.wav",
         ],
         min_interval_ms=60,
-        volume=1.0,
+        volume=0.7,
+    )
+
+    register_group(
+        "ui.ready_up",
+        [
+            "assets/sounds/ui/ready_up/UI - Button 01.wav"
+        ],
+        min_interval_ms=60,
+        volume=0.9,
+    )
+
+    # other sounds ###############################################################################
+    register_group(
+        "misc.transition",
+        [
+            "assets/sounds/misc/transition/Transportation - Move 01.wav"
+        ],
+        min_interval_ms=60,
+        volume=0.6,
     )

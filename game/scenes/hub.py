@@ -31,6 +31,7 @@ from game.world.components import (
     NetIdentity, Owner, SpawnRequest,
     PlayerTag, LocalControlled,
     Transform, Facing, Sprite, AnimationState,
+    SoundRequest,
 )
 from game.world.actors.hero_factory import create as create_hero
 from game.world.systems.animation import AnimationSystem
@@ -689,6 +690,7 @@ class HubScene(Scene):
 
         catalog_len = len(self.HERO_CATALOG)
 
+        # UP
         if key in (pygame.K_UP, pygame.K_w):
             slot.selected_char_index = (slot.selected_char_index - 1) % catalog_len
             slot.ready = False
@@ -702,6 +704,15 @@ class HubScene(Scene):
                         "type": MSG_LOBBY_STATE,
                         "slots": self._build_lobby_slots_payload(),
                     })
+            
+            # register sound for character selection change
+            slot_comps = self.world.components_of(slot_eid)
+            slot_comps[SoundRequest] = SoundRequest(
+                event="menu_move",
+                global_event=True,
+            )
+
+        # DOWN
         elif key in (pygame.K_DOWN, pygame.K_s):
             slot.selected_char_index = (slot.selected_char_index + 1) % catalog_len
             slot.ready = False
@@ -714,6 +725,15 @@ class HubScene(Scene):
                     "type": MSG_LOBBY_STATE,
                     "slots": self._build_lobby_slots_payload(),
                 })
+            
+            # register sound for character selection change
+            slot_comps = self.world.components_of(slot_eid)
+            slot_comps[SoundRequest] = SoundRequest(
+                event="menu_move",
+                global_event=True,
+            )
+
+        # SELECT
         elif key in (pygame.K_RETURN, pygame.K_SPACE):
             slot.ready = not slot.ready
             if self.mode == "JOIN":
@@ -724,6 +744,13 @@ class HubScene(Scene):
                         "type": MSG_LOBBY_STATE,
                         "slots": self._build_lobby_slots_payload(),
                     })
+            
+            # register sound for character selection change
+            slot_comps = self.world.components_of(slot_eid)
+            slot_comps[SoundRequest] = SoundRequest(
+                event="ready_up",
+                global_event=True,
+            )
 
         # Host-only shortcut: R key toggles all non-empty slots to ready 
         elif key == pygame.K_r and self.mode == "HOST":

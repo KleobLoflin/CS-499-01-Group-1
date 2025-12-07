@@ -90,15 +90,12 @@ class AI:
     target_id: int|None = None  # explicit target; None = auto-pick nearest player
     agro_range: int = 0   # distance to start chasing
     aggro_sfx_played: bool = False
-    aggro_sfx_played: bool = False
 
 
 @dataclass
 class lifeSpan:
     duration: float = 5.0    # seconds until entity is removed
     elapsed: float = 0.0     # time elapsed since creation
-
-
 
 @dataclass
 class Life:
@@ -110,8 +107,6 @@ class Damage:
     owner_id: Optional[int] = None  # entity that caused the damage
     # friendly fire option here later?
     
-
-
 # presentation #####################################################
 
 @dataclass

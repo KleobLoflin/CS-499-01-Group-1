@@ -2,7 +2,7 @@
 # game/world/systems/triggers.py
 #Performs actions based on invisble rectangles in the map
 import pygame
-from game.world.components import Transform, Map, OnMap, PlayerTag
+from game.world.components import Transform, Map, OnMap, PlayerTag, SoundRequest
 
 class TriggerSystem:
     def __init__(self, scene):
@@ -87,6 +87,13 @@ class TriggerSystem:
 
                 # record the transition
                 pending_transitions.append((pid, target_map, tx, ty))
+
+                # sound request for map transition
+                comps_pid = world.components_of(pid)
+                comps_pid[SoundRequest] = SoundRequest(
+                    event="map_transition",   
+                    global_event=False,       
+                )
 
                 # Don't process multiple exits for the same player in a single frame
                 break
