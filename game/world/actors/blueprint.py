@@ -58,6 +58,9 @@ def build_ProjectileRequest(spec, ctx):
 def build_Projectile(spec, ctx):
     pass
 
+def build_ProjectileSpawner(spec, ctx):
+    return ProjectileSpawner(spawn_kind=spec["spawn_kind"])
+
 
 # gather all builder functions
 BUILDERS = {
@@ -78,6 +81,7 @@ BUILDERS = {
     "Owner": build_Owner,
     "ProjectileRequest": build_ProjectileRequest,
     "Projectile": build_Projectile,
+    "ProjectileSpawner": build_ProjectileSpawner,
 
 
 }

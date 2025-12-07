@@ -13,7 +13,7 @@
 import random
 import time
 from game.world.actors.enemy_factory import create as create_enemy
-from game.world.components import Transform, Intent, AI, PlayerTag, OnMap, ActiveMapId, Attack, ProjectileRequest
+from game.world.components import Transform, Intent, AI, PlayerTag, OnMap, ActiveMapId, Attack, ProjectileRequest, ProjectileSpawner
 from game.world.actors.blueprint import apply_blueprint
 from game.world.actors.blueprint_index import enemy as enemy_bp
 # Moved AI dataclasses to components and now there is a "kind" label for the different kinds of AI.
@@ -38,6 +38,7 @@ class EnemyAISystem:#System):
             ai: AI = comps[AI]
             pos: Transform = comps[Transform]
             intent: Intent = comps[Intent]
+
 
             # choose target position
             target_pos: Transform | None = None
@@ -141,7 +142,12 @@ class EnemyAISystem:#System):
 
                 elif ai.kind == "Range":
 
-                    if dist > 30 and dist < ai.agro_range:  
+
+                    spawner = comps.get(ProjectileSpawner)
+                    if not spawner:
+                        continue
+
+                    if dist > 10 and dist < ai.agro_range:  
                         intent.move_x = dx / dist
                         intent.move_y = dy / dist
                     else:
@@ -164,12 +170,12 @@ class EnemyAISystem:#System):
                         if dist < ai.agro_range and dist > 10:
                             if world.get(entity_id, ProjectileRequest) is None:
 
-                                spawn_kind = getattr(ai, "spawn_kind", "skelet")
+                                spawn_kind =spawner.spawn_kind 
                                 print("ProjectileRequest added for", entity_id)
                                 world.add(
                                     entity_id,
-                                    ProjectileRequest(target_pos=(target_pos.x, target_pos.y,
-                                                                  spawn_kind))
+                                    ProjectileRequest(target_pos=(target_pos.x, target_pos.y), spawn_kind=spawn_kind)
+                                                                 
                                     
                                         )
 
@@ -183,33 +189,3 @@ class EnemyAISystem:#System):
                     intent.facing = "left"
             elif intent.move_x > 0.01:
                     intent.facing = "right"
-
-
-    def spawn_projectile(self, world, pos, target_pos, owner_id, target_id):
-        proj_id = create_enemy(
-            world,
-            kind="skelet",
-            pos=(pos.x, pos.y),
-            params={
-                "owner": owner_id,
-                "target_id": target_id
-            }
-        )
-
-        # put projectile on same map as owner
-        owner_onmap = world.get(owner_id, OnMap)
-        if owner_onmap:
-            world.add(proj_id, OnMap(id=owner_onmap.id))
-
-        # give initial direction
-        dx = target_pos.x - pos.x
-        dy = target_pos.y - pos.y
-        dist = max((dx*dx + dy*dy)**0.5, 0.001)
-
-        proj_intent = world.get(proj_id, Intent)
-        if proj_intent:
-            proj_intent.move_x = dx / dist
-            proj_intent.move_y = dy / dist
-
-        print("Projectile spawned:", proj_id)
-

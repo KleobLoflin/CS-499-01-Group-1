@@ -89,6 +89,7 @@ class AI:
     kind: str   # current kinds: "chase", "flee", "wander", ...
     target_id: int|None = None  # explicit target; None = auto-pick nearest player
     agro_range: int = 0   # distance to start chasing
+   
 
 
 
@@ -120,6 +121,10 @@ class ProjectileRequest:
 class Projectile:
     pass
 
+
+@dataclass
+class ProjectileSpawner:
+    spawn_kind: str
 
 # presentation #####################################################
 

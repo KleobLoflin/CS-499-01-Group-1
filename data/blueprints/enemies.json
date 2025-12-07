@@ -50,9 +50,10 @@
             {"type": "Transform"},
             {"type": "Intent"},
             {"type": "Movement", "speed": 0},
-            {"type": "AI", "kind": "Range", "agro_range": 150,  "spawn_kind": "skelet"},
+            {"type": "AI", "kind": "Range", "agro_range": 150},
             {"type": "Sprite", "atlas": "enemy.necro", "z": 10},
             {"type": "AnimationState", "clip": "idle"},
+            {"type": "ProjectileSpawner", "spawn_kind": "skelet"},
             {"type": "Facing"},
             {"type": "Attack", "max_cooldown": 2},
             {"type": "HitboxSize", "radius": 6},
@@ -70,10 +71,11 @@
             {"type": "Transform"},
             {"type": "Intent"},
             {"type": "Movement", "speed": 45},
-            {"type": "AI", "kind": "chase", "agro_range": 150},
+            {"type": "AI", "kind": "chase", "agro_range": 125},
             {"type": "Sprite", "atlas": "enemy.skelet", "z": 10},
             {"type": "AnimationState", "clip": "idle"},
             {"type": "Facing"},
+             {"type": "Facing"},
             {"type": "Attack", "max_cooldown": 2},
             {"type": "HitboxSize", "radius": 6},
             {"type": "Life", "hp": 2}
@@ -85,13 +87,14 @@
         "components": [
             {"type": "Transform"},
             {"type": "Intent"},
-            {"type": "Movement", "speed": 75},
-            {"type": "AI", "kind": "Range", "agro_range": 150},
+            {"type": "Movement", "speed": 45},
+            {"type": "AI", "kind": "Range", "agro_range": 200,"spawn_kind": "chort"},
             {"type": "Sprite", "atlas": "enemy.big_demon", "z": 10},
             {"type": "AnimationState", "clip": "idle"},
+            {"type": "ProjectileSpawner", "spawn_kind": "chort"},
             {"type": "Facing"},
             {"type": "Attack", "max_cooldown": 2},
-            {"type": "HitboxSize", "radius": 6},
+            {"type": "HitboxSize", "radius": 12},
             {"type": "Life", "hp": 15}
         ]
 
