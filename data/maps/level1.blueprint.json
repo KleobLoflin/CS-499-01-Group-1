@@ -29,8 +29,8 @@
       { "type": "goblin", "tile_pos": [6, 32] },
       { "type": "goblin", "tile_pos": [7, 36] },
       { "type": "skelet", "tile_pos": [8, 34] },
-      { "type": "necro", "tile_pos": [10, 20] },
-      { "type": "boss", "tile_pos": [12, 27] }
+      { "type": "boss", "tile_pos": [12, 27] },
+      { "type": "necro", "tile_pos": [10, 25] }
     ],
     "exits": [
       { "to": "level1", "region": "east" }

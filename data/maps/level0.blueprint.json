@@ -20,8 +20,11 @@
       { "type": "potion_health", "pos": [224, 176] }
     ],
     "static_enemies": [
-      { "type": "chort", "pos": [22, 8] },
-      { "type": "big_zombie", "pos": [22, 13]}
+      {"type": "boss", "pos": [37, 10]},
+      {"type": "necro", "pos": [54, 25]},
+      {"type": "necro", "pos": [54, 10]},
+      {"type": "necro", "pos": [0, 0]},
+      {"type": "necro", "pos": [80, 10]}
     ],
     "exits": [
       { "to": "level1", "region": "east" }
