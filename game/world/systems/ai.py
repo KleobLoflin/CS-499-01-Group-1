@@ -41,9 +41,6 @@ class EnemyAISystem:#System):
             pos: Transform = comps[Transform]
             intent: Intent = comps[Intent]
 
-            # get enemy size
-            size = infer_enemy_size(ai)
-
             # pick nearest player on the same map as this AI
             target_pos: Transform | None = None
 
@@ -146,7 +143,7 @@ class EnemyAISystem:#System):
                         if should_play_sound:
                             comps[SoundRequest] = SoundRequest(
                                 event="enemy_aggro",
-                                subtype=size,
+                                subtype=ai.size,
                                 global_event=False,
                             )
                             ai.last_aggro_target_id = current_target_id
