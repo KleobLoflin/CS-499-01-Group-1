@@ -118,7 +118,7 @@ def build_world_snapshot(world, tick: int) -> Dict[str, Any]:
         host_map_id = comps[ActiveMapId].id
         break
 
-    # Players
+    # Players ################################################################
     players: List[PlayerSnapshot] = []
     for _eid, comps in world.query(PlayerTag, Owner, Transform, Facing, AnimationState, Life):
         owner: Owner = comps[Owner]
@@ -141,7 +141,7 @@ def build_world_snapshot(world, tick: int) -> Dict[str, Any]:
             score=score.points if score else 0,
         ))
 
-    # Enemies: any AI+Life entity that is not tagged as a Player
+    # Enemies #################################################################
     enemies: List[EnemySnapshot] = []
     for eid, comps in world.query(AI, Life, Transform, Facing, AnimationState, Sprite):
         if PlayerTag in comps:
@@ -166,7 +166,7 @@ def build_world_snapshot(world, tick: int) -> Dict[str, Any]:
             map_id=getattr(om, "id", None),
         ))
 
-    # Pickups
+    # Pickups ####################################################
     pickups: List[PickupSnapshot] = []
     for eid, comps in world.query(Pickup, Transform, Sprite):
         tr: Transform = comps[Transform]
@@ -183,7 +183,7 @@ def build_world_snapshot(world, tick: int) -> Dict[str, Any]:
             map_id=getattr(om, "id", None),
         ))
     
-    # sound requests
+    # sound requests ###########################################
     sound_events: list[dict[str, Any]] = []
     for eid, comps in world.query(SoundRequest):
         req: SoundRequest = comps[SoundRequest]
@@ -406,7 +406,7 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
 
     _cleanup_remote_category(world, "enemy", enemy_ids_in_snapshot)
 
-    # Pickups
+    # Pickups #########################################################
     pickups_data = msg.get("pickups", [])
     pickup_ids_in_snapshot: set[int] = set()
 
@@ -436,7 +436,7 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
 
     _cleanup_remote_category(world, "pickup", pickup_ids_in_snapshot)
 
-    # Sound Requests
+    # Sound Requests #####################################################
     sound_events = msg.get("sound_events", [])
     for ev in sound_events:
         event = ev.get("event")

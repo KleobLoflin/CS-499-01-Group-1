@@ -369,7 +369,10 @@ class DungeonScene(Scene):
             peers=net.peers,
         ))
 
-        self.world.systems.append(NetHostSystem())
+        # NetHostSystem needs to run after all sound request producing systems but before SoundSystem
+        for idx, sys in enumerate(self.world.systems):
+            if isinstance(sys, CollisionSystem):
+                self.world.systems.insert(idx + 1, NetHostSystem())
 
     def _attach_client_net_singleton(self) -> None:
         """Attach NetClientState to the existing NetClient that was created in HubScene"""
