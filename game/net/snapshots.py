@@ -23,6 +23,7 @@ from game.world.components import (
     RemoteEntity,
     ActiveMapId,
     OnMap,
+    Score
 )
 
 from game.world.maps.map_factory import create_or_activate, resolve_map_hint_to_id
@@ -37,6 +38,7 @@ class PlayerSnapshot:
     frame: int
     hp: float
     map_id: Optional[str] = None
+    score: int
 
 
 @dataclass
@@ -92,6 +94,7 @@ def build_world_snapshot(world, tick: int) -> Dict[str, Any]:
         anim: AnimationState = comps[AnimationState]
         life: Life = comps[Life]
         om: OnMap | None = world.get(_eid, OnMap)
+        score = world.get(_eid, Score)
 
         players.append(PlayerSnapshot(
             peer_id=owner.peer_id,
@@ -102,6 +105,7 @@ def build_world_snapshot(world, tick: int) -> Dict[str, Any]:
             frame=anim.frame,
             hp=life.hp,
             map_id=getattr(om, "id", None),
+            score=score.points if score else 0,
         ))
 
     # Enemies: any AI+Life entity that is not tagged as a Player
@@ -277,15 +281,18 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
 
             new_clip = pdata.get("clip", anim.clip)
 
-            # if clip changes
-            if new_clip != anim.clip:
-                anim.clip = new_clip
-                anim.time = 0.0
-                anim.frame = 0
-                anim.changed = True
-
-            # found matching entity so stop scanning
-            break
+                # if clip changes
+                if new_clip != anim.clip:
+                    anim.clip = new_clip
+                    anim.time = 0.0
+                    anim.frame = 0
+                    anim.changed = True
+                    break
+                score_val = pdata.get("score")
+                if score_val is not None:
+                    score_comp = world.get(_eid, Score)
+                    if score_comp:
+                        score_comp.points = int(score_val)     
 
     # Enemies ###############################
     enemies_data = msg.get("enemies", [])
