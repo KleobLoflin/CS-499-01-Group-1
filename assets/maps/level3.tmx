@@ -446,9 +446,9 @@
  <objectgroup id="6" name="triggers">
   <object id="96" x="768" y="560" width="32" height="32">
    <properties>
-    <property name="target_map" value="level0"/>
-    <property name="target_x" value="50"/>
-    <property name="target_y" value="180"/>
+    <property name="target_map" value="level4"/>
+    <property name="target_x" value="145"/>
+    <property name="target_y" value="240"/>
     <property name="trigger_type" value="exit"/>
    </properties>
   </object>

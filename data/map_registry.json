@@ -9,13 +9,6 @@
             "weight": 1
         },
         {
-            "id": "level0",
-            "tmx_path": "assets/maps/level0.tmx",
-            "blueprint_path": "data/maps/level0.blueprint.json",
-            "tags": ["tier0"],
-            "weight": 1
-        },
-        {
             "id": "hub",
             "tmx_path": "assets/maps/hub.tmx",
             "blueprint_path": "data/maps/hub.blueprint.json",
@@ -40,6 +33,13 @@
             "id": "level3",
             "tmx_path": "assets/maps/level3.tmx",
             "blueprint_path": "data/maps/level3.blueprint.json",
+            "tags": ["tier0"],
+            "weight": 1
+        },
+                {
+            "id": "level4",
+            "tmx_path": "assets/maps/level4.tmx",
+            "blueprint_path": "data/maps/level4.blueprint.json",
             "tags": ["tier0"],
             "weight": 1
         }
