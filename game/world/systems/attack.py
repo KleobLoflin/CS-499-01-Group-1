@@ -20,6 +20,22 @@ def _infer_enemy_size_from_ai(ai: AI) -> str:
 
     return size
 
+# helper to map enemy size from ai data ##############
+def _infer_enemy_size_from_ai(ai: AI) -> str:
+    enemy_type = getattr(ai, "enemy_type", "")
+    if enemy_type in ("boss",):
+        size = "big"
+    elif enemy_type in ("big_zombie", ):
+        size = "medium"
+    elif enemy_type in ("chort",):
+        size = "small"
+    elif enemy_type in ("goblin",):
+        size = "tiny"
+    else:
+        size = "small"
+
+    return size
+
 class AttackSystem:
     """
     Anim-matched swings:
@@ -93,6 +109,11 @@ class AttackSystem:
                 self.swing_progress[eid] = 0.0
                 self.already_hit[eid] = set()
                 self.prev_tip[eid] = None
+                self.prev_tip[eid] = None
+
+                # attack sound request
+                if PlayerTag in comps:
+                    comps[SoundRequest] = SoundRequest(event="player_swing")
 
                 # attack sound request
                 if PlayerTag in comps:
@@ -182,7 +203,10 @@ class AttackSystem:
                         enemy_life = world.get(enemy_id, Life)
                         enemy_ai: AI | None = world.get(enemy_id, AI)
 
+                        enemy_ai: AI | None = world.get(enemy_id, AI)
+
                         if enemy_life:
+                            old_hp = enemy_life.hp
                             old_hp = enemy_life.hp
                             enemy_life.hp -= atk.damage
                             new_hp = enemy_life.hp

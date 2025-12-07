@@ -105,6 +105,7 @@ class DungeonScene(Scene):
                 CameraFollowSystem(),
                 CameraClampSystem(),
                 SoundSystem(),  
+                SoundSystem(),  
                 LifeSpanSystem(),
                 ScoringSystem(),
                 death(),
@@ -121,8 +122,10 @@ class DungeonScene(Scene):
                 CameraFollowSystem(),
                 CameraClampSystem(),
                 SoundSystem(),
+                SoundSystem(),
                 LifeSpanSystem(),
                 death(),
+                
                 
             ]
             self._attach_client_net_singleton()
@@ -142,8 +145,10 @@ class DungeonScene(Scene):
                 CameraFollowSystem(),
                 CameraClampSystem(),
                 SoundSystem(),
+                SoundSystem(),
                 LifeSpanSystem(),
                 death(),
+                
                 
             ]
 
@@ -369,6 +374,10 @@ class DungeonScene(Scene):
             peers=net.peers,
         ))
 
+        # NetHostSystem needs to run after all sound request producing systems but before SoundSystem
+        for idx, sys in enumerate(self.world.systems):
+            if isinstance(sys, CollisionSystem):
+                self.world.systems.insert(idx + 1, NetHostSystem())
         # NetHostSystem needs to run after all sound request producing systems but before SoundSystem
         for idx, sys in enumerate(self.world.systems):
             if isinstance(sys, CollisionSystem):
