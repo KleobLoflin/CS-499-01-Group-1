@@ -276,10 +276,10 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
                 tr.net_y = new_y
 
             # life and facing
-            life.hp = float(pdata.get("hp", life.hp))
-            facing.direction = pdata.get("facing", facing.direction)
+                life.hp = float(pdata.get("hp", life.hp))
+                facing.direction = pdata.get("facing", facing.direction)
 
-            new_clip = pdata.get("clip", anim.clip)
+                new_clip = pdata.get("clip", anim.clip)
 
                 # if clip changes
                 if new_clip != anim.clip:
