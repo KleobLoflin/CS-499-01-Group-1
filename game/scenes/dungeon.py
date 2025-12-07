@@ -37,6 +37,7 @@ from game.world.systems.camera_follow import CameraFollowSystem
 from game.world.systems.camera_clamp import CameraClampSystem
 from game.world.systems.lifespan import LifeSpanSystem
 from game.world.systems.death import death
+from game.world.systems.sound import SoundSystem
 from game.world.systems.scoring import ScoringSystem
 from game.world.systems.hud_render import HudRenderSystem
 
@@ -105,7 +106,8 @@ class DungeonScene(Scene):
                 CameraClampSystem(),
                 LifeSpanSystem(),
                 ScoringSystem(),
-                death()
+                death(),
+                SoundSystem(),           
             ]
             if self.role == "HOST":
                 self._attach_host_net_singleton()
@@ -120,6 +122,7 @@ class DungeonScene(Scene):
                 CameraClampSystem(),
                 LifeSpanSystem(),
                 death(),
+                SoundSystem(),
             ]
             self._attach_client_net_singleton()
         else : # fallback to SOLO
@@ -139,6 +142,7 @@ class DungeonScene(Scene):
                 CameraClampSystem(),
                 LifeSpanSystem(),
                 death(),
+                SoundSystem(),
             ]
 
         # Spawn players

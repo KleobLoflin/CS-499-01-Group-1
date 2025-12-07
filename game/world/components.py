@@ -319,3 +319,11 @@ class ScoreValue:
 @dataclass
 class LastHitBy:
     attacker_eid: int = -1
+
+# Sound ##############################################################################################
+
+@dataclass
+class SoundRequest:
+    event: str                          # "player_swing", "enemy_aggro", "enemy_hit", etc...
+    subtype: Optional[str] = None       # enemy size/type
+    global_event: bool = False          # for UI/map transitions

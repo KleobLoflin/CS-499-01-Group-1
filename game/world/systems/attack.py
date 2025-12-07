@@ -1,5 +1,24 @@
-from game.world.components import Intent, Attack, Transform, HitboxSize, PlayerTag, AI, Life, OnMap, LastHitBy
+# AUTHORED BY: Matthew Payne
+# EDITED BY: Scott Petty
+
+from game.world.components import Intent, Attack, Transform, HitboxSize, PlayerTag, AI, Life, OnMap, LastHitBy, SoundRequest
 import math
+
+# helper to map enemy size from ai data ##############
+def _infer_enemy_size_from_ai(ai: AI) -> str:
+    enemy_type = getattr(ai, "enemy_type", "")
+    if enemy_type in ("boss",):
+        size = "big"
+    elif enemy_type in ("big_zombie", ):
+        size = "medium"
+    elif enemy_type in ("chort",):
+        size = "small"
+    elif enemy_type in ("goblin",):
+        size = "tiny"
+    else:
+        size = "small"
+
+    return size
 
 class AttackSystem:
     """
@@ -73,7 +92,11 @@ class AttackSystem:
                 atk.remaining_cooldown = atk.max_cooldown
                 self.swing_progress[eid] = 0.0
                 self.already_hit[eid] = set()
-                self.prev_tip[eid] = None  
+                self.prev_tip[eid] = None
+
+                # attack sound request
+                if PlayerTag in comps:
+                    comps[SoundRequest] = SoundRequest(event="player_swing")
 
             if atk.active:
                 self.swing_progress[eid] += dt
@@ -157,9 +180,35 @@ class AttackSystem:
                 for enemy_id in hit_this_frame:
                     if enemy_id not in self.already_hit[eid]:
                         enemy_life = world.get(enemy_id, Life)
+                        enemy_ai: AI | None = world.get(enemy_id, AI)
+
                         if enemy_life:
+                            old_hp = enemy_life.hp
                             enemy_life.hp -= atk.damage
-                            #print(f"Enemy {enemy_id} HP: {enemy_life.hp}")
+                            new_hp = enemy_life.hp
+
+                            # decide enemy size
+                            size = "small"
+                            if enemy_ai is not None:
+                                size = _infer_enemy_size_from_ai(enemy_ai)
+                            
+                            # attach sound request
+                            enemy_comps = world.components_of(enemy_id)
+
+                            if old_hp > 0 and new_hp <= 0:
+                                # enemy death
+                                enemy_comps[SoundRequest] = SoundRequest(
+                                    event="enemy_death",
+                                    subtype=size,
+                                    global_event=False,
+                                )
+                            elif new_hp < old_hp:
+                                # enemy hit but still alive
+                                enemy_comps[SoundRequest] = SoundRequest(
+                                    event="enemy_hit",
+                                    subtype=size,
+                                    global_event=False,
+                                )
 
                             existing = world.get(enemy_id, LastHitBy)
                             if existing:

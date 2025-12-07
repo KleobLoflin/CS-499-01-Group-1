@@ -35,6 +35,7 @@ from game.world.components import (
 from game.world.actors.hero_factory import create as create_hero
 from game.world.systems.animation import AnimationSystem
 from game.world.systems.render import RenderSystem
+from game.world.systems.sound import SoundSystem
 
 from game.net.context import net
 from game.net.discovery import HostDiscovery, ClientDiscovery
@@ -80,7 +81,8 @@ class HubScene(Scene):
 
         # systems
         self.world.systems = [
-            AnimationSystem()
+            AnimationSystem(),
+            SoundSystem(),
         ]
         self.render_system = RenderSystem()
 

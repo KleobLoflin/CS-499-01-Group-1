@@ -14,6 +14,7 @@ from game.core.time import FixedClock
 from game.scene_manager import SceneManager
 from game.scenes.menu import TitleScene
 from game.core.window import Window
+from game.sound.audio import bootstrap_sounds
 from game.core.resources import load_atlases
 from game.world.actors.blueprint_index import load as load_blueprints
 
@@ -29,7 +30,8 @@ def run() -> None:
     # create virtual surface at fixed resolution
     base_surface = pygame.Surface((Config.WINDOW_W, Config.WINDOW_H))
 
-    # load atlases and blueprints
+    # load assets, atlases, and blueprints
+    bootstrap_sounds()
     load_atlases("data/sprites/atlases.json")
     load_blueprints("data/blueprints/heroes.json", "data/blueprints/enemies.json")
 
