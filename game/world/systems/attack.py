@@ -1,6 +1,3 @@
-# AUTHORED BY: Matthew Payne
-# EDITED BY: Scott Petty, Colin Adams
-
 from game.world.components import Intent, Attack, Transform, HitboxSize, PlayerTag, AI, Life, OnMap, LastHitBy
 import math
 
