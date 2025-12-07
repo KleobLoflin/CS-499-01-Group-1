@@ -31,29 +31,6 @@ from game.world.components import (
 
 from game.world.maps.map_factory import create_or_activate, resolve_map_hint_to_id
 
-# helper to map atlas_id to enemy size
-def _infer_enemy_size_from_atlas_id(atlas_id: str) -> str:
-    aid = atlas_id.lower()
-
-    # Boss / huge
-    if "boss" in aid:
-        return "big"
-
-    # Bigger regular monsters like big zombie
-    if "big_zombie" in aid or "zombie_big" in aid or "brute" in aid:
-        return "medium"
-
-    # Small enemies like chort
-    if "chort" in aid:
-        return "small"
-
-    # Tiny enemies like goblin
-    if "goblin" in aid or "tiny" in aid:
-        return "tiny"
-
-    # Fallback
-    return "small"
-
 @dataclass
 class PlayerSnapshot:
     peer_id: str
@@ -362,9 +339,6 @@ def apply_world_snapshot(world, msg: Dict[str, Any], my_peer_id: str) -> None:
                 anim.time = 0.0
                 anim.frame = 0
                 anim.changed = True
-            
-            # found matching entity so stop scanning
-            break
         
             # if clip changes
             if new_clip != anim.clip:

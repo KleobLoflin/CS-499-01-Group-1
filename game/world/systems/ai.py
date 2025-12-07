@@ -31,11 +31,8 @@ class EnemyAISystem:#System):
         # build a mapping of map_id -> list of player Transforms on that map
         players_by_map: dict[str, list[tuple[int, Transform]]] = {}
         for player_eid, comps in world.query(Transform, PlayerTag, OnMap):
-        players_by_map: dict[str, list[tuple[int, Transform]]] = {}
-        for player_eid, comps in world.query(Transform, PlayerTag, OnMap):
             tr: Transform = comps[Transform]
             om: OnMap = comps[OnMap]
-            players_by_map.setdefault(om.id, []).append((player_eid, tr))
             players_by_map.setdefault(om.id, []).append((player_eid, tr))
 
         # drive AI for entities with AI + Transform + Intent
@@ -58,8 +55,6 @@ class EnemyAISystem:#System):
                         best_dist2 = float("inf")
                         best_target_id: int | None = None
                         for p_eid, p_tr in same_map_players:
-                        best_target_id: int | None = None
-                        for p_eid, p_tr in same_map_players:
                             dx = p_tr.x - pos.x
                             dy = p_tr.y - pos.y
                             d2 = dx * dx + dy * dy
@@ -68,13 +63,7 @@ class EnemyAISystem:#System):
                                 best_tr = p_tr
                                 best_target_id = p_eid
 
-                                best_target_id = p_eid
-
                         target_pos = best_tr
-
-                        # track which player this enemy is targeting
-                        if best_target_id is not None:
-                            ai.target_id = best_target_id
 
                         # track which player this enemy is targeting
                         if best_target_id is not None:
@@ -90,9 +79,6 @@ class EnemyAISystem:#System):
                 dist = (dx * dx + dy * dy) ** 0.5
 
             if dist > ai.agro_range or target_pos == None:
-                # out of aggro range or no valid target so clear target_id
-                ai.target_id = None
-
                 # out of aggro range or no valid target so clear target_id
                 ai.target_id = None
 
@@ -143,18 +129,6 @@ class EnemyAISystem:#System):
                     last_sound_target_id = getattr(ai, "last_aggro_target_id", None)
 
                     if chasing_now:
-                if ai.kind == "chase":
-                    # check if in range
-                    chasing_now = (dist > 10 and dist < ai.agro_range and target_pos is not None)
-
-                    # previous chasing state
-                    was_chasing = getattr(ai, "was_chasing", False)
-                    ai.was_chasing = chasing_now
-
-                    current_target_id = getattr(ai, "target_id", None)
-                    last_sound_target_id = getattr(ai, "last_aggro_target_id", None)
-
-                    if chasing_now:
                         intent.move_x = dx / dist
                         intent.move_y = dy / dist
 
@@ -186,7 +160,6 @@ class EnemyAISystem:#System):
                         elif was_chasing and current_target_id is not None and current_target_id != last_sound_target_id:
                             should_play_sound = True
                         
-                        
                         if should_play_sound:
                             comps[SoundRequest] = SoundRequest(
                                 event="enemy_aggro",
@@ -198,10 +171,6 @@ class EnemyAISystem:#System):
                     else:
                         intent.move_x = 0.0
                         intent.move_y = 0.0
-                
-                if ai.kind == "projectileHoming":
-                    # separated projectilehoming from chase because sounds should be different
-                    pass
                 
                 if ai.kind == "projectileHoming":
                     # separated projectilehoming from chase because sounds should be different
@@ -243,7 +212,6 @@ class EnemyAISystem:#System):
                         intent.move_x = 0.0
                         intent.move_y = 0.0
 
-
                     atk = comps.get(Attack)
                     if not atk or not target_pos:
                         continue
@@ -267,9 +235,6 @@ class EnemyAISystem:#System):
                                                                  
                                     
                                         )
-
-
-
         # optional: face target
             #intent.facing = "left" if dx < 0 else "right
 
