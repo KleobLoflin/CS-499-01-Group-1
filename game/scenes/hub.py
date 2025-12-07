@@ -282,7 +282,7 @@ class HubScene(Scene):
                             "map_id": "level1",
                         }
 
-                        next_scene = DungeonScene(role="SOLO", spawn_requests=spawn_requests)
+                        next_scene = DungeonScene(self.scene_manager, role="SOLO", spawn_requests=spawn_requests)
                         self.scene_manager.set(next_scene)
         
             # HOST
@@ -606,7 +606,7 @@ class HubScene(Scene):
             })
 
         # Host transitions to DungeonScene(HOST)
-        self.scene_manager.set(DungeonScene(role="HOST"))
+        self.scene_manager.set(DungeonScene(self.scene_manager, role="HOST"))
 
     # networking JOIN ##############################################################
 
@@ -639,7 +639,7 @@ class HubScene(Scene):
             elif mtype == MSG_START_GAME:
                 lobby_payload = msg.get("lobby", {})
                 net.lobby_data = lobby_payload
-                self.scene_manager.set(DungeonScene(role="CLIENT"))
+                self.scene_manager.set(DungeonScene(self.scene_manager, role="CLIENT"))
             elif mtype == MSG_JOIN_DENY:
                 # TODO: show error to player
                 pass

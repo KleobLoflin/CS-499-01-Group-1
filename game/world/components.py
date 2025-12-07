@@ -23,6 +23,16 @@ class PlayerTag:
 class LocalControlled:
     pass
 
+# local pause state for this client's player
+@dataclass
+class PauseState:
+    # True when this client is in the pause menu
+    is_paused: bool = False
+    # 0 = Resume, 1 = Quit to Title
+    selected_index: int = 0
+    # True once the player has chosen "Quit to Title"
+    quit_to_title: bool = False
+
 # transform: data representing world-space position
 # later will add velocity, rotation, etc... anything needed for size/location/orientation
 @dataclass

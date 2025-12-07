@@ -16,7 +16,7 @@ from game.core.config import Config
 
 from game.world.world import World
 from game.world.components import (
-    Transform, Map, ActiveMapId, OnMap, SpawnPolicy, LocalControlled,
+    Transform, Map, ActiveMapId, OnMap, SpawnPolicy, LocalControlled, PauseState,
     SpawnRequest, Owner, PlayerTag, NetIdentity, NetHostState,
     NetClientState, MapSpawnState
     )
@@ -57,7 +57,10 @@ from game.world.maps.map_blueprint import build_Map_component
 from game.world.maps.map_factory import create_or_activate, resolve_map_hint_to_id
 
 class DungeonScene(Scene):
-    def __init__(self, role, spawn_requests: list[SpawnRequest] | None = None) -> None:
+    def __init__(self, scene_manager, role, spawn_requests: list[SpawnRequest] | None = None) -> None:
+        # So we can swap back to TitleScene when quitting from pause menu
+        self.scene_manager = scene_manager
+
         self.world = World()
         self.role = role.upper()
         self.render = RenderSystem()
@@ -65,6 +68,18 @@ class DungeonScene(Scene):
         self.spawn_requests: list[SpawnRequest] = spawn_requests or []
         self.player_id: int | None = None
         net.role = self.role
+
+        # Pause menu UI / state
+        pygame.font.init()
+        self.pause_font = pygame.font.Font("assets/fonts/Retro Gaming.ttf", 16)
+        self.pause_options = ["Resume", "Quit to Title"]
+
+        # Edge tracking for pause/menu keys
+        self._prev_pause_pressed = False
+        self._prev_menu_up = False
+        self._prev_menu_down = False
+        self._prev_menu_accept = False
+        self._prev_menu_back = False
 
     def enter(self) -> None:
         # initial map, or pick a fixed id 
@@ -166,14 +181,129 @@ class DungeonScene(Scene):
             if hasattr(system, "handle_event"):
                 system.handle_event(event)
 
+    def _get_pause_state(self) -> PauseState | None:
+        # Find PauseState attached to the LocalControlled player
+        for _eid, comps in self.world.query(LocalControlled):
+            ps = comps.get(PauseState)
+            if ps is not None:
+                return ps
+        return None
+
+    def _update_pause(self, dt: float) -> None:
+        """Handle pause toggle + pause menu using direct keyboard input."""
+        pygame.event.pump()
+        keys = pygame.key.get_pressed()
+
+        ps = self._get_pause_state()
+        if ps is None:
+            # still update edge values so they don't all count as "new" later
+            self._prev_pause_pressed = keys[pygame.K_p]
+            self._prev_menu_up = keys[pygame.K_w] or keys[pygame.K_UP]
+            self._prev_menu_down = keys[pygame.K_s] or keys[pygame.K_DOWN]
+            self._prev_menu_accept = keys[pygame.K_RETURN] or keys[pygame.K_SPACE]
+            self._prev_menu_back = keys[pygame.K_ESCAPE]
+            return
+
+        # --- Toggle pause with P ---
+        pause_pressed = keys[pygame.K_p]
+        if pause_pressed and not self._prev_pause_pressed:
+            ps.is_paused = not ps.is_paused
+            if ps.is_paused:
+                ps.selected_index = 0
+                ps.quit_to_title = False
+        self._prev_pause_pressed = pause_pressed
+
+        # --- While paused, route input to menu only ---
+        if ps.is_paused:
+            up = keys[pygame.K_w] or keys[pygame.K_UP]
+            down = keys[pygame.K_s] or keys[pygame.K_DOWN]
+            accept = keys[pygame.K_RETURN] or keys[pygame.K_SPACE]
+            back = keys[pygame.K_ESCAPE]
+
+            # move selection (edge-based)
+            if up and not self._prev_menu_up:
+                ps.selected_index = (ps.selected_index - 1) % 2
+            if down and not self._prev_menu_down:
+                ps.selected_index = (ps.selected_index + 1) % 2
+
+            # accept option
+            if accept and not self._prev_menu_accept:
+                if ps.selected_index == 0:
+                    # Resume
+                    ps.is_paused = False
+                elif ps.selected_index == 1:
+                    # Quit to Title – DungeonScene.update will act on this
+                    ps.quit_to_title = True
+
+            # back (Esc) also resumes
+            if back and not self._prev_menu_back:
+                ps.is_paused = False
+
+            self._prev_menu_up = up
+            self._prev_menu_down = down
+            self._prev_menu_accept = accept
+            self._prev_menu_back = back
+        else:
+            # Not paused – just keep edge tracking in sync
+            self._prev_menu_up = keys[pygame.K_w] or keys[pygame.K_UP]
+            self._prev_menu_down = keys[pygame.K_s] or keys[pygame.K_DOWN]
+            self._prev_menu_accept = keys[pygame.K_RETURN] or keys[pygame.K_SPACE]
+            self._prev_menu_back = keys[pygame.K_ESCAPE]
+
     # one fixed simulation step, runs all systems in order
     def update(self, dt: float) -> None:
+        # 1) Handle local pause/menu input
+        self._update_pause(dt)
+
+        # 2) Check if pause menu requested a quit-to-title
+        ps = self._get_pause_state()
+        if ps is not None and ps.quit_to_title:
+            ps.quit_to_title = False
+            from game.scenes.menu import TitleScene
+            self.scene_manager.set(TitleScene(self.scene_manager))
+            return
+
+        # 3) Simulation always runs (host + other players keep going)
         self.world.update(dt)
 
     # renders all graphics
     def draw(self, surface: Surface) -> None:
+        # normal world + HUD
         self.render.draw(self.world, surface)
-        self.hud.draw(self.world, surface) 
+        self.hud.draw(self.world, surface)
+
+        # pause overlay on top (local-only)
+        ps = self._get_pause_state()
+        if ps is not None and ps.is_paused:
+            self._draw_pause_overlay(surface, ps)
+
+    def _draw_pause_overlay(self, surface: Surface, ps: PauseState) -> None:
+        w, h = Config.WINDOW_W, Config.WINDOW_H
+
+        # dim screen
+        overlay = pygame.Surface((w, h), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 160))
+        surface.blit(overlay, (0, 0))
+
+        # simple panel
+        panel_w, panel_h = 260, 140
+        panel_x = (w - panel_w) // 2
+        panel_y = (h - panel_h) // 2
+        pygame.draw.rect(surface, (30, 30, 30), (panel_x, panel_y, panel_w, panel_h))
+        pygame.draw.rect(surface, (200, 200, 200), (panel_x, panel_y, panel_w, panel_h), 2)
+
+        # title
+        title_surf = self.pause_font.render("Paused", True, (255, 255, 255))
+        title_rect = title_surf.get_rect(center=(w // 2, panel_y + 30))
+        surface.blit(title_surf, title_rect)
+
+        # options
+        for idx, label in enumerate(self.pause_options):
+            selected = (idx == ps.selected_index)
+            color = (255, 255, 0) if selected else (220, 220, 220)
+            text_surf = self.pause_font.render(label, True, color)
+            text_rect = text_surf.get_rect(center=(w // 2, panel_y + 70 + idx * 30))
+            surface.blit(text_surf, text_rect)
 
     # Map transitions ############################################################################
     def _ensure_map_loaded(self, map_id: str) -> None:
@@ -305,6 +435,7 @@ class DungeonScene(Scene):
             # Mark local-controlled player
             if req.is_local:
                 self.world.add(eid, LocalControlled())
+                self.world.add(eid, PauseState())
                 self.player_id = eid
 
     def _spawn_players_from_net_lobby(self) -> None:
@@ -352,6 +483,7 @@ class DungeonScene(Scene):
             if peer_id == net.my_peer_id:
                 # Mark local-controlled player on this machine
                 self.world.add(eid, LocalControlled())
+                self.world.add(eid, PauseState())
                 self.player_id = eid
 
     # networking ###############################################################
