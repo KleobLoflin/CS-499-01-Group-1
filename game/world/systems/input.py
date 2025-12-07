@@ -2,7 +2,7 @@
 # Class input
 
 import pygame
-from game.world.components import Intent, InputState, LocalControlled
+from game.world.components import Intent, InputState, LocalControlled, PauseState
 
 KEY_TO_DIRECTION = {
     pygame.K_w: "up",
@@ -20,10 +20,17 @@ DASH_KEYS = {pygame.K_LSHIFT, pygame.K_RSHIFT}
 
 class InputSystem:
     def update(self, world, dt: float):
+        pause: PauseState | None = None
+
         for _, comps in world.query(LocalControlled):
             input: InputState = comps.get(InputState)
             intent: Intent = comps.get(Intent)
+            pause = comps.get(PauseState)
             break
+
+        # If this client's player is paused, do not process gameplay input
+        if pause is not None and pause.is_paused:
+            return
 
         # process events and key state
         pygame.event.pump()
