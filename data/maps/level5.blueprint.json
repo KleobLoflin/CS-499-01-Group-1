@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "meta": {
+    "name": "Level 5",
+    "music": "n/a",
+    "ambience": "room.small"
+  },
+  "title_spawns": [
+    {
+      "kind": "enemy",
+      "enemy_type": "chort",
+      "count": 5,
+      "region": "center"
+    }
+  ],
+  "game_spawns": {
+    "player_start": { "tile_pos": [3, 23] },
+    "objects": [],
+    "pickups": [
+      { "type": "potion_health", "tile_pos": [224, 176] }
+    ],
+    "static_enemies": [
+      { "type": "chort", "tile_pos": [22, 22] },
+      { "type": "chort", "tile_pos": [24, 11] },
+      { "type": "chort", "tile_pos": [16, 17] },
+      { "type": "chort", "tile_pos": [27, 23] },
+      { "type": "chort", "tile_pos": [34, 17] },
+      { "type": "big_zombie", "tile_pos": [58, 20] },
+      { "type": "big_zombie", "tile_pos": [59, 25] },
+      { "type": "goblin", "tile_pos": [53, 27] },
+      { "type": "goblin", "tile_pos": [45, 15] },
+      { "type": "goblin", "tile_pos": [47, 22] },
+      { "type": "goblin", "tile_pos": [54, 22] },
+      { "type": "goblin", "tile_pos": [51, 23] },
+      { "type": "goblin", "tile_pos": [53, 28] },
+      { "type": "goblin", "tile_pos": [46, 19] },
+      { "type": "goblin", "tile_pos": [47, 16] },
+      { "type": "skelet", "tile_pos": [24, 37] },
+      { "type": "skelet", "tile_pos": [21, 34] },
+      { "type": "necro", "tile_pos": [31, 15] },
+      { "type": "necro", "tile_pos": [25, 36] }
+    ],
+    "exits": [
+      { "to": "level4", "region": "east" }
+    ]
+  },
+  "regions": {
+    "center": { "type": "ring", "center": [176, 128], "r_min": 20, "r_max": 80 },
+    "north": { "type": "rect", "x": 80, "y": 72, "w": 240, "h": 144 },
+    "east": { "type": "poly", "points": [[64, 48], [352, 48], [352, 64], [64, 64]] },
+    "west": { "type": "rect", "x": 336, "y": 112, "w": 24, "h": 48 },
+    "south": {}
+  }
+}

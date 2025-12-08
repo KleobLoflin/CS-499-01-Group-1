@@ -20,17 +20,11 @@
       { "type": "potion_health", "tile_pos": [224, 176] }
     ],
     "static_enemies": [
-      { "type": "chort", "tile_pos": [13, 11] },
-      { "type": "chort", "tile_pos": [19, 11] },
-      { "type": "chort", "tile_pos": [31, 24] },
-      { "type": "big_zombie", "tile_pos": [14, 7] },
-      { "type": "goblin", "tile_pos": [5, 30] },
-      { "type": "goblin", "tile_pos": [4, 33] },
-      { "type": "goblin", "tile_pos": [6, 32] },
-      { "type": "goblin", "tile_pos": [7, 36] },
-      { "type": "skelet", "tile_pos": [8, 34] },
-      { "type": "boss", "tile_pos": [12, 27] },
-      { "type": "necro", "tile_pos": [10, 25] }
+      { "type": "chort", "tile_pos": [26, 22] },
+      { "type": "chort", "tile_pos": [24, 15] },
+      { "type": "chort", "tile_pos": [27, 10] },
+      { "type": "boss", "tile_pos": [33, 14] },
+      { "type": "necro", "tile_pos": [36, 15] }
     ],
     "exits": [
       { "to": "level1", "region": "east" }

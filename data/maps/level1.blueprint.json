@@ -22,15 +22,29 @@
     "static_enemies": [
       { "type": "chort", "tile_pos": [13, 11] },
       { "type": "chort", "tile_pos": [19, 11] },
-      { "type": "chort", "tile_pos": [31, 24] },
+      { "type": "chort", "tile_pos": [29, 14] },
+      { "type": "chort", "tile_pos": [13, 11] },
+      { "type": "chort", "tile_pos": [19, 11] },
+      { "type": "chort", "tile_pos": [32, 17] },
       { "type": "big_zombie", "tile_pos": [14, 7] },
+      { "type": "big_zombie", "tile_pos": [29, 24] },
       { "type": "goblin", "tile_pos": [5, 30] },
       { "type": "goblin", "tile_pos": [4, 33] },
       { "type": "goblin", "tile_pos": [6, 32] },
       { "type": "goblin", "tile_pos": [7, 36] },
+      { "type": "goblin", "tile_pos": [5, 30] },
+      { "type": "goblin", "tile_pos": [4, 33] },
+      { "type": "goblin", "tile_pos": [6, 32] },
+      { "type": "goblin", "tile_pos": [7, 36] },
+      { "type": "goblin", "tile_pos": [32, 29] },
+      { "type": "goblin", "tile_pos": [29, 30] },
+      { "type": "goblin", "tile_pos": [27, 32] },
+      { "type": "goblin", "tile_pos": [23, 33] },
+      { "type": "goblin", "tile_pos": [30, 15] },
+      { "type": "goblin", "tile_pos": [26, 11] },
+      { "type": "goblin", "tile_pos": [34, 17] },
       { "type": "skelet", "tile_pos": [8, 34] },
-      { "type": "boss", "tile_pos": [12, 27] },
-      { "type": "necro", "tile_pos": [10, 25] }
+      { "type": "necro", "tile_pos": [10, 41] }
     ],
     "exits": [
       { "to": "level1", "region": "east" }
