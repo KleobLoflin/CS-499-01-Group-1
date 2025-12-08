@@ -20,7 +20,13 @@ class NetSmoothingSystem:
             # If no network target yet, skip
             if tr.net_x is None or tr.net_y is None:
                 continue
-
-            # exponential smoothing toward target
-            tr.x += (tr.net_x - tr.x) * alpha
-            tr.y += (tr.net_y - tr.y) * alpha
+            
+            # if enemy just spawned from snapshot at (0, 0), snap to correct position
+            if tr.x < 1 and tr.y < 1:
+                tr.x = tr.net_x
+                tr.y = tr.net_y
+            
+            else:
+                # exponential smoothing toward target
+                tr.x += (tr.net_x - tr.x) * alpha
+                tr.y += (tr.net_y - tr.y) * alpha
