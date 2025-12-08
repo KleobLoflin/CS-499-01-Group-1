@@ -11,7 +11,7 @@
             {"type": "Attack", "max_cooldown": 2},
             {"type": "HitboxSize", "radius": 6},
             {"type": "Life", "hp": 4},
-            {"type": "ScoreValue", "amount": 100}
+            {"type": "ScoreValue", "amount": 150}
         ]
     },
 
@@ -27,7 +27,7 @@
             {"type": "Attack", "max_cooldown": 2},
             {"type": "HitboxSize", "radius": 10},
             {"type": "Life", "hp": 5},
-            {"type": "ScoreValue", "amount": 200}
+            {"type": "ScoreValue", "amount": 300}
         ]
     },
 
@@ -60,8 +60,8 @@
             {"type": "Facing"},
             {"type": "Attack", "max_cooldown": 2},
             {"type": "HitboxSize", "radius": 6},
-            {"type": "Life", "hp": 1}
-            
+            {"type": "Life", "hp": 1},
+            {"type": "ScoreValue", "amount": 200}            
         ]
     },
     
@@ -77,7 +77,8 @@
              {"type": "Facing"},
             {"type": "Attack", "max_cooldown": 2},
             {"type": "HitboxSize", "radius": 6},
-            {"type": "Life", "hp": 2}
+            {"type": "Life", "hp": 2},
+            {"type": "ScoreValue", "amount": 100}  
         ]
     },
 
@@ -93,7 +94,8 @@
             {"type": "Facing"},
             {"type": "Attack", "max_cooldown": 2},
             {"type": "HitboxSize", "radius": 12},
-            {"type": "Life", "hp": 15}
+            {"type": "Life", "hp": 15},
+            {"type": "ScoreValue", "amount": 1500}  
         ]
 
     },
