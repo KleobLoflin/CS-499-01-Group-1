@@ -21,12 +21,19 @@ DASH_KEYS = {pygame.K_LSHIFT, pygame.K_RSHIFT}
 class InputSystem:
     def update(self, world, dt: float):
         pause: PauseState | None = None
+        input: InputState | None = None
+        intent: Intent | None = None
 
         for _, comps in world.query(LocalControlled):
             input: InputState = comps.get(InputState)
             intent: Intent = comps.get(Intent)
             pause = comps.get(PauseState)
             break
+
+        # If we have no local-controlled player (e.g. dead and spectating),
+        # skip gameplay input entirely.
+        if input is None or intent is None:
+            return
 
         # If this client's player is paused, do not process gameplay input
         if pause is not None and pause.is_paused:

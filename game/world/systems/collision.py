@@ -1,6 +1,6 @@
-#WORKED ON BY: Colin Adams, Scott Petty, Nicholas Loflin, Matthew Payne
+#WORKED ON BY: Colin Adams, Scott Petty, Nicholas Loflin, Matthew Payne, Cole Herzog
 #Class collision
-from game.world.components import Transform, HitboxSize, PlayerTag, Map, ActiveMapId, OnMap,  Projectile
+from game.world.components import Transform, HitboxSize, PlayerTag, Map, ActiveMapId, OnMap,  Projectile, Life, SoundRequest, AI
 import pygame
 import math
 from game.core.config import Config
@@ -8,9 +8,16 @@ from game.core.config import Config
 class CollisionSystem:
     def __init__(self, collision_rects=None):
         self.knockbacks = {}
+        self.damage_cooldowns = {} # per-player damage cooldowns
         self.collision_rects = collision_rects or []
 
     def update(self, world, dt: float):
+        # Update damage cooldowns
+        for pid in list(self.damage_cooldowns.keys()):
+            self.damage_cooldowns[pid] -= dt
+            if self.damage_cooldowns[pid] <= 0:
+                del self.damage_cooldowns[pid]
+
         # Apply knockback to any entity currently in knockback
         expired = []
         for eid, state in self.knockbacks.items():
@@ -95,11 +102,38 @@ class CollisionSystem:
                         dx = player_tr.x - tr.x
                         dy = player_tr.y - tr.y
                         distance = math.sqrt(dx*dx + dy*dy)
-                        if distance < 10 and distance > 0:
+                        if 0 < distance < 10:
                             dx /= distance
                             dy /= distance
+
+                            # Is this thing allowed to hurt the player?
+                            is_enemy = world.get(eid, AI) is not None
+                            is_projectile = world.get(eid, Projectile) is not None
+
+                            # Only deal damage when starting a new knockback so we
+                            # don't drain HP every frame while overlapping.
+                            if player_entity not in self.damage_cooldowns and (is_enemy or is_projectile):
+                                life = world.get(player_entity, Life)
+                                if life:
+                                    life.hp -= 1  # -1 HP per enemy / projectile hit
+
+                                    # Trigger player-hit sound on the player
+                                    pcomps = world.components_of(player_entity)
+                                    pcomps[SoundRequest] = SoundRequest(event="player_hit")
+
+                                    # Set damage cooldown (tune this value as needed)
+                                    self.damage_cooldowns[player_entity] = 0.5  # 0.5s of invuln
+
+                            # Knockback to player (same as before)
                             self.knockbacks[player_entity] = {"timer": 0.2, "dir": (dx, dy)}
+                            # Knockback to the other entity (same as before)
                             self.knockbacks[eid] = {"timer": 0.2, "dir": (-dx, -dy)}
+
+                            # If this is a projectile, consume it on hit so it
+                            # doesn't keep colliding and dealing damage.
+                            if is_projectile:
+                                world.delete_entity(eid)
+                                break
 
             
             entity_radius = (hitbox.radius / 2) if hitbox else 5
