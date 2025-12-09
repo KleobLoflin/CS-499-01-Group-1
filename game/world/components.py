@@ -114,7 +114,7 @@ class lifeSpan:
 
 @dataclass
 class Life:
-    hp: float = 5.0    # hp it currently has
+    hp: float = 10.0    # hp it currently has
 
 @dataclass
 class Damage:

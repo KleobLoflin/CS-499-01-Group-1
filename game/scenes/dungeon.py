@@ -81,6 +81,10 @@ class DungeonScene(Scene):
         self._prev_menu_accept = False
         self._prev_menu_back = False
 
+        # Death / game-over state
+        self._game_over = False
+        self._saw_any_player = False  # becomes True once at least one player has spawned
+
     def enter(self) -> None:
         # initial map, or pick a fixed id 
         load_registry("data/map_registry.json")
@@ -250,8 +254,46 @@ class DungeonScene(Scene):
             self._prev_menu_accept = keys[pygame.K_RETURN] or keys[pygame.K_SPACE]
             self._prev_menu_back = keys[pygame.K_ESCAPE]
 
+    def _update_death_screen(self, dt: float) -> None:
+        """Handle input while the death screen is active: allow quitting to title."""
+        pygame.event.pump()
+        keys = pygame.key.get_pressed()
+
+        accept = keys[pygame.K_RETURN] or keys[pygame.K_SPACE]
+        back = keys[pygame.K_ESCAPE]
+
+        # Edge-based detection using the same prev flags as pause menu
+        if (accept and not self._prev_menu_accept) or (back and not self._prev_menu_back):
+            from game.scenes.menu import TitleScene
+            self.scene_manager.set(TitleScene(self.scene_manager))
+            return
+
+        self._prev_menu_accept = accept
+        self._prev_menu_back = back
+
+
+    def _check_full_party_death(self) -> None:
+        """Detect when all player entities have been removed (full-party wipe)."""
+        # Check if there is currently any PlayerTag in the world
+        has_player_now = False
+        for _eid, _comps in self.world.query(PlayerTag):
+            has_player_now = True
+            break
+
+        if has_player_now:
+            # Mark that the run has actually started (we've seen at least one player)
+            self._saw_any_player = True
+        elif self._saw_any_player and not has_player_now:
+            # We previously had a player, and now we have none: everyone is dead.
+            self._game_over = True
+
     # one fixed simulation step, runs all systems in order
     def update(self, dt: float) -> None:
+        # 0) If we've hit game-over, only handle the death screen UI
+        if self._game_over:
+            self._update_death_screen(dt)
+            return
+
         # 1) Handle local pause/menu input
         self._update_pause(dt)
 
@@ -266,16 +308,23 @@ class DungeonScene(Scene):
         # 3) Simulation always runs (host + other players keep going)
         self.world.update(dt)
 
+        # 4) After simulation, check for full-party death
+        self._check_full_party_death()
+
     # renders all graphics
     def draw(self, surface: Surface) -> None:
         # normal world + HUD
         self.render.draw(self.world, surface)
         self.hud.draw(self.world, surface)
 
-        # pause overlay on top (local-only)
-        ps = self._get_pause_state()
-        if ps is not None and ps.is_paused:
-            self._draw_pause_overlay(surface, ps)
+        if self._game_over:
+            # Death screen over everything
+            self._draw_death_overlay(surface)
+        else:
+            # pause overlay on top (local-only)
+            ps = self._get_pause_state()
+            if ps is not None and ps.is_paused:
+                self._draw_pause_overlay(surface, ps)
 
     def _draw_pause_overlay(self, surface: Surface, ps: PauseState) -> None:
         w, h = Config.WINDOW_W, Config.WINDOW_H
@@ -304,6 +353,26 @@ class DungeonScene(Scene):
             text_surf = self.pause_font.render(label, True, color)
             text_rect = text_surf.get_rect(center=(w // 2, panel_y + 70 + idx * 30))
             surface.blit(text_surf, text_rect)
+
+    def _draw_death_overlay(self, surface: Surface) -> None:
+        w, h = Config.WINDOW_W, Config.WINDOW_H
+
+        # Dim background
+        overlay = pygame.Surface((w, h), pygame.SRCALPHA)
+        overlay.fill((0, 0, 0, 180))  # semi-transparent black
+        surface.blit(overlay, (0, 0))
+
+        # Title text
+        title_surf = self.pause_font.render("You Died", True, (255, 50, 50))
+        title_rect = title_surf.get_rect(center=(w // 2, h // 2 - 20))
+        surface.blit(title_surf, title_rect)
+
+        # Instructions text
+        info_text = "Press Enter or Esc to return to Title"
+        info_surf = self.pause_font.render(info_text, True, (230, 230, 230))
+        info_rect = info_surf.get_rect(center=(w // 2, h // 2 + 20))
+        surface.blit(info_surf, info_rect)
+
 
     # Map transitions ############################################################################
     def _ensure_map_loaded(self, map_id: str) -> None:

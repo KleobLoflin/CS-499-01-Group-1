@@ -21,9 +21,10 @@ class CameraFollowSystem:
             break
         if cam is None:
             return
-        
+
         # choose the target
         target_tr = None
+        # 1) Prefer the local-controlled player (normal behavior)
         for _, comps in world.query(PlayerTag, LocalControlled, Transform):
             # make sure target is in active map
             if active_id is not None:
@@ -32,9 +33,18 @@ class CameraFollowSystem:
                     continue
             target_tr = comps[Transform]
             break
+
+        # 2) If local-controlled hero no longer exists (dead),
+        #    fall back to *any* player so we can spectate others
+        #    ignoring ActiveMapId
+        if target_tr is None:
+            for _, comps in world.query(PlayerTag, Transform):
+                target_tr = comps[Transform]
+                break
+
         if target_tr is None:
             return
-        
+
         # compute deadzone rectangle in world space
         hw, hh = cam.viewport_w // 2, cam.viewport_h // 2
         view_left = cam.x - hw
