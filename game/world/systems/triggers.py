@@ -111,4 +111,4 @@ class TriggerSystem:
                 self.scene.change_map_for_entity(pid, target_map, tx, ty)
             else:
                 if getattr(self.scene, "player_id", None) == pid and hasattr(self.scene, "change_map"):
-                    self.scene.change_map(target_map, tx, ty)
+                    self.scene.change_map(target_map, tx, ty) 

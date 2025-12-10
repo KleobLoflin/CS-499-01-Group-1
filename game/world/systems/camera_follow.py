@@ -1,20 +1,27 @@
 # AUTHORED BY: Scott Petty
+# EDITED BY: COLE HERZOG
 
 from game.world.components import (
-    Camera, CameraFollowLocalPlayer, Transform, PlayerTag, 
-    LocalControlled, ActiveMapId, OnMap
+    Camera,
+    CameraFollowLocalPlayer,
+    Transform,
+    PlayerTag,
+    LocalControlled,
+    ActiveMapId,
+    OnMap,
 )
+
 
 class CameraFollowSystem:
     def update(self, world, dt: float) -> None:
 
-        # get active map
+        # Get active map 
         active_id = None
         for _, comps in world.query(ActiveMapId):
             active_id = comps[ActiveMapId].id
             break
-
-        # find camera that follows local player
+        
+        # Find camera that follows local player
         cam_eid, cam = None, None
         for eid, comps in world.query(Camera, CameraFollowLocalPlayer):
             cam_eid, cam = eid, comps[Camera]
@@ -22,28 +29,42 @@ class CameraFollowSystem:
         if cam is None:
             return
 
-        # choose the target
+        
+        # Choose the target entity:
+        #   1) Prefer the local-controlled player on the active map
+        #   2) If none, fall back to any player (spectate mode)
         target_tr = None
+        target_eid = None
+
         # 1) Prefer the local-controlled player (normal behavior)
-        for _, comps in world.query(PlayerTag, LocalControlled, Transform):
+        for eid, comps in world.query(PlayerTag, LocalControlled, Transform):
             # make sure target is in active map
             if active_id is not None:
                 om = comps.get(OnMap)
                 if om is not None and om.id != active_id:
                     continue
             target_tr = comps[Transform]
+            target_eid = eid
             break
 
         # 2) If local-controlled hero no longer exists (dead),
-        #    fall back to *any* player so we can spectate others
+        #    fall back to *any* player so we can spectate others,
         #    ignoring ActiveMapId
         if target_tr is None:
-            for _, comps in world.query(PlayerTag, Transform):
+            for eid, comps in world.query(PlayerTag, Transform):
                 target_tr = comps[Transform]
+                target_eid = eid
                 break
 
+        # No players
         if target_tr is None:
+            cam.target_eid = None
+            cam.spectate = False
             return
+
+        # Remember who we’re following
+        cam.target_eid = target_eid
+        cam.spectate = (world.get(target_eid, LocalControlled) is None)
 
         # compute deadzone rectangle in world space
         hw, hh = cam.viewport_w // 2, cam.viewport_h // 2

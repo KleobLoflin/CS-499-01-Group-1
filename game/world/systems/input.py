@@ -27,7 +27,6 @@ class InputSystem:
         for _, comps in world.query(LocalControlled):
             input: InputState = comps.get(InputState)
             intent: Intent = comps.get(Intent)
-            pause = comps.get(PauseState)
             break
 
         # If we have no local-controlled player (e.g. dead and spectating),
@@ -35,8 +34,24 @@ class InputSystem:
         if input is None or intent is None:
             return
 
+        # lookup global pause state
+        for _eid, comps in world.query(PauseState):
+            pause = comps[PauseState]
+            break
+
         # If this client's player is paused, do not process gameplay input
         if pause is not None and pause.is_paused:
+            # stop all intent to move
+            intent.move_x = 0.0
+            intent.move_y = 0.0
+            intent.dash = False
+            intent.basic_atk = False
+            intent.basic_atk_held = False
+
+            # Clear input history so we don't get weird edge triggers on resume
+            input.key_order.clear()
+            input.prev_attack_pressed = False
+            input.prev_dash_pressed = False
             return
 
         # process events and key state

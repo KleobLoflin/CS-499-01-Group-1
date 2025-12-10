@@ -251,6 +251,8 @@ class Camera:
     deadzone_h: int = 64
     clamp_rect: Optional[Tuple[int, int, int ,int]] = None
     pixel_snap: bool = True
+    target_eid: int | None = None
+    spectate: bool = False
 
 @dataclass
 class CameraFollowLocalPlayer:

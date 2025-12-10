@@ -35,6 +35,7 @@ from game.world.systems.camera_spawn import EnsureCameraSystem
 from game.world.systems.camera_bootstrap import CameraBootstrapSystem
 from game.world.systems.camera_follow import CameraFollowSystem
 from game.world.systems.camera_clamp import CameraClampSystem
+from game.world.systems.viewpoint_active_map import ViewpointActiveMapSystem
 from game.world.systems.lifespan import LifeSpanSystem
 from game.world.systems.death import death
 from game.world.systems.sound import SoundSystem
@@ -94,6 +95,15 @@ class DungeonScene(Scene):
             map_id = mi.id
         create_or_activate(self.world, map_id)
 
+        # global pausee controller
+        has_pause = False
+        for _eid, _comps in self.world.query(PauseState):
+            has_pause = True
+            break
+        if not has_pause:
+            peid = self.world.new_entity()
+            self.world.add(peid, PauseState())
+
         # Scene/run policy for SpawnSystem (gameplay)
         has_lobby_spawns = bool(self.spawn_requests)
         spawn_player = (self.role == "SOLO" and not has_lobby_spawns)
@@ -124,6 +134,7 @@ class DungeonScene(Scene):
                 CameraBootstrapSystem(),
                 CameraFollowSystem(),
                 CameraClampSystem(),
+                ViewpointActiveMapSystem(),
                 SoundSystem(),  
                 LifeSpanSystem(),
                 ScoringSystem(),
@@ -141,6 +152,7 @@ class DungeonScene(Scene):
                 CameraBootstrapSystem(),
                 CameraFollowSystem(),
                 CameraClampSystem(),
+                ViewpointActiveMapSystem(),
                 SoundSystem(),
                 LifeSpanSystem(),
                 death(),
@@ -162,6 +174,7 @@ class DungeonScene(Scene):
                 CameraBootstrapSystem(),
                 CameraFollowSystem(),
                 CameraClampSystem(),
+                ViewpointActiveMapSystem(),
                 SoundSystem(),
                 LifeSpanSystem(),
                 death(),
@@ -187,10 +200,8 @@ class DungeonScene(Scene):
 
     def _get_pause_state(self) -> PauseState | None:
         # Find PauseState attached to the LocalControlled player
-        for _eid, comps in self.world.query(LocalControlled):
-            ps = comps.get(PauseState)
-            if ps is not None:
-                return ps
+        for _eid, comps in self.world.query(PauseState):
+            return comps[PauseState]
         return None
 
     def _update_pause(self, dt: float) -> None:
@@ -406,6 +417,7 @@ class DungeonScene(Scene):
 
         # check if this entity is local-controlled
         is_local = self.world.get(entity_id, LocalControlled) is not None
+
         if is_local:
             # for local player, this machine's active map becomes target_id
             create_or_activate(self.world, target_id)
@@ -504,7 +516,6 @@ class DungeonScene(Scene):
             # Mark local-controlled player
             if req.is_local:
                 self.world.add(eid, LocalControlled())
-                self.world.add(eid, PauseState())
                 self.player_id = eid
 
     def _spawn_players_from_net_lobby(self) -> None:
@@ -552,7 +563,6 @@ class DungeonScene(Scene):
             if peer_id == net.my_peer_id:
                 # Mark local-controlled player on this machine
                 self.world.add(eid, LocalControlled())
-                self.world.add(eid, PauseState())
                 self.player_id = eid
 
     # networking ###############################################################
