@@ -12,7 +12,7 @@
             {"type":"Attack", "max_cooldown": 0.25},
             {"type":"HitboxSize"},
             {"type":"Owner"},
-            {"type":"Life", "hp": 5},
+            {"type":"Life", "hp": 6},
             {"type":"Score", "points": 0}
         ]
     },
@@ -30,7 +30,7 @@
             {"type":"Attack", "max_cooldown": 0.25},
             {"type":"HitboxSize"},
             {"type":"Owner"},
-            {"type":"Life", "hp": 5},
+            {"type":"Life", "hp": 6},
             {"type":"Score", "points": 0}
         ]
     },
@@ -48,7 +48,7 @@
             {"type":"Attack", "max_cooldown": 0.25},
             {"type":"HitboxSize"},
             {"type":"Owner"},
-            {"type":"Life", "hp": 5},
+            {"type":"Life", "hp": 6},
             {"type":"Score", "points": 0}
         ]
     },
@@ -66,7 +66,7 @@
             {"type":"Attack", "max_cooldown": 0.25},
             {"type":"HitboxSize"},
             {"type":"Owner"},
-            {"type":"Life", "hp": 5},
+            {"type":"Life", "hp": 6},
             {"type":"Score", "points": 0}
         ]
     },
@@ -84,7 +84,7 @@
             {"type":"Attack", "max_cooldown": 0.25},
             {"type":"HitboxSize"},
             {"type":"Owner"},
-            {"type":"Life", "hp": 5},
+            {"type":"Life", "hp": 6},
             {"type":"Score", "points": 0}
         ]
     }

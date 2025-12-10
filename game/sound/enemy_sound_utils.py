@@ -1,5 +1,6 @@
 # AUTHORED BY: Scott Petty
 # helper to get enemy size from AI
+# NO LONGER USED, add ai.size for all enemies in json
 
 from game.world.components import AI
 

@@ -2,7 +2,7 @@
 # game/world/systems/triggers.py
 #Performs actions based on invisble rectangles in the map
 import pygame
-from game.world.components import Transform, Map, OnMap, PlayerTag, SoundRequest
+from game.world.components import Transform, Map, OnMap, PlayerTag, SoundRequest, Life
 
 class TriggerSystem:
     def __init__(self, scene):
@@ -94,6 +94,13 @@ class TriggerSystem:
                     event="map_transition",   
                     global_event=False,       
                 )
+
+                # player heal 1 hp everytime that get to a new map
+                life: Life = comps[Life]
+                if life.hp <= 4:
+                    life.hp += 2
+                elif life.hp == 5:
+                    life.hp += 1
 
                 # Don't process multiple exits for the same player in a single frame
                 break

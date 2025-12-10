@@ -117,9 +117,12 @@ class CollisionSystem:
                                 if life:
                                     life.hp -= 1  # -1 HP per enemy / projectile hit
 
-                                    # Trigger player-hit sound on the player
+                                    # Trigger player-hit or player-death sound on the player
                                     pcomps = world.components_of(player_entity)
-                                    pcomps[SoundRequest] = SoundRequest(event="player_hit")
+                                    if life.hp <= 0:
+                                        pcomps[SoundRequest] = SoundRequest(event="player_death")
+                                    else:
+                                        pcomps[SoundRequest] = SoundRequest(event="player_hit")
 
                                     # Set damage cooldown (tune this value as needed)
                                     self.damage_cooldowns[player_entity] = 0.5  # 0.5s of invuln

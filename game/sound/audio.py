@@ -254,6 +254,15 @@ def bootstrap_sounds() -> None:
         volume=0.7
     )
 
+    register_group(
+        "player.death",
+        [
+            "assets/sounds/player/death/cartoon-trombone-sound-effect-241387.mp3"
+        ],
+        min_interval_ms = 500,
+        volume = 0.5
+    )   
+
     # enemy aggro sounds ###################################################
     register_group(
         "enemy.aggro.big",

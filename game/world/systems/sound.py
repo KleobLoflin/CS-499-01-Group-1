@@ -142,7 +142,7 @@ class SoundSystem:
         elif event == "player_hit":
             audio.play_sfx_group("misc.damage")
         elif event == "player_death":
-            audio.play_sfx_group("enemy.death.medium")  # change later when player death is implemented
+            audio.play_sfx_group("player.death")
 
         # Enemy actions 
         elif event == "enemy_hit":
