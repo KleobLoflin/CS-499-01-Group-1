@@ -493,7 +493,7 @@ class DungeonScene(Scene):
             return
 
         # Spread players horizontally around the base position
-        spacing = 16.0
+        spacing = 8.0
         start_offset = -spacing * (count - 1) / 2.0
 
         for i, req in enumerate(self.spawn_requests):
