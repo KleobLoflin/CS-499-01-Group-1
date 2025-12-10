@@ -48,7 +48,7 @@ def build_lifeSpan(spec, ctx):
     return lifeSpan(duration=spec.get("duration", 5))
 
 def build_Life(spec,ctx):
-    return Life(hp=spec.get("hp",10))
+    return Life(hp=spec.get("hp",10), max_hp=spec.get("max_hp", 10))
 
 def build_Owner(spec, ctx): return Owner(peer_id=ctx.get("owner", None))
 

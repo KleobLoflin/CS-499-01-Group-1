@@ -165,7 +165,7 @@ class DungeonScene(Scene):
                 SoundSystem(),
                 LifeSpanSystem(),
                 death(),
-                
+                ProjectileSpawnSystem(),
             ]
 
         # Spawn players

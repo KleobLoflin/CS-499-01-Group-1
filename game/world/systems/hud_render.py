@@ -69,14 +69,14 @@ class HudRenderSystem:
         life_hp = None
         for _eid, comps in world.query(LocalControlled, Life):
             life_hp = comps[Life].hp
+            max_hp = comps[Life].max_hp
             break
 
         if life_hp is None:
             return  # no local player yet
 
-        # Clamp hp to [0, 6] for 3 hearts * 2 hp each
-        max_hearts = 3
-        max_hp = max_hearts * 2
+        # Clamp hp 
+        max_hearts = int(max_hp / 2)
         hp = max(0, min(int(life_hp), max_hp))
 
         # Basic placement info
