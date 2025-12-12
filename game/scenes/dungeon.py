@@ -12,6 +12,7 @@
 from game.scenes.base import Scene
 import pygame
 from pygame import Surface
+import math
 from game.core.config import Config
 
 from game.world.world import World
@@ -493,7 +494,7 @@ class DungeonScene(Scene):
             return
 
         # Spread players horizontally around the base position
-        spacing = 8.0
+        spacing = 16.0
         start_offset = -spacing * (count - 1) / 2.0
 
         for i, req in enumerate(self.spawn_requests):
@@ -521,30 +522,40 @@ class DungeonScene(Scene):
     def _spawn_players_from_net_lobby(self) -> None:
         """
         HOST/CLIENT: spawn heroes based on net.lobby_data["heroes"] mapping.
-        Both host and clients run this so that all machines have matching hero
-        entities; host is authoritative for simulation, clients treat them as
-        proxies and get their updated positions from snapshots.
+        Spawns players in a compact 2-column grid on adjacent tiles.
         """
         heroes_by_peer = {}
         if isinstance(net.lobby_data, dict):
             heroes_by_peer = net.lobby_data.get("heroes", {}) or {}
         if not heroes_by_peer:
-            # Fallback: just spawn local player
             heroes_by_peer = {net.my_peer_id: "hero.knight_blue"}
 
         active_id, base_x, base_y = self._find_active_map_and_spawn_pos()
-        count = len(heroes_by_peer)
-        spacing = 32.0
-        start_offset = -spacing * (count - 1) / 2.0
 
-        for i, (peer_id, hero_key) in enumerate(heroes_by_peer.items()):
+        # --- compact formation settings ---
+        tile = 32.0          # change to Config.TILE_SIZE if you have it
+        cols = 2             # 2-wide grid keeps it compact for up to 5 players
+        count = len(heroes_by_peer)
+        rows = int(math.ceil(count / cols))
+
+        # Center the grid around (base_x, base_y)
+        x0 = base_x - ((cols - 1) / 2.0) * tile
+        y0 = base_y - ((rows - 1) / 2.0) * tile
+
+        # IMPORTANT: stable ordering across machines
+        ordered = sorted(heroes_by_peer.items(), key=lambda kv: kv[0])
+
+        for i, (peer_id, hero_key) in enumerate(ordered):
             if "." in hero_key:
                 archetype = hero_key.split(".", 1)[1]
             else:
                 archetype = hero_key
 
-            x = base_x + start_offset + spacing * i
-            y = base_y
+            c = i % cols
+            r = i // cols
+
+            x = x0 + c * tile
+            y = y0 + r * tile
 
             eid = create_hero(
                 self.world,
@@ -553,15 +564,10 @@ class DungeonScene(Scene):
                 pos=(x, y),
             )
 
-            # Tag with OnMap so RenderSystem shows them on the active map
             if active_id is not None:
                 self.world.add(eid, OnMap(id=active_id))
 
-            # Owner(peer_id) is added in hero_factory via owner_client_id,
-            # so we don't have to add it manually here.
-
             if peer_id == net.my_peer_id:
-                # Mark local-controlled player on this machine
                 self.world.add(eid, LocalControlled())
                 self.player_id = eid
 
