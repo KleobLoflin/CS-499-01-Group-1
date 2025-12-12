@@ -533,8 +533,8 @@ class DungeonScene(Scene):
         active_id, base_x, base_y = self._find_active_map_and_spawn_pos()
 
         # --- compact formation settings ---
-        tile = 32.0          # change to Config.TILE_SIZE if you have it
-        cols = 2             # 2-wide grid keeps it compact for up to 5 players
+        tile = 16.0          
+        cols = 2             
         count = len(heroes_by_peer)
         rows = int(math.ceil(count / cols))
 
