@@ -7,6 +7,7 @@
 # the point of this script is to be a single source for loading assets to prevent double loading
 
 import json, os, pygame
+from game.core.paths import resource_path
 
 images = {}     # path -> surface
 atlases = {}    # atlas ids -> graphical metadata
@@ -14,10 +15,10 @@ atlases = {}    # atlas ids -> graphical metadata
 # loads an image from a path and used to create a pygame surface.
 # stores the surface in the images dictionary as well as returns the surface.
 def image(path: str) -> pygame.Surface:
-    surface = images.get(path)
+    surface = images.get(resource_path(path))
     if surface is None:
-        surface = pygame.image.load(path).convert_alpha()
-        images[path] = surface
+        surface = pygame.image.load(resource_path(path)).convert_alpha()
+        images[resource_path(path)] = surface
     return surface
 
 # reads and loads atlas data from a .json file

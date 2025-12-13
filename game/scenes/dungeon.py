@@ -22,6 +22,7 @@ from game.world.components import (
     NetClientState, MapSpawnState
     )
 from game.world.actors.hero_factory import create as create_hero
+from game.core.paths import resource_path
 from game.world.systems.input import InputSystem
 from game.world.systems.movement import MovementSystem
 from game.world.systems.ai import EnemyAISystem
@@ -73,7 +74,7 @@ class DungeonScene(Scene):
 
         # Pause menu UI / state
         pygame.font.init()
-        self.pause_font = pygame.font.Font("assets/fonts/Retro Gaming.ttf", 16)
+        self.pause_font = pygame.font.Font(resource_path("assets/fonts/Retro Gaming.ttf"), 16)
         self.pause_options = ["Resume", "Quit to Title"]
 
         # Edge tracking for pause/menu keys
@@ -89,7 +90,7 @@ class DungeonScene(Scene):
 
     def enter(self) -> None:
         # initial map, or pick a fixed id 
-        load_registry("data/map_registry.json")
+        load_registry(resource_path("data/map_registry.json"))
         map_id = net.lobby_data.get("map_id") if isinstance(net.lobby_data, dict) else None
         if map_id is None:
             mi = pick(require_all=["tier1"])

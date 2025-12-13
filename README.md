@@ -82,6 +82,29 @@ GateCrashers supports LAN co-op with up to **five players** (host + four clients
 
 ---
 
+## 🏗️ Building a Windows Executable (PyInstaller)
+
+Install PyInstaller:
+
+```bash
+pip install pyinstaller
+```
+
+From the project root run:
+
+```bash
+pyinstaller \
+  --onefile \
+  --name GateCrashers \
+  --hidden-import pytmx \
+  --add-data "assets:assets" \
+  --add-data "data:data" \
+  --add-data "game:game" \
+  game/app.py
+```
+
+The finished executable will be created in dist/GateCrashers.exe
+
 ## Credits
 
 GateCrashers was developed as a senior design / capstone project by:

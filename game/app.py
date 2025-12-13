@@ -11,6 +11,7 @@
 import sys, pygame
 from game.core.config import Config
 from game.core.time import FixedClock
+from game.core.paths import resource_path
 from game.scene_manager import SceneManager
 from game.scenes.menu import TitleScene
 from game.core.window import Window
@@ -32,8 +33,8 @@ def run() -> None:
 
     # load assets, atlases, and blueprints
     bootstrap_sounds()
-    load_atlases("data/sprites/atlases.json")
-    load_blueprints("data/blueprints/heroes.json", "data/blueprints/enemies.json")
+    load_atlases(resource_path("data/sprites/atlases.json"))
+    load_blueprints(resource_path("data/blueprints/heroes.json"), resource_path("data/blueprints/enemies.json"))
 
     # this starts the title scene
     scenes = SceneManager()

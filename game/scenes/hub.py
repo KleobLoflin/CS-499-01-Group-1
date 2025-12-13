@@ -34,6 +34,7 @@ from game.world.components import (
     SoundRequest,
 )
 from game.world.actors.hero_factory import create as create_hero
+from game.core.paths import resource_path
 from game.world.systems.animation import AnimationSystem
 from game.world.systems.render import RenderSystem
 from game.world.systems.sound import SoundSystem
@@ -89,11 +90,11 @@ class HubScene(Scene):
 
         # font
         pygame.font.init()
-        self.font = pygame.font.Font("assets/fonts/Retro Gaming.ttf", 16)
+        self.font = pygame.font.Font(resource_path("assets/fonts/Retro Gaming.ttf"), 16)
 
         # player slot images
-        self.slot_normal_img = pygame.image.load("assets/ui/hub_screen/hub_slot_normal.png").convert_alpha()
-        self.slot_ready_img = pygame.image.load("assets/ui/hub_screen/hub_slot_ready.png").convert_alpha()
+        self.slot_normal_img = pygame.image.load(resource_path("assets/ui/hub_screen/hub_slot_normal.png")).convert_alpha()
+        self.slot_ready_img = pygame.image.load(resource_path("assets/ui/hub_screen/hub_slot_ready.png")).convert_alpha()
 
         self.slot_w = self.slot_normal_img.get_width()
         self.slot_h = self.slot_normal_img.get_height()

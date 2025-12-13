@@ -4,6 +4,7 @@ import json
 import random
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Iterable
+from game.core.paths import resource_path
 
 @dataclass(frozen=True)
 class MapInfo:
@@ -22,8 +23,8 @@ def load_registry(path: str):
     REGISTRY = {
         m["id"]: MapInfo(
             id=m["id"],
-            tmx_path=m["tmx_path"],
-            blueprint_path=m.get("blueprint_path",""),
+            tmx_path=resource_path(m["tmx_path"]),
+            blueprint_path=resource_path(m.get("blueprint_path","")),
             tags=m.get("tags",[]),
             weight=int(m.get("weight",1)),
         )

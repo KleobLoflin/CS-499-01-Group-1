@@ -1,6 +1,7 @@
 import pygame
 from pygame import Surface
 from game.core.config import Config
+from game.core.paths import resource_path
 from game.world.components import Score, PlayerTag, Owner, LocalControlled, Life
 from game.net.context import net
 
@@ -27,15 +28,15 @@ class HudRenderSystem:
         # Heart asset check
         if HudRenderSystem.HEART_FULL is None:
             HudRenderSystem.HEART_FULL = pygame.image.load(
-                "assets/ui/ui_heart_full.png"
+                resource_path("assets/ui/ui_heart_full.png")
             ).convert_alpha()
         if HudRenderSystem.HEART_HALF is None:
             HudRenderSystem.HEART_HALF = pygame.image.load(
-                "assets/ui/ui_heart_half.png"
+                resource_path("assets/ui/ui_heart_half.png")
             ).convert_alpha()
         if HudRenderSystem.HEART_EMPTY is None:
             HudRenderSystem.HEART_EMPTY = pygame.image.load(
-                "assets/ui/ui_heart_empty.png"
+                resource_path("assets/ui/ui_heart_empty.png")
             ).convert_alpha()
 
         # Collect player scores

@@ -5,6 +5,7 @@
 
 import os
 import random
+from game.core.paths import resource_path
 from typing import Dict, List, Optional
 
 import pygame
@@ -104,15 +105,15 @@ def play_sfx_group(group_id: str, *, volume: Optional[float] = None) -> None:
 SCENE_MUSIC_CONFIG: dict[str, Dict[str, Optional[str]]] = {
     "title": {
         "intro": None,
-        "loop": "assets/sounds/music/title/cinematic-halloween-synthesizer-music-248525.mp3",
+        "loop": resource_path("assets/sounds/music/title/cinematic-halloween-synthesizer-music-248525.mp3"),
     },
     "hub": {
-        "intro": "assets/sounds/music/hub/07. Spirits Forest (intro).mp3",
-        "loop": "assets/sounds/music/hub/07. Spirits Forest (loop).mp3",
+        "intro": resource_path("assets/sounds/music/hub/07. Spirits Forest (intro).mp3"),
+        "loop": resource_path("assets/sounds/music/hub/07. Spirits Forest (loop).mp3"),
     },
     "dungeon": {
         "intro": None,
-        "loop": "assets/sounds/music/dungeon/05. Long Journey.mp3"
+        "loop": resource_path("assets/sounds/music/dungeon/05. Long Journey.mp3")
     },
 }
 
@@ -231,14 +232,14 @@ def bootstrap_sounds() -> None:
     register_group(
         "player.sword_swing",
         [
-            "assets/sounds/player/sword_swing/1.wav",
-            "assets/sounds/player/sword_swing/2.wav",
-            "assets/sounds/player/sword_swing/3.wav",
-            "assets/sounds/player/sword_swing/4.wav",
-            "assets/sounds/player/sword_swing/5.wav",
-            "assets/sounds/player/sword_swing/6.wav",
-            "assets/sounds/player/sword_swing/7.wav",
-            "assets/sounds/player/sword_swing/8.wav",
+            resource_path("assets/sounds/player/sword_swing/1.wav"),
+            resource_path("assets/sounds/player/sword_swing/2.wav"),
+            resource_path("assets/sounds/player/sword_swing/3.wav"),
+            resource_path("assets/sounds/player/sword_swing/4.wav"),
+            resource_path("assets/sounds/player/sword_swing/5.wav"),
+            resource_path("assets/sounds/player/sword_swing/6.wav"),
+            resource_path("assets/sounds/player/sword_swing/7.wav"),
+            resource_path("assets/sounds/player/sword_swing/8.wav"),
         ],
         min_interval_ms=30,
         volume=0.9,
@@ -247,8 +248,8 @@ def bootstrap_sounds() -> None:
     register_group(
         "player.dash",
         [
-            "assets/sounds/player/dash/Woosh_1.ogg",
-            "assets/sounds/player/dash/Woosh_2.ogg",
+            resource_path("assets/sounds/player/dash/Woosh_1.ogg"),
+            resource_path("assets/sounds/player/dash/Woosh_2.ogg"),
         ],
         min_interval_ms=400,
         volume=0.7
@@ -257,7 +258,7 @@ def bootstrap_sounds() -> None:
     register_group(
         "player.death",
         [
-            "assets/sounds/player/death/cartoon-trombone-sound-effect-241387.mp3"
+            resource_path("assets/sounds/player/death/cartoon-trombone-sound-effect-241387.mp3")
         ],
         min_interval_ms = 500,
         volume = 0.5
@@ -267,9 +268,9 @@ def bootstrap_sounds() -> None:
     register_group(
         "enemy.aggro.big",
         [
-            "assets/sounds/enemy/big/grunt/Noise_Big_Monster_1.wav",
-            "assets/sounds/enemy/big/grunt/Noise_Big_Monster_1.wav",
-            "assets/sounds/enemy/big/grunt/Noise_Big_Monster_1.wav",
+            resource_path("assets/sounds/enemy/big/grunt/Noise_Big_Monster_1.wav"),
+            resource_path("assets/sounds/enemy/big/grunt/Noise_Big_Monster_2.wav"),
+            resource_path("assets/sounds/enemy/big/grunt/Noise_Big_Monster_3.wav"),
         ],
         min_interval_ms=150,
         volume=1.0,
@@ -278,9 +279,9 @@ def bootstrap_sounds() -> None:
     register_group(
         "enemy.aggro.medium",
         [
-            "assets/sounds/enemy/medium/grunt/Noise_Medium_Monster_1.wav",
-            "assets/sounds/enemy/medium/grunt/Noise_Medium_Monster_2.wav",
-            "assets/sounds/enemy/medium/grunt/Noise_Medium_Monster_3.wav",
+            resource_path("assets/sounds/enemy/medium/grunt/Noise_Medium_Monster_1.wav"),
+            resource_path("assets/sounds/enemy/medium/grunt/Noise_Medium_Monster_2.wav"),
+            resource_path("assets/sounds/enemy/medium/grunt/Noise_Medium_Monster_3.wav"),
         ],
         min_interval_ms=150,
         volume=0.8,
@@ -289,9 +290,9 @@ def bootstrap_sounds() -> None:
     register_group(
         "enemy.aggro.small",
         [
-            "assets/sounds/enemy/small/grunt/Noise_Small_Monster_1.wav",
-            "assets/sounds/enemy/small/grunt/Noise_Small_Monster_2.wav",
-            "assets/sounds/enemy/small/grunt/Noise_Small_Monster_3.wav",
+            resource_path("assets/sounds/enemy/small/grunt/Noise_Small_Monster_1.wav"),
+            resource_path("assets/sounds/enemy/small/grunt/Noise_Small_Monster_2.wav"),
+            resource_path("assets/sounds/enemy/small/grunt/Noise_Small_Monster_3.wav"),
         ],
         min_interval_ms=150,
         volume=0.7,
@@ -300,9 +301,9 @@ def bootstrap_sounds() -> None:
     register_group(
         "enemy.aggro.tiny",
         [
-            "assets/sounds/enemy/tiny/grunt/Noise_Tiny_Monster_1.wav",
-            "assets/sounds/enemy/tiny/grunt/Noise_Tiny_Monster_2.wav",
-            "assets/sounds/enemy/tiny/grunt/Noise_Tiny_Monster_3.wav",
+            resource_path("assets/sounds/enemy/tiny/grunt/Noise_Tiny_Monster_1.wav"),
+            resource_path("assets/sounds/enemy/tiny/grunt/Noise_Tiny_Monster_2.wav"),
+            resource_path("assets/sounds/enemy/tiny/grunt/Noise_Tiny_Monster_3.wav"),
         ],
         min_interval_ms=150,
         volume=0.7,
@@ -312,9 +313,9 @@ def bootstrap_sounds() -> None:
     register_group(
         "enemy.death.big",
         [
-            "assets/sounds/enemy/big/death/Noise_Big_Monster_Down_1.wav",
-            "assets/sounds/enemy/big/death/Noise_Big_Monster_Down_2.wav",
-            "assets/sounds/enemy/big/death/Noise_Big_Monster_Down_3.wav",
+            resource_path("assets/sounds/enemy/big/death/Noise_Big_Monster_Down_1.wav"),
+            resource_path("assets/sounds/enemy/big/death/Noise_Big_Monster_Down_2.wav"),
+            resource_path("assets/sounds/enemy/big/death/Noise_Big_Monster_Down_3.wav"),
         ],
         min_interval_ms=50,
         volume=1.0,
@@ -323,9 +324,9 @@ def bootstrap_sounds() -> None:
     register_group(
         "enemy.death.medium",
         [
-            "assets/sounds/enemy/medium/death/Noise_Medium_Monster_Down_1.wav",
-            "assets/sounds/enemy/medium/death/Noise_Medium_Monster_Down_2.wav",
-            "assets/sounds/enemy/medium/death/Noise_Medium_Monster_Down_3.wav",
+            resource_path("assets/sounds/enemy/medium/death/Noise_Medium_Monster_Down_1.wav"),
+            resource_path("assets/sounds/enemy/medium/death/Noise_Medium_Monster_Down_2.wav"),
+            resource_path("assets/sounds/enemy/medium/death/Noise_Medium_Monster_Down_3.wav"),
         ],
         min_interval_ms=50,
         volume=0.9,
@@ -334,9 +335,9 @@ def bootstrap_sounds() -> None:
     register_group(
         "enemy.death.small",
         [
-            "assets/sounds/enemy/small/death/Noise_Small_Monster_Down_1.wav",
-            "assets/sounds/enemy/small/death/Noise_Small_Monster_Down_2.wav",
-            "assets/sounds/enemy/small/death/Noise_Small_Monster_Down_3.wav",
+            resource_path("assets/sounds/enemy/small/death/Noise_Small_Monster_Down_1.wav"),
+            resource_path("assets/sounds/enemy/small/death/Noise_Small_Monster_Down_2.wav"),
+            resource_path("assets/sounds/enemy/small/death/Noise_Small_Monster_Down_3.wav"),
         ],
         min_interval_ms=50,
         volume=0.8,
@@ -345,9 +346,9 @@ def bootstrap_sounds() -> None:
     register_group(
         "enemy.death.tiny",
         [
-            "assets/sounds/enemy/tiny/death/Noise_Tiny_Monster_Down_1.wav",
-            "assets/sounds/enemy/tiny/death/Noise_Tiny_Monster_Down_2.wav",
-            "assets/sounds/enemy/tiny/death/Noise_Tiny_Monster_Down_3.wav",
+            resource_path("assets/sounds/enemy/tiny/death/Noise_Tiny_Monster_Down_1.wav"),
+            resource_path("assets/sounds/enemy/tiny/death/Noise_Tiny_Monster_Down_2.wav"),
+            resource_path("assets/sounds/enemy/tiny/death/Noise_Tiny_Monster_Down_3.wav"),
         ],
         min_interval_ms=50,
         volume=0.8,
@@ -357,10 +358,10 @@ def bootstrap_sounds() -> None:
     register_group(
         "misc.damage",
         [
-            "assets/sounds/misc/damage/1.wav",
-            "assets/sounds/misc/damage/2.wav",
-            "assets/sounds/misc/damage/3.wav",
-            "assets/sounds/misc/damage/4.wav",
+            resource_path("assets/sounds/misc/damage/1.wav"),
+            resource_path("assets/sounds/misc/damage/2.wav"),
+            resource_path("assets/sounds/misc/damage/3.wav"),
+            resource_path("assets/sounds/misc/damage/4.wav"),
         ],
         min_interval_ms=40,
         volume=0.8,
@@ -370,7 +371,7 @@ def bootstrap_sounds() -> None:
     register_group(
         "misc.chest_open",
         [
-            "assets/sounds/misc/chest_open/SpecialFX_Magic_2.wav",
+            resource_path("assets/sounds/misc/chest_open/SpecialFX_Magic_2.wav"),
         ],
         min_interval_ms=300,
         volume=0.9,
@@ -380,7 +381,7 @@ def bootstrap_sounds() -> None:
     register_group(
         "ui.menu_item_change",
         [
-            "assets/sounds/ui/menu_item_change/UI - Button Select 1.wav",
+            resource_path("assets/sounds/ui/menu_item_change/UI - Button Select 1.wav"),
         ],
         min_interval_ms=60,
         volume=0.4,
@@ -389,7 +390,7 @@ def bootstrap_sounds() -> None:
     register_group(
         "ui.ready_up",
         [
-            "assets/sounds/ui/ready_up/UI - Button 01.wav"
+            resource_path("assets/sounds/ui/ready_up/UI - Button 01.wav")
         ],
         min_interval_ms=60,
         volume=0.9,
@@ -399,7 +400,7 @@ def bootstrap_sounds() -> None:
     register_group(
         "misc.transition",
         [
-            "assets/sounds/misc/transition/Transportation - Move 01.wav"
+            resource_path("assets/sounds/misc/transition/Transportation - Move 01.wav")
         ],
         min_interval_ms=60,
         volume=0.5,

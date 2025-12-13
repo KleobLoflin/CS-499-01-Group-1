@@ -24,6 +24,7 @@ from game.world.systems.collision import CollisionSystem
 from game.world.systems.spawn import SpawnSystem
 from game.world.systems.ai import EnemyAISystem
 from game.world.systems.sound import SoundSystem
+from game.core.paths import resource_path
 
 from game.world.maps.map_index import load_registry, pick
 from game.world.maps.map_factory import create_or_activate
@@ -34,16 +35,16 @@ class TitleScene(Scene):
         self.world = World()
 
         # logo:
-        self.logo_img = pygame.image.load("assets/ui/title_screen/logo/logo.png").convert_alpha()
+        self.logo_img = pygame.image.load(resource_path("assets/ui/title_screen/logo/logo.png")).convert_alpha()
 
         # option-state screens, indexed by TitleMenu.selected_index order:
         #   0: Single Player, 1: Host, 2: Join, 3: Settings, 4: Quit
         self.options_imgs = {
-            0: pygame.image.load("assets/ui/title_screen/menu/single_player.png").convert_alpha(),
-            1: pygame.image.load("assets/ui/title_screen/menu/host.png").convert_alpha(),
-            2: pygame.image.load("assets/ui/title_screen/menu/join.png").convert_alpha(),
-            3: pygame.image.load("assets/ui/title_screen/menu/settings.png").convert_alpha(),
-            4: pygame.image.load("assets/ui/title_screen/menu/quit.png").convert_alpha(),
+            0: pygame.image.load(resource_path("assets/ui/title_screen/menu/single_player.png")).convert_alpha(),
+            1: pygame.image.load(resource_path("assets/ui/title_screen/menu/host.png")).convert_alpha(),
+            2: pygame.image.load(resource_path("assets/ui/title_screen/menu/join.png")).convert_alpha(),
+            3: pygame.image.load(resource_path("assets/ui/title_screen/menu/settings.png")).convert_alpha(),
+            4: pygame.image.load(resource_path("assets/ui/title_screen/menu/quit.png")).convert_alpha(),
         }
 
         # menu system (pure-PNG)
@@ -58,7 +59,7 @@ class TitleScene(Scene):
 
     def enter(self) -> None:
         # Registry once
-        load_registry("data/map_registry.json")
+        load_registry(resource_path("data/map_registry.json"))
 
         # pick any map tagged "title_ok" (weighted)
         mi = pick(require_all=["title_ok"])
